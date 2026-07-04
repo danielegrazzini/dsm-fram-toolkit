@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FEBS Simulator v6 — FRAM-Extended Browning-Eppinger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07090f; --panel:#0b0e18; --card:#0f1220; --card2:#141828;
+  --b1:#1a2035; --b2:#222d48; --b3:#2d3a5a;
+  --orange:#f59e0b; --orange2:#d97706;
+  --green:#10b981; --red:#ef4444; --blue:#3b82f6;
+  --cyan:#06b6d4; --purple:#8b5cf6; --yellow:#fbbf24;
+  --inp:#60a5fa; --out:#34d399; --pre:#fbbf24; --res:#f87171; --ctl:#a78bfa; --tim:#22d3ee;
+  --text:#e2e8f5; --muted:#64748b; --dim:#1e2535;
+  --cell:30px; --label:80px;
+  --r: .375rem;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;display:flex;flex-direction:column}
+
+/* ── HEADER ── */
+.hdr{background:var(--panel);border-bottom:1px solid var(--b2);height:48px;display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0}
+.logo{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--orange);letter-spacing:3px}
+.logo-sub{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px}
+.hdr-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.hdr-btn{font-family:'Space Mono',monospace;font-size:9px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--b2);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s}
+.hdr-btn:hover{color:var(--text);border-color:var(--b3)}
+.hdr-btn.pri{border-color:var(--orange);color:var(--orange)}
+.hdr-btn.pri:hover{background:#1a1200}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+.dot.run{background:var(--orange);animation:pulse .6s infinite alternate}
+.dot.ok{background:var(--green)}
+@keyframes pulse{from{opacity:.4}to{opacity:1}}
+
+/* ── WIZARD BAR ── */
+.wbar{background:var(--panel);border-bottom:1px solid var(--b2);height:42px;display:flex;align-items:stretch;padding:0 20px;gap:0;flex-shrink:0;overflow:hidden}
+.wstep{display:flex;align-items:center;gap:8px;padding:0 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.wstep:hover:not(.locked) .wlbl{color:var(--text)}
+.wstep.active{border-bottom-color:var(--orange)}
+.wstep.active .wnum{background:var(--orange);color:#000}
+.wstep.active .wlbl{color:var(--orange)}
+.wstep.done .wnum{background:var(--green);color:#000}
+.wstep.done .wlbl{color:var(--green)}
+.wstep.locked{opacity:.35;cursor:not-allowed}
+.wnum{width:20px;height:20px;border-radius:50%;background:var(--b2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;flex-shrink:0;transition:all .2s}
+.wlbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);transition:color .15s}
+.wst{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:1px}
+.wst.ok{color:var(--green)}.wst.warn{color:var(--orange)}
+.wsep{color:var(--b3);font-size:14px;display:flex;align-items:center;padding:0 4px}
+
+/* ── BODY ── */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.pane{display:none;flex:1;overflow:hidden;flex-direction:column}
+.pane.on{display:flex}
+.scroll{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* ── SECTION HEADERS ── */
+.sh{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--orange);letter-spacing:2px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--b2)}
+.snote{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+
+/* ── FOOTER ── */
+.foot{background:var(--panel);border-top:1px solid var(--b2);padding:10px 24px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.msg{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)}
+.msg.ok{color:var(--green)}.msg.warn{color:var(--orange)}
+
+/* ── BUTTONS ── */
+.btn{font-family:'Space Mono',monospace;font-size:10px;padding:7px 16px;border-radius:var(--r);border:1px solid var(--b2);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s}
+.btn:hover:not(:disabled){color:var(--text);border-color:var(--b3)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.pri{background:var(--orange);border-color:var(--orange);color:#000;font-weight:700}
+.btn.pri:hover:not(:disabled){background:var(--orange2);border-color:var(--orange2)}
+.btn.sm{padding:4px 10px;font-size:9px}
+
+/* ── PANE 1: FUNCTIONS + DSM ── */
+.p1-layout{display:flex;gap:16px;height:100%;overflow:hidden}
+.p1-left{width:340px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.p1-right{flex:1;overflow:auto}
+
+/* Function cards */
+.fn-list{display:flex;flex-direction:column;gap:6px}
+.fn-card{background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:8px 10px;display:flex;align-items:center;gap:8px;transition:border-color .15s}
+.fn-card:hover{border-color:var(--b3)}
+.fn-card.active-card{border-color:var(--orange)}
+.fn-idx{font-family:'Space Mono',monospace;font-size:10px;color:var(--orange);min-width:22px;font-weight:700}
+.fn-nm-inp{flex:1;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none}
+.fn-nm-inp::placeholder{color:var(--muted)}
+.fn-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;transition:color .15s}
+.fn-del:hover{color:var(--red)}
+.fn-desc{width:100%;background:transparent;border:none;border-top:1px solid var(--b2);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:10px;outline:none;padding-top:5px;margin-top:5px;resize:none;height:32px}
+.fn-desc::placeholder{color:var(--b3)}
+
+/* DSM binary grid */
+.dsm-outer{overflow:auto}
+#dsm-grid{display:grid;gap:2px}
+.dc{width:var(--cell);height:var(--cell);display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:10px;transition:all .12s}
+.dc.diag{background:var(--b2);color:var(--b3);cursor:default}
+.dc.off{background:var(--dim);cursor:pointer;color:transparent}
+.dc.off:hover{background:var(--b2)}
+.dc.on{background:#1a2e00;color:var(--green);border:1px solid var(--green);cursor:pointer;font-weight:700}
+.dc.on:hover{background:#243d00}
+.dc.fb{background:#1a0e00;color:var(--orange);border:1px solid var(--orange);cursor:pointer;font-weight:700}
+.dc.fb:hover{background:#261500}
+.dc.col-hdr{background:var(--card2);color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;cursor:default}
+.dc.row-hdr{background:var(--card2);color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;cursor:default;width:var(--label);justify-content:flex-end;padding-right:6px}
+
+/* DSM stats */
+.dsm-stats{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.ds{background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:6px 12px;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)}
+.ds span{color:var(--orange);font-size:13px;font-weight:700;display:block;margin-bottom:1px}
+.dsm-legend{display:flex;gap:12px;margin-bottom:8px;font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);align-items:center}
+.leg-dot{width:10px;height:10px;border-radius:2px;border:1px solid}
+.export-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+
+/* ── PANE 2: TRIANGULAR PARAMETERS ── */
+.tri-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin-top:4px}
+.tri-card{background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:12px}
+.tri-fn-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.tri-fn-idx{font-family:'Space Mono',monospace;font-size:11px;color:var(--orange);font-weight:700}
+.tri-fn-nm{font-size:12px;font-weight:500}
+.tri-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.tri-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);width:28px}
+.tri-inp{width:58px;background:var(--card2);border:1px solid var(--b2);color:var(--text);font-family:'Space Mono',monospace;font-size:11px;padding:4px 6px;border-radius:3px;outline:none;transition:border-color .15s}
+.tri-inp:focus{border-color:var(--orange)}
+.tri-sep{color:var(--b3);font-size:10px}
+.tri-tag{font-family:'Space Mono',monospace;font-size:8px;padding:2px 6px;border-radius:2px}
+.tag-s{background:#0a1428;color:var(--inp);border:1px solid #0d1e3a}
+.tag-c{background:#0a1e14;color:var(--out);border:1px solid #0d2818}
+.ic-row{display:flex;align-items:center;gap:8px;margin-top:6px;padding-top:6px;border-top:1px solid var(--b2)}
+
+/* ── PANE 3: TENSOR M ── */
+.t3-layout{display:flex;gap:16px;overflow:hidden;height:100%}
+.t3-left{width:380px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.t3-right{flex:1;overflow:auto}
+
+/* Tensor coupling cards */
+.coup-card{background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:10px 12px}
+.coup-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.coup-pair{font-family:'Space Mono',monospace;font-size:10px;color:var(--orange)}
+.coup-names{font-size:10px;color:var(--muted)}
+.f6-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.f6-lbl{font-family:'Space Mono',monospace;font-size:9px;width:22px;font-weight:700}
+.f6-slider{flex:1;appearance:none;height:3px;border-radius:2px;outline:none;cursor:pointer}
+.f6-slider::-webkit-slider-thumb{appearance:none;width:12px;height:12px;border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+.f6-val{font-family:'Space Mono',monospace;font-size:9px;width:28px;text-align:right}
+.f6-norm{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--b2)}
+.f6-norm span{color:var(--yellow)}
+.imp-row{display:flex;align-items:center;gap:8px;margin-top:6px}
+.imp-inp{width:60px;background:var(--card2);border:1px solid var(--b2);color:var(--text);font-family:'Space Mono',monospace;font-size:11px;padding:4px 6px;border-radius:3px;outline:none}
+.imp-inp:focus{border-color:var(--orange)}
+
+/* Tensor matrix overview */
+.tm-grid{display:grid;gap:2px}
+.tm-cell{width:var(--cell);height:var(--cell);display:flex;align-items:center;justify-content:center;border-radius:2px;font-family:'Space Mono',monospace;font-size:8px;cursor:pointer;transition:all .12s;position:relative}
+.tm-cell.diag{background:var(--b2);color:var(--muted);cursor:default}
+.tm-cell.empty{background:var(--dim);color:var(--b3)}
+.tm-cell.active{cursor:pointer}
+.tm-cell.selected{outline:2px solid var(--orange);outline-offset:-2px}
+
+/* ── PANE 4: PARAMETERS ── */
+.par-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:4px}
+.par-card{background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:12px}
+.par-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:6px;letter-spacing:1px}
+.par-inp{width:100%;background:var(--card2);border:1px solid var(--b2);color:var(--text);font-family:'Space Mono',monospace;font-size:16px;padding:6px 8px;border-radius:3px;outline:none;transition:border-color .15s}
+.par-inp:focus{border-color:var(--orange)}
+.par-note{font-size:10px;color:var(--muted);margin-top:4px}
+.weights-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.w-item{display:flex;align-items:center;gap:6px}
+.w-lbl{font-family:'Space Mono',monospace;font-size:10px;font-weight:700}
+.w-inp{width:56px;background:var(--card2);border:1px solid var(--b2);color:var(--text);font-family:'Space Mono',monospace;font-size:11px;padding:4px 6px;border-radius:3px;outline:none}
+.formula{background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:12px 16px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);line-height:1.8;margin-bottom:14px}
+.formula b{color:var(--orange)}
+
+/* ── PANE 5: OPERATIONAL DATA ── */
+/* ── PANE 6: RESULTS ── */
+.mstrip{display:flex;gap:8px;padding:12px 24px;background:var(--panel);border-bottom:1px solid var(--b2);flex-wrap:wrap;flex-shrink:0}
+.met{background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:8px 14px;min-width:100px}
+.met.hi{border-color:var(--orange)}
+.ml{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:2px}
+.mv{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--text)}
+.met.hi .mv{color:var(--orange)}
+.res-layout{display:flex;gap:0;flex:1;overflow:hidden}
+.otabs{display:flex;border-bottom:1px solid var(--b2);background:var(--panel);flex-shrink:0}
+.otab{font-family:'Space Mono',monospace;font-size:9px;padding:8px 14px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s}
+.otab:hover{color:var(--text)}
+.otab.on{color:var(--orange);border-bottom-color:var(--orange)}
+.opane{display:none;flex:1;overflow-y:auto;padding:16px 20px}
+.opane.on{display:block}
+.pbar{width:100%;height:3px;background:var(--b2);border-radius:2px;overflow:hidden;margin-top:6px}
+.pbfill{height:100%;background:var(--orange);width:0;transition:width .15s}
+.irr-row{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--card);border-radius:var(--r);margin-bottom:5px;border-left:3px solid var(--b2);transition:border-color .2s}
+.irr-row.top{border-left-color:var(--orange)}
+.irr-nm{font-size:11px;min-width:120px}
+.irr-bar-wrap{flex:1;height:8px;background:var(--b2);border-radius:4px;overflow:hidden}
+.irr-bar{height:100%;background:var(--orange);border-radius:4px;transition:width .4s}
+.irr-val{font-family:'Space Mono',monospace;font-size:10px;color:var(--orange);min-width:40px;text-align:right}
+canvas{display:block;max-width:100%}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--b3)}
+
+/* aspect colors for sliders */
+.asp0{--ac:var(--inp)} .asp1{--ac:var(--out)} .asp2{--ac:var(--pre)}
+.asp3{--ac:var(--res)} .asp4{--ac:var(--ctl)} .asp5{--ac:var(--tim)}
+.f6-slider{background:var(--b2)}
+.asp0 .f6-slider,.asp1 .f6-slider,.asp2 .f6-slider,
+.asp3 .f6-slider,.asp4 .f6-slider,.asp5 .f6-slider{
+  background:linear-gradient(to right, var(--ac) 0%, var(--ac) calc(var(--pct,50)*1%), var(--b2) calc(var(--pct,50)*1%), var(--b2) 100%);
+}
+.f6-slider::-webkit-slider-thumb{background:var(--ac)}
+.f6-lbl.asp0{color:var(--inp)}.f6-lbl.asp1{color:var(--out)}.f6-lbl.asp2{color:var(--pre)}
+.f6-lbl.asp3{color:var(--res)}.f6-lbl.asp4{color:var(--ctl)}.f6-lbl.asp5{color:var(--tim)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="logo">FEBS</div>
+    <div class="logo-sub">FRAM-Extended Browning-Eppinger Simulation · v6</div>
+  </div>
+  <div class="hdr-right">
+    <button class="hdr-btn pri" onclick="loadAirport()">&#8615; Airport example</button>
+    <button class="hdr-btn" onclick="resetAll()">&#10005; Reset</button>
+    <div class="dot" id="dot"></div>
+    <span id="stxt" style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)"></span>
+  </div>
+</div>
+
+<!-- WIZARD BAR -->
+<div class="wbar">
+  <div class="wstep active" id="ws1" onclick="nav(1)">
+    <div class="wnum" id="wn1">1</div>
+    <div><div class="wlbl">Functions &amp; DSM</div><div class="wst" id="wst1">—</div></div>
+  </div>
+  <div class="wsep">›</div>
+  <div class="wstep locked" id="ws2" onclick="nav(2)">
+    <div class="wnum" id="wn2">2</div>
+    <div><div class="wlbl">B-E Parameters</div><div class="wst" id="wst2">—</div></div>
+  </div>
+  <div class="wsep">›</div>
+  <div class="wstep locked" id="ws3" onclick="nav(3)">
+    <div class="wnum" id="wn3">3</div>
+    <div><div class="wlbl">Tensor M &amp; Impact</div><div class="wst" id="wst3">—</div></div>
+  </div>
+  <div class="wsep">›</div>
+  <div class="wstep locked" id="ws4" onclick="nav(4)">
+    <div class="wnum" id="wn4">4</div>
+    <div><div class="wlbl">FEBS Parameters</div><div class="wst" id="wst4">—</div></div>
+  </div>
+  <div class="wsep">›</div>
+  <div class="wstep locked" id="ws5" onclick="nav(5)">
+    <div class="wnum" id="wn5">5</div>
+    <div><div class="wlbl">Operational Data</div><div class="wst" id="wst5">—</div></div>
+  </div>
+  <div class="wstep locked" id="ws6" onclick="nav(6)">
+    <div class="wnum" id="wn6">6</div>
+    <div><div class="wlbl">Results</div><div class="wst" id="wst6">—</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 1 — FUNCTIONS + BINARY DSM
+═══════════════════════════════════════════════════ -->
+<div class="pane on" id="p1">
+  <div class="scroll" style="display:flex;gap:20px;overflow:hidden;padding:0">
+
+    <!-- LEFT: function list -->
+    <div style="width:300px;flex-shrink:0;padding:16px;border-right:1px solid var(--b2);overflow-y:auto;display:flex;flex-direction:column;gap:10px">
+      <div class="sh">FUNCTIONS</div>
+      <div class="snote" style="margin-bottom:8px">Define the process functions. The DSM updates in real time.</div>
+      <div id="fn-list" class="fn-list"></div>
+      <button class="btn sm" onclick="addFn()" style="margin-top:4px">+ Add function</button>
+    </div>
+
+    <!-- RIGHT: DSM binary grid -->
+    <div style="flex:1;padding:16px;overflow:auto;display:flex;flex-direction:column;gap:0">
+      <div class="sh">BINARY DSM <span style="font-weight:400;color:var(--muted);font-size:8px">— row i depends on column j</span></div>
+      <div class="snote">Click to activate dependencies.
+        <span style="color:var(--green)">&#9632;</span> feed-forward (sotto diagonale) &nbsp;
+        <span style="color:var(--orange)">&#9632;</span> feedback (sopra diagonale)
+      </div>
+
+      <!-- stats bar -->
+      <div class="dsm-stats">
+        <div class="ds"><span id="ds-n">0</span>FUNCTIONS</div>
+        <div class="ds"><span id="ds-l">0</span>LINK</div>
+        <div class="ds"><span id="ds-d">0%</span>DENSITY</div>
+        <div class="ds"><span id="ds-fb">0</span>FEEDBACK</div>
+      </div>
+
+      <!-- export row -->
+      <div class="export-row">
+        <button class="btn sm" onclick="expCSV()">&#8595; CSV</button>
+        <button class="btn sm" onclick="expJSON()">&#8595; JSON</button>
+        <button class="btn sm" onclick="expMIT()">&#8595; MIT format</button>
+        <button class="btn sm" onclick="fillLower()">&#9661; Lower triangle only</button>
+        <button class="btn sm" onclick="dsmClear()">&#10005; Clear</button>
+      </div>
+
+      <div id="dsm-wrap" class="dsm-outer" style="margin-top:8px"></div>
+
+      <!-- feedback warning -->
+      <div id="fb-warn" style="display:none;margin-top:10px;background:#120800;border:1px solid var(--orange);border-radius:var(--r);padding:8px 12px;font-family:'Space Mono',monospace;font-size:9px;color:var(--orange)"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <button class="btn pri" onclick="validateP1()">&#9654; VALIDATE FUNCTIONS &amp; DSM</button>
+    <span class="msg" id="m1"></span>
+    <button class="btn sm" style="margin-left:auto" onclick="nav(2)" id="n1" disabled>Next &#8250;</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 2 — TRIANGULAR PARAMETERS B-E
+═══════════════════════════════════════════════════ -->
+<div class="pane" id="p2">
+  <div class="scroll">
+    <div class="sh">B-E PARAMETERS — TRIANGULAR DISTRIBUTIONS</div>
+    <div class="snote">
+      Enter the triangular distribution parameters for each function.
+      <b style="color:var(--text)">B</b>=Best Case &nbsp;·&nbsp; <b style="color:var(--text)">M</b>=Most Likely &nbsp;·&nbsp; <b style="color:var(--text)">W</b>=Worst Case
+    </div>
+    <div class="tri-grid" id="tri-grid"></div>
+  </div>
+  <div class="foot">
+    <button class="btn sm" onclick="nav(1)">&#8249; Back</button>
+    <button class="btn pri" onclick="validateP2()">&#9654; VALIDATE PARAMETERS</button>
+    <span class="msg" id="m2"></span>
+    <button class="btn sm" style="margin-left:auto" onclick="nav(3)" id="n2" disabled>Next &#8250;</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 3 — TENSOR M & IMPACT MATRIX
+═══════════════════════════════════════════════════ -->
+<div class="pane" id="p3">
+  <div style="display:flex;flex:1;overflow:hidden">
+
+    <!-- LEFT: coupling cards -->
+    <div style="width:400px;flex-shrink:0;border-right:1px solid var(--b2);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px">
+      <div class="sh">ACTIVE PAIRS — FRAME-6 + IMPACT</div>
+      <div class="snote" style="margin-bottom:8px;font-size:11px">
+        Only pairs activated in the DSM can be edited.<br>
+        <span style="color:var(--inp)">I</span> Input &nbsp;
+        <span style="color:var(--out)">O</span> Output &nbsp;
+        <span style="color:var(--pre)">P</span> Precond. &nbsp;
+        <span style="color:var(--res)">R</span> Resource &nbsp;
+        <span style="color:var(--ctl)">C</span> Control &nbsp;
+        <span style="color:var(--tim)">T</span> Time
+      </div>
+      <div id="coup-list"></div>
+    </div>
+
+    <!-- RIGHT: tensor matrix overview -->
+    <div style="flex:1;padding:16px;overflow:auto;display:flex;flex-direction:column;gap:10px">
+      <div class="sh">TENSOR M OVERVIEW</div>
+      <div class="snote">Weighted Euclidean norm &#8214;C&#8214;<sub>w</sub> for each active pair. Colours: coupling intensity.</div>
+      <div id="tm-wrap"></div>
+
+      <!-- Impact matrix -->
+      <div class="sh" style="margin-top:16px">IMPACT MATRIX DSM<sub>ij2</sub></div>
+      <div class="snote">Fraction of activity i influenced by variability of j. Synchronised with FRAME-6.</div>
+      <div id="imp-wrap"></div>
+    </div>
+  </div>
+  <div class="foot">
+    <button class="btn sm" onclick="nav(2)">&#8249; Back</button>
+    <button class="btn pri" onclick="validateP3()">&#9654; VALIDATE TENSOR</button>
+    <span class="msg" id="m3"></span>
+    <button class="btn sm" style="margin-left:auto" onclick="nav(4)" id="n3" disabled>Next &#8250;</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 4 — FEBS PARAMETERS
+═══════════════════════════════════════════════════ -->
+<div class="pane" id="p4">
+  <div class="scroll">
+    <div class="sh">FEBS PARAMETERS</div>
+    <div class="formula">
+      <b>&#952;</b> = F<sup>&#8722;1</sup>(p) soglia adattiva &nbsp;&#183;&nbsp;
+      <b>S<sub>ij</sub></b> = &#8214;C&#8214;<sup>&#946;</sup> se &#8214;C&#8214; &#8805; &#952;, 0 altrimenti &nbsp;&#183;&nbsp;
+      <b>P<sub>ij</sub></b> = p<sub>base</sub> &#183; (S<sub>ij</sub>/S<sub>max</sub>) &nbsp;&#183;&nbsp;
+      <b>IRR<sub>i</sub></b> = &#931;<sub>j&#8712;N(i)</sub> S<sub>ij</sub> &#183; imp<sub>ij</sub> &#183; IC<sub>i</sub> &#183; ActS<sub>i</sub> &#183; (1 + freq<sub>i</sub>/r)
+    </div>
+    <div class="par-grid">
+      <div class="par-card">
+        <div class="par-lbl">p — THRESHOLD PERCENTILE (%)</div>
+        <input class="par-inp" type="number" id="pp" value="75" min="1" max="99">
+        <div class="par-note">&#952; = F<sup>&#8722;1</sup>(p/100) — controls dormancy</div>
+      </div>
+      <div class="par-card">
+        <div class="par-lbl">&#946; — AMPLIFICATION EXPONENT</div>
+        <input class="par-inp" type="number" id="beta" value="1.5" min="0.1" max="5" step="0.1">
+        <div class="par-note">P<sub>ij</sub> sensitivity to norm (&#946; &gt; 1)</div>
+      </div>
+      <div class="par-card">
+        <div class="par-lbl">p<sub>base</sub> — BASE PROBABILITY</div>
+        <input class="par-inp" type="number" id="pbase" value="0.3" min="0.01" max="1" step="0.01">
+        <div class="par-note">Maximum scale of P<sub>ij</sub></div>
+      </div>
+      <div class="par-card">
+        <div class="par-lbl">&#961; — S/C CORRELATION</div>
+        <input class="par-inp" type="number" id="rho" value="0.7" min="0" max="0.99" step="0.01">
+        <div class="par-note">Normal copula schedule-cost</div>
+      </div>
+      <div class="par-card">
+        <div class="par-lbl">RUNS MONTE CARLO</div>
+        <input class="par-inp" type="number" id="rmax" value="1000" min="100" max="5000" step="100">
+        <div class="par-note">Iterations (min 200 for stability)</div>
+      </div>
+      <div class="par-card">
+        <div class="par-lbl">SCHEDULE TARGET (days)</div>
+        <input class="par-inp" type="number" id="ts" value="0" min="0">
+        <div class="par-note">P(S &#8804; ts) — 0 = disabled</div>
+      </div>
+      <div class="par-card">
+        <div class="par-lbl">COST TARGET ($k)</div>
+        <input class="par-inp" type="number" id="tc" value="0" min="0">
+        <div class="par-note">P(C &#8804; tc) — 0 = disabled</div>
+      </div>
+    </div>
+
+    <div class="sh" style="margin-top:20px">FRAME-6 ASPECT WEIGHTS w<sub>k</sub></div>
+    <div class="snote">Weighted norm &#8214;C&#8214;<sub>w</sub> = &#8730;(&#931; w<sub>k</sub>&#183;c&#178;<sub>k</sub>). Default = 1/6 uniform.</div>
+    <div class="weights-row">
+      <div class="w-item"><span class="w-lbl" style="color:var(--inp)">I</span><input class="w-inp" id="wI" value="0.167" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--out)">O</span><input class="w-inp" id="wO" value="0.167" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--pre)">P</span><input class="w-inp" id="wP" value="0.167" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--res)">R</span><input class="w-inp" id="wR" value="0.167" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--ctl)">C</span><input class="w-inp" id="wC" value="0.167" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--tim)">T</span><input class="w-inp" id="wT" value="0.167" type="number" min="0" max="1" step="0.01"></div>
+    </div>
+  </div>
+  <div class="foot">
+    <button class="btn sm" onclick="nav(3)">&#8249; Back</button>
+    <button class="btn pri" onclick="validateP4()">&#9654; CONFIRM PARAMETERS</button>
+    <span class="msg" id="m4"></span>
+    <button class="btn sm" style="margin-left:auto" onclick="nav(6)" id="n4" disabled>Next &#8250; Simulate</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     PANE 5 — OPERATIONAL DATA
+     PANE 6 — RESULTS
+═══════════════════════════════════════════════════ -->
+
+<div class="pane" id="p5">
+  <div class="sh">OPERATIONAL FREQUENCY — freq<sub>i</sub> / r
+    <span style="font-weight:400;font-size:11px;color:var(--muted);margin-left:12px">
+      How many times per cycle did each function trigger variability propagation?
+    </span>
+  </div>
+
+  <!-- MODE TOGGLE -->
+  <div style="padding:14px 20px 10px;background:var(--panel);border-bottom:1px solid var(--b2);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="font-size:12px;font-weight:600;color:var(--text)">freq<sub>i</sub> source:</div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+      <input type="radio" name="freqMode" value="sim" id="fmSim" checked onchange="toggleFreqMode()">
+      <span>Simulated (from Monte Carlo)</span>
+    </label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+      <input type="radio" name="freqMode" value="emp" id="fmEmp" onchange="toggleFreqMode()">
+      <span>Empirical (field data)</span>
+    </label>
+    <div style="margin-left:auto;font-size:11px;color:var(--muted);max-width:380px">
+      Simulated: freq<sub>i</sub> is estimated from the Monte Carlo runs (standard mode, freq≈0 if P<sub>base</sub> is low).
+      Empirical: you provide measured values from incident logs or direct observation.
+    </div>
+  </div>
+
+  <!-- FREQ INPUT TABLE -->
+  <div style="padding:16px 20px;overflow-y:auto;flex:1">
+    <div id="freq-table-cont"></div>
+
+    <!-- INTERPRETATION NOTE -->
+    <div style="margin-top:18px;padding:12px 16px;background:var(--panel);border:1px solid var(--b2);border-radius:4px;font-size:11px;color:var(--muted)">
+      <b style="color:var(--text)">Interpretation of freq<sub>i</sub>/r:</b>
+      &nbsp; &lt;0.05 = rare (structural IRR dominates) &nbsp;|&nbsp;
+      0.05–0.20 = moderate (dynamic component relevant) &nbsp;|&nbsp;
+      &gt;0.20 = frequent (dynamic IRR may rerank functions)
+      <br><br>
+      <b style="color:var(--text)">Formula effect:</b>
+      &nbsp; IRR<sub>i</sub> = [Σ S<sub>ij</sub> · IMPACT<sub>ij</sub> · IC<sub>i</sub> · E[ActS<sub>i</sub>]] · <b>(1 + freq<sub>i</sub>/r)</b>
+      &nbsp;— when freq<sub>i</sub>/r = 0, IRR reduces to its structural approximation (paper Tables 5 & 6).
+    </div>
+  </div>
+
+  <div class="foot">
+    <button class="btn sm" onclick="nav(4)">&#8249; Back</button>
+    <button class="btn pri" onclick="confirmFreq()" id="n5btn">Confirm &amp; Continue &#8250;</button>
+    <span class="msg" id="m5"></span>
+  </div>
+</div>
+
+<div class="pane" id="p6">
+  <!-- metrics strip -->
+  <div class="mstrip">
+    <div class="met"><div class="ml">E[S] days</div><div class="mv" id="r-es">—</div></div>
+    <div class="met"><div class="ml">&#963;_S</div><div class="mv" id="r-ss">—</div></div>
+    <div class="met hi"><div class="ml">E[C] $k</div><div class="mv" id="r-ec">—</div></div>
+    <div class="met"><div class="ml">&#963;_C</div><div class="mv" id="r-sc">—</div></div>
+    <div class="met"><div class="ml">Runs</div><div class="mv" id="r-n">—</div></div>
+    <div class="met"><div class="ml">&#952;</div><div class="mv" id="r-theta">—</div></div>
+    <div class="met"><div class="ml">Active pairs</div><div class="mv" id="r-act">—</div></div>
+    <div class="met"><div class="ml">P(S&#8804;ts)</div><div class="mv" id="r-ps">—</div></div>
+    <div class="met"><div class="ml">IRR &gt; 0</div><div class="mv" id="r-irr">—</div></div>
+  </div>
+
+  <!-- progress bar -->
+  <div style="padding:0 24px;background:var(--panel);border-bottom:1px solid var(--b2)">
+    <div class="pbar"><div class="pbfill" id="pf"></div></div>
+  </div>
+
+  <!-- output tabs -->
+  <div class="otabs">
+    <div class="otab on" data-t="irr" onclick="sw('irr')">IRR</div>
+    <div class="otab" data-t="schedule" onclick="sw('schedule')">Schedule</div>
+    <div class="otab" data-t="cost" onclick="sw('cost')">Cost</div>
+    <div class="otab" data-t="sens" onclick="sw('sens')">Sensitivity</div>
+    <div class="otab" data-t="pipe" onclick="sw('pipe')">Pipeline</div>
+  </div>
+
+  <div style="flex:1;overflow:hidden;position:relative">
+    <div class="opane on" id="op-irr">
+      <div class="sh">FUNCTIONAL RESONANCE RISK INDEX</div>
+      <div id="irr-cont"></div>
+    </div>
+    <div class="opane" id="op-schedule">
+      <div class="sh">SCHEDULE DISTRIBUTION</div>
+      <canvas id="cv-s" height="220"></canvas>
+    </div>
+    <div class="opane" id="op-cost">
+      <div class="sh">COST DISTRIBUTION</div>
+      <canvas id="cv-c" height="220"></canvas>
+    </div>
+    <div class="opane" id="op-sens">
+      <div class="sh">SENSITIVITY ANALYSIS — 9 SCENARIOS (p &#215; &#946;)</div>
+      <div id="sens-cont"></div>
+    </div>
+    <div class="opane" id="op-pipe">
+      <div class="sh">FEBS PIPELINE</div>
+      <div id="pipe-cont"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <button class="btn sm" onclick="nav(5)">&#8249; Back</button>
+    <button class="btn pri" id="rb" onclick="runSim()" disabled>&#9654; RUN FEBS</button>
+    <span class="msg" id="m6"></span>
+    <button class="btn sm" onclick="runSens()" id="sb" disabled style="margin-left:auto">&#9654;&#9654; Sensitivity 9 scenarios</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+'use strict';
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANE 5 — OPERATIONAL DATA (freq_i)
+// ═══════════════════════════════════════════════════════════════════════
+
+function renderFreqPane(){
+  empiricalFreq = Array(N).fill(0);
+  const tbody = fns.map((f,ii)=>{
+    const pct = (empiricalFreq[ii]*100).toFixed(1);
+    const badge = empiricalFreq[ii]<0.05
+      ? '<span style="color:#27ae60;font-size:10px">● rare</span>'
+      : empiricalFreq[ii]<0.20
+        ? '<span style="color:#e67e22;font-size:10px">● moderate</span>'
+        : '<span style="color:#e74c3c;font-size:10px">● frequent</span>';
+    const disabled = useEmpFreq ? '' : 'disabled';
+    return `<tr>
+      <td style="font-weight:600;padding:8px 10px">${f.nm||'F'+(ii+1)}</td>
+      <td style="color:var(--muted);font-size:11px;padding:8px 10px">${f.desc||'—'}</td>
+      <td style="padding:8px 10px">
+        <input type="number" id="freq-r-${ii}" min="0" max="10" step="0.001"
+          value="${empiricalFreq[ii].toFixed(3)}"
+          style="width:90px;font-family:monospace;font-size:13px;padding:4px 6px;
+                 border:1px solid var(--b2);border-radius:3px;background:var(--panel);color:var(--text)"
+          ${disabled}
+          oninput="updateFreq(${ii})">
+      </td>
+      <td style="padding:8px 10px;font-family:monospace;font-size:12px" id="freq-dyn-${ii}">
+        × (1 + ${pct}%) = <b>${(1+empiricalFreq[ii]).toFixed(3)}</b>
+      </td>
+      <td style="padding:8px 10px" id="freq-badge-${ii}">${badge}</td>
+    </tr>`;
+  }).join('');
+
+  i('freq-table-cont').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:var(--accent);color:#fff">
+          <th style="padding:8px 10px;text-align:left;font-weight:600">Function</th>
+          <th style="padding:8px 10px;text-align:left;font-weight:600">Description</th>
+          <th style="padding:8px 10px;text-align:left;font-weight:600">freq<sub>i</sub>/r &nbsp;<span style="font-weight:400;font-size:11px">(0 = never, 1 = every cycle)</span></th>
+          <th style="padding:8px 10px;text-align:left;font-weight:600">Dynamic factor</th>
+          <th style="padding:8px 10px;text-align:left;font-weight:600">Level</th>
+        </tr>
+      </thead>
+      <tbody style="border:1px solid var(--b2)">${tbody}</tbody>
+    </table>`;
+}
+
+function toggleFreqMode(){
+  useEmpFreq = i('fmEmp').checked;
+  // enable/disable inputs
+  for(let ii=0;ii<N;ii++){
+    const inp = i('freq-r-'+ii);
+    if(inp) inp.disabled = !useEmpFreq;
+  }
+  // reset empirical to 0 when switching to simulated
+  if(!useEmpFreq){
+    empiricalFreq = Array(N).fill(0);
+    for(let ii=0;ii<N;ii++) updateFreq(ii);
+  }
+}
+
+function updateFreq(ii){
+  const v = Math.max(0, parseFloat(i('freq-r-'+ii)?.value||0)||0);
+  empiricalFreq[ii] = v;
+  const pct = (v*100).toFixed(1);
+  const dynEl = i('freq-dyn-'+ii);
+  if(dynEl) dynEl.innerHTML = `× (1 + ${pct}%) = <b>${(1+v).toFixed(3)}</b>`;
+  const badge = v<0.05
+    ? '<span style="color:#27ae60;font-size:10px">● rare</span>'
+    : v<0.20
+      ? '<span style="color:#e67e22;font-size:10px">● moderate</span>'
+      : '<span style="color:#e74c3c;font-size:10px">● frequent</span>';
+  const bEl = i('freq-badge-'+ii);
+  if(bEl) bEl.innerHTML = badge;
+}
+
+function confirmFreq(){
+  // Validate
+  for(let ii=0;ii<N;ii++){
+    const v = empiricalFreq[ii];
+    if(useEmpFreq && (isNaN(v)||v<0)){
+      msg(5,'freq('+(ii+1)+') must be ≥ 0','err'); return;
+    }
+  }
+  const mode = useEmpFreq ? 'Empirical (' + empiricalFreq.map(v=>v.toFixed(2)).join(', ') + ')' : 'Simulated (MC)';
+  setDone(5, useEmpFreq ? 'Empirical freq' : 'MC freq');
+  i('ws6').classList.remove('locked');
+  msg(5,'','');
+  nav(6);
+}
+
+function getEffectiveFreq(mcFreq, r){
+  // Returns the freq vector to use in IRR computation
+  if(useEmpFreq){
+    // User-supplied freq_i/r: multiply by r so computeIRR divides back correctly
+    return empiricalFreq.map(v => v * r);
+  }
+  return mcFreq;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════════════════════════
+let N = 0;
+let fns = [];       // [{nm, desc, bs,ms,ws, bc,mc,wc, ic}]
+let dsmB = [];      // dsmB[i][j] = 0|1
+let tensorM = [];   // tensorM[i][j] = [cI,cO,cP,cR,cC,cT]
+let impactM = [];   // impactM[i][j] = 0..1
+
+let empiricalFreq = [];    // empiricalFreq[i] = freq_i/r (user input)
+let useEmpFreq = false;    // true = use empirical, false = use MC-simulated
+
+let simS=[], simC=[], ganttD=[];
+let febs_IRR=[], febs_norms={}, febs_S={}, febs_P={}, febs_freq=[];
+let sensResults=[];
+
+const ASPECTS = ['I','O','P','R','C','T'];
+const ASP_FULL = ['Input','Output','Precond.','Resource','Control','Time'];
+const ASP_COLORS = ['var(--inp)','var(--out)','var(--pre)','var(--res)','var(--ctl)','var(--tim)'];
+
+// ═══ AIRPORT DATASET ═══════════════════════════════════════════════════
+const AIRPORT = {
+  n:5,
+  fns:[
+    {nm:'F1 ATC Landing',  desc:'ATC clearance for landing',        bs:3, ms:5, ws:8,  bc:3, mc:5, wc:8,  ic:0.8},
+    {nm:'F2 Deboarding',   desc:'Passenger deboarding process',     bs:15,ms:20,ws:30, bc:15,mc:20,wc:30, ic:0.7},
+    {nm:'F3 Refueling',    desc:'Aircraft refueling operation',     bs:10,ms:15,ws:25, bc:10,mc:15,wc:25, ic:0.6},
+    {nm:'F4 Boarding',     desc:'Passenger boarding process',       bs:20,ms:25,ws:35, bc:20,mc:25,wc:35, ic:0.7},
+    {nm:'F5 ATC Departure',desc:'ATC clearance for departure',      bs:3, ms:5, ws:8,  bc:3, mc:5, wc:8,  ic:0.8},
+  ],
+  dsm:[
+    [0,0,0,0,0],
+    [1,0,0,0,0],
+    [1,1,0,0,0],
+    [0,1,1,0,0],
+    [1,1,1,1,0],
+  ],
+  tensor:[
+    [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]],
+    [[0.8,0.4,0.3,0.4,0.3,0.8],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]],
+    [[0.4,0.2,0.7,0.6,0,0.3],[0.3,0.6,0.8,0.4,0,0.2],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]],
+    [[0,0,0,0,0,0],[0.5,0.5,0.4,0.6,0.3,0.8],[0.2,0.3,0.5,0.9,0.4,0.7],[0,0,0,0,0,0],[0,0,0,0,0,0]],
+    [[0.6,0.2,0.4,0.1,0.8,0.5],[0.3,0.4,0.3,0.2,0,0.5],[0.2,0.5,0.4,0.7,0,0.4],[0.2,0.3,0.5,0.2,0.6,0.7],[0,0,0,0,0,0]],
+  ],
+  impact:[
+    [0,0,0,0,0],
+    [0.3,0,0,0,0],
+    [0.2,0.4,0,0,0],
+    [0,0.3,0.5,0,0],
+    [0.2,0.3,0.4,0.3,0],
+  ]
+};
+
+// ═══ MATH UTILITIES ═══════════════════════════════════════════════════
+function triICDF(u,a,b,c){const F=(b-a)/(c-a);return u<=F?a+Math.sqrt(u*(b-a)*(c-a)):c-Math.sqrt((1-u)*(c-a)*(c-b));}
+function phiInv(p){p=Math.max(1e-10,Math.min(1-1e-10,p));const a=[2.515517,0.802853,0.010328],b=[1.432788,0.189269,0.001308];const t=p<0.5?Math.sqrt(-2*Math.log(p)):Math.sqrt(-2*Math.log(1-p));const z=t-(a[0]+a[1]*t+a[2]*t*t)/(1+b[0]*t+b[1]*t*t+b[2]*t*t*t);return p<0.5?-z:z;}
+function phi(z){return 0.5*(1+erf(z/Math.SQRT2));}
+function erf(x){const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+p*x);return s*(1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x));}
+function corrU(us,uc,rho){return phi(rho*phiInv(us)+Math.sqrt(1-rho*rho)*phiInv(uc));}
+function lhs(n,k){const c=[];for(let j=0;j<k;j++){const col=Array.from({length:n},(_,i)=>(i+Math.random())/n);for(let i=col.length-1;i>0;i--){const j2=Math.floor(Math.random()*(i+1));[col[i],col[j2]]=[col[j2],col[i]];}c.push(col);}return Array.from({length:n},(_,i)=>c.map(col=>col[i]));}
+function stable(S,b,a){const r=S.length;if(r<2*b)return false;const rc=S.slice(-b),pv=S.slice(-2*b,-b);const mr=rc.reduce((a,x)=>a+x,0)/b,mp=pv.reduce((a,x)=>a+x,0)/b;if(!mp||Math.abs(mr-mp)/mp>=a)return false;const vr=rc.reduce((a,x)=>a+(x-mr)**2,0)/b,vp=pv.reduce((a,x)=>a+(x-mp)**2,0)/b;return !vp||Math.abs(vr-vp)/vp<a;}
+function getWeights(){return[+i('wI').value,+i('wO').value,+i('wP').value,+i('wR').value,+i('wC').value,+i('wT').value];}
+function i(id){return document.getElementById(id);}
+function setS(t){const e=i('stxt');if(e)e.textContent=t;}
+function dl(fn,ct,data){const a=document.createElement('a');a.href='data:'+ct+';charset=utf-8,'+encodeURIComponent(data);a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);}
+
+// ═══ FEBS MATH CORE ════════════════════════════════════════════════════
+function febsInit(p_pct,beta,pbase){
+  const w=getWeights();
+  const norms={},pairs=[];
+  for(let ii=0;ii<N;ii++) for(let j=0;j<N;j++){
+    if(ii===j)continue;
+    const c=tensorM[ii][j];
+    if(!c||c.every(v=>v===0))continue;
+    const norm=Math.sqrt(c.reduce((s,ck,k)=>s+w[k]*ck*ck,0));
+    if(norm>0){norms[`${ii},${j}`]=norm;pairs.push({i:ii,j,norm});}
+  }
+  if(pairs.length===0)return null;
+  const sn=pairs.map(p=>p.norm).sort((a,b)=>a-b);
+  const ti=Math.floor((p_pct/100)*sn.length);
+  const theta=sn[Math.min(ti,sn.length-1)];
+  const S={};
+  pairs.forEach(({i:ii,j,norm})=>{S[`${ii},${j}`]=norm>=theta?Math.pow(norm,beta):0;});
+  const Smax=Math.max(...Object.values(S));
+  const P={};
+  pairs.forEach(({i:ii,j})=>{const k=`${ii},${j}`;P[k]=Smax>0?pbase*(S[k]/Smax):0;});
+  const activePairs=Object.values(S).filter(s=>s>0).length;
+  return{norms,S,P,theta,Smax,activePairs,pairs,p:p_pct,b:beta,pb:pbase};
+}
+
+function banding(W,WN,P_mat){
+  for(let ii=0;ii<N;ii++)WN[ii]=false;
+  let f=-1;
+  for(let ii=0;ii<N;ii++){if(W[ii]>0){WN[ii]=true;f=ii;break;}}
+  if(f<0)return;
+  for(let j=f+1;j<N;j++){
+    if(W[j]>0){
+      let ok=true;
+      for(let k=f;k<j;k++){if((P_mat[j][k]||0)>0&&W[k]>0){ok=false;break;}}
+      if(ok)WN[j]=true;else break;
+    }
+  }
+}
+
+function singleRun(P_mat,u_s,u_c,rho,rec){
+  const W=new Array(N).fill(1),WN=new Array(N).fill(false);
+  const ActS=fns.map((f,ii)=>triICDF(u_s[ii],f.bs,f.ms,f.ws));
+  const ActC=fns.map((f,ii)=>triICDF(corrU(u_s[ii],u_c[ii],rho),f.bc,f.mc,f.wc));
+  const Wdone=new Array(N).fill(0);
+  const freq_run=new Array(N).fill(0);
+  let S=0,gantt=rec?Array.from({length:N},()=>[]):null;
+  const maxS=ActS.reduce((a,b)=>a+b,0)*30;
+  while(W.some(w=>w>0)&&S<maxS){
+    banding(W,WN,P_mat);
+    let minDt=Infinity;
+    for(let ii=0;ii<N;ii++){if(WN[ii]&&ActS[ii]>0){const rem=W[ii]*ActS[ii];if(rem<minDt)minDt=rem;}}
+    if(!isFinite(minDt))break;
+    S+=minDt;
+    const completed=[];
+    for(let ii=0;ii<N;ii++){
+      if(WN[ii]){
+        const frac=minDt/ActS[ii];
+        W[ii]=Math.max(0,W[ii]-frac);
+        Wdone[ii]+=frac;
+        if(W[ii]<0.001){W[ii]=0;completed.push(ii);}
+      }
+      if(gantt)gantt[ii].push(WN[ii]?+W[ii].toFixed(3):null);
+    }
+    for(const ci of completed){
+      for(let j=0;j<ci;j++){
+        const p=P_mat[j][ci]||0;
+        if(p>0&&Math.random()<=p){
+          freq_run[j]++;
+          W[j]+=impactM[j][ci]*fns[j].ic;
+          if(W[j]>1)W[j]=0.9;
+          for(let k=j+1;k<N;k++){
+            const p2=P_mat[k][j]||0;
+            if(p2>0&&Math.random()<=p2){
+              if(W[k]===1)W[k]=2;
+              W[k]+=impactM[k][j]*fns[k].ic;
+              if(W[k]>=2)W[k]=1;
+              if(W[k]>1)W[k]=0.9;
+            }
+          }
+        }
+      }
+    }
+  }
+  const C=ActC.reduce((s,c,ii)=>s+c*Wdone[ii],0);
+  return{S,C,gantt,freq:freq_run};
+}
+
+function computeIRR(S_map,freq_vec,r){
+  const IRR=new Array(N).fill(0);
+  for(let ii=0;ii<N;ii++){
+    const Ni=[];
+    for(let j=0;j<N;j++){if(ii!==j){const k=`${ii},${j}`;if(S_map[k]>0)Ni.push(j);}}
+    const sum_S=Ni.reduce((s,j)=>{const k=`${ii},${j}`;return s+(S_map[k]||0)*(impactM[ii][j]||0);},0);
+    const dyn=1+(freq_vec[ii]||0)/r;
+    IRR[ii]=sum_S*fns[ii].ic*fns[ii].ms*dyn;
+  }
+  return IRR;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANE 1 — FUNCTIONS & DSM
+// ═══════════════════════════════════════════════════════════════════════
+
+function initState(n){
+  N=n;
+  dsmB=Array.from({length:N},()=>new Array(N).fill(0));
+  tensorM=Array.from({length:N},()=>Array.from({length:N},()=>[0,0,0,0,0,0]));
+  impactM=Array.from({length:N},()=>new Array(N).fill(0));
+}
+
+function addFn(){
+  const idx=fns.length;
+  fns.push({nm:`F${idx+1}`,desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8});
+  N=fns.length;
+  // expand matrices
+  for(let row of dsmB) row.push(0);
+  dsmB.push(new Array(N).fill(0));
+  for(let row of tensorM) row.push([0,0,0,0,0,0]);
+  tensorM.push(Array.from({length:N},()=>[0,0,0,0,0,0]));
+  for(let row of impactM) row.push(0);
+  impactM.push(new Array(N).fill(0));
+  renderFnList();
+  renderDSM();
+}
+
+function delFn(idx){
+  if(N<=2){msg(1,'At least 2 functions required','warn');return;}
+  fns.splice(idx,1);
+  N=fns.length;
+  dsmB.splice(idx,1);
+  dsmB.forEach(r=>r.splice(idx,1));
+  tensorM.splice(idx,1);
+  tensorM.forEach(r=>r.splice(idx,1));
+  impactM.splice(idx,1);
+  impactM.forEach(r=>r.splice(idx,1));
+  renderFnList();
+  renderDSM();
+}
+
+function renderFnList(){
+  const el=i('fn-list');
+  if(!el)return;
+  let h='';
+  fns.forEach((f,idx)=>{
+    h+=`<div class="fn-card" id="fc${idx}">
+      <span class="fn-idx">F${idx+1}</span>
+      <input class="fn-nm-inp" placeholder="Function name" value="${f.nm}"
+        onchange="fns[${idx}].nm=this.value;renderDSM()" oninput="fns[${idx}].nm=this.value;renderDSM()">
+      <button class="fn-del" onclick="delFn(${idx})" title="Elimina">&#10005;</button>
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+
+function renderDSM(){
+  const wrap=i('dsm-wrap');
+  if(!wrap||N===0)return;
+  const CELL=28,LABEL=64;
+  let css=`<style>
+  #dg{display:grid;grid-template-columns:${LABEL}px repeat(${N},${CELL}px);gap:2px;font-family:'Space Mono',monospace;font-size:9px}
+  .dch{width:${CELL}px;height:${CELL}px;display:flex;align-items:center;justify-content:center;background:var(--card2);color:var(--muted);border-radius:2px}
+  .drh{width:${LABEL}px;height:${CELL}px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;background:var(--card2);color:var(--muted);border-radius:2px;overflow:hidden}
+  .dc2{width:${CELL}px;height:${CELL}px;display:flex;align-items:center;justify-content:center;border-radius:2px;cursor:pointer;transition:all .1s;font-size:11px;font-weight:700}
+  .dc2.diag{background:var(--b2);color:var(--b3);cursor:default}
+  .dc2.off{background:var(--dim);color:transparent}.dc2.off:hover{background:var(--b2)}
+  .dc2.on{background:#0f2200;color:var(--green);border:1px solid var(--green)}
+  .dc2.on:hover{background:#162e00}
+  .dc2.fb{background:#1a0a00;color:var(--orange);border:1px solid var(--orange)}
+  .dc2.fb:hover{background:#241200}
+  </style>`;
+  let h=css+'<div id="dg"><div></div>';
+  for(let j=0;j<N;j++) h+=`<div class="dch" title="${fns[j]?.nm||'F'+(j+1)}">F${j+1}</div>`;
+  for(let ii=0;ii<N;ii++){
+    const nm=(fns[ii]?.nm||'F'+(ii+1)).slice(0,9);
+    h+=`<div class="drh" title="${fns[ii]?.nm||''}">F${ii+1} ${nm}</div>`;
+    for(let j=0;j<N;j++){
+      if(ii===j){h+=`<div class="dc2 diag">&#9632;</div>`;continue;}
+      const val=dsmB[ii]?dsmB[ii][j]:0;
+      const isFB=(val&&ii<j);
+      const cls=!val?'off':isFB?'fb':'on';
+      const sym=val?'&#9632;':'&#9633;';
+      h+=`<div class="dc2 ${cls}" onclick="toggleDSM(${ii},${j})"
+            title="F${ii+1}←F${j+1}: ${fns[ii]?.nm||''} dipende da ${fns[j]?.nm||''}">${sym}</div>`;
+    }
+  }
+  h+='</div>';
+  wrap.innerHTML=h;
+  updateDSMStats();
+}
+
+function toggleDSM(ii,j){
+  if(!dsmB[ii])return;
+  dsmB[ii][j]=dsmB[ii][j]?0:1;
+  // sync tensorM: if activating set default; if deactivating clear
+  if(dsmB[ii][j]===1 && tensorM[ii][j].every(v=>v===0)){
+    tensorM[ii][j]=[0.5,0.5,0.5,0.5,0.5,0.5];
+    impactM[ii][j]=0.5;
+  } else if(dsmB[ii][j]===0){
+    tensorM[ii][j]=[0,0,0,0,0,0];
+    impactM[ii][j]=0;
+  }
+  renderDSM();
+}
+
+function updateDSMStats(){
+  let links=0,fb=0;
+  for(let ii=0;ii<N;ii++) for(let j=0;j<N;j++){
+    if(ii!==j&&dsmB[ii]&&dsmB[ii][j]){links++;if(ii<j)fb++;}
+  }
+  const max=N*(N-1);
+  const den=max>0?Math.round(links/max*100):0;
+  ['ds-n','ds-l','ds-d','ds-fb'].forEach((id,k)=>{
+    const el=i(id);if(el)el.textContent=[N,links,den+'%',fb][k];
+  });
+  const fw=i('fb-warn');
+  if(fw){
+    if(fb>0){
+      const pairs=[];
+      for(let ii=0;ii<N;ii++) for(let j=ii+1;j<N;j++)
+        if(dsmB[ii]&&dsmB[ii][j]&&dsmB[j]&&dsmB[j][ii]) pairs.push(`F${ii+1}↔F${j+1}`);
+      fw.style.display='block';
+      fw.innerHTML='⚠ '+fb+' link feedback: '+pairs.slice(0,8).join(', ')+(pairs.length>8?'…':'')+'<br><span style="color:var(--muted)">I loop di feedback generano rework B-E — atteso in FEBS.</span>';
+    } else fw.style.display='none';
+  }
+}
+
+function fillLower(){
+  dsmB=Array.from({length:N},()=>new Array(N).fill(0));
+  for(let ii=1;ii<N;ii++) for(let j=0;j<ii;j++){
+    dsmB[ii][j]=1;
+    if(tensorM[ii][j].every(v=>v===0)) tensorM[ii][j]=[0.5,0.5,0.5,0.5,0.5,0.5];
+    if(!impactM[ii][j]) impactM[ii][j]=0.5;
+  }
+  renderDSM();
+}
+
+function dsmClear(){
+  dsmB=Array.from({length:N},()=>new Array(N).fill(0));
+  tensorM=Array.from({length:N},()=>Array.from({length:N},()=>[0,0,0,0,0,0]));
+  impactM=Array.from({length:N},()=>new Array(N).fill(0));
+  renderDSM();
+}
+
+function expCSV(){
+  const nms=fns.map((f,i)=>f.nm||'F'+(i+1));
+  let s=';'+nms.join(';')+'\n';
+  for(let ii=0;ii<N;ii++) s+=nms[ii]+';'+dsmB[ii].map((v,j)=>ii===j?'X':v).join(';')+'\n';
+  dl('FEBS_DSM.csv','text/csv',s);
+}
+function expJSON(){
+  const obj={n:N,functions:fns.map((f,ii)=>({id:ii+1,name:f.nm,desc:f.desc})),
+    binary_dsm:dsmB,timestamp:new Date().toISOString()};
+  dl('FEBS_DSM.json','application/json',JSON.stringify(obj,null,2));
+}
+function expMIT(){
+  const nms=fns.map((f,ii)=>f.nm||'F'+(ii+1));
+  let s='Element;'+nms.join(';')+'\n';
+  for(let ii=0;ii<N;ii++){
+    const row=[nms[ii]];
+    for(let j=0;j<N;j++) row.push(ii===j?String(ii+1):dsmB[ii][j]?'1':'');
+    s+=row.join(';')+'\n';
+  }
+  dl('FEBS_DSM_MIT.csv','text/csv',s);
+}
+
+function validateP1(){
+  if(N<2){msg(1,'At least 2 functions required','warn');return;}
+  if(!fns.every(f=>f.nm&&f.nm.trim())){msg(1,'Assign a name to all functions','warn');return;}
+  let links=0;
+  for(let ii=0;ii<N;ii++) for(let j=0;j<N;j++) if(ii!==j&&dsmB[ii][j])links++;
+  if(links===0){msg(1,'Activate at least one dependency in the DSM','warn');return;}
+  msg(1,'✓ '+N+' functions, '+links+' DSM links','ok');
+  setDone(1,N+' functions, '+links+' links');
+  i('n1').disabled=false;
+  i('ws2').classList.remove('locked');
+  renderTriGrid();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANE 2 — TRIANGULAR PARAMETERS
+// ═══════════════════════════════════════════════════════════════════════
+
+function renderTriGrid(){
+  const el=i('tri-grid');
+  if(!el)return;
+  let h='';
+  fns.forEach((f,idx)=>{
+    h+=`<div class="tri-card">
+      <div class="tri-fn-hdr">
+        <span class="tri-fn-idx">F${idx+1}</span>
+        <span class="tri-fn-nm">${f.nm||'F'+(idx+1)}</span>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">DURATION (days)</div>
+        <div class="tri-row">
+          <span class="tag-s tri-tag">S</span>
+          <span class="tri-lbl">B</span>
+          <input class="tri-inp" type="number" value="${f.bs}" min="0" step="0.1"
+            onchange="fns[${idx}].bs=+this.value">
+          <span class="tri-sep">≤</span>
+          <span class="tri-lbl">M</span>
+          <input class="tri-inp" type="number" value="${f.ms}" min="0" step="0.1"
+            onchange="fns[${idx}].ms=+this.value">
+          <span class="tri-sep">≤</span>
+          <span class="tri-lbl">W</span>
+          <input class="tri-inp" type="number" value="${f.ws}" min="0" step="0.1"
+            onchange="fns[${idx}].ws=+this.value">
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:4px;letter-spacing:1px">COST ($k)</div>
+        <div class="tri-row">
+          <span class="tag-c tri-tag">C</span>
+          <span class="tri-lbl">B</span>
+          <input class="tri-inp" type="number" value="${f.bc}" min="0" step="0.1"
+            onchange="fns[${idx}].bc=+this.value">
+          <span class="tri-sep">≤</span>
+          <span class="tri-lbl">M</span>
+          <input class="tri-inp" type="number" value="${f.mc}" min="0" step="0.1"
+            onchange="fns[${idx}].mc=+this.value">
+          <span class="tri-sep">≤</span>
+          <span class="tri-lbl">W</span>
+          <input class="tri-inp" type="number" value="${f.wc}" min="0" step="0.1"
+            onchange="fns[${idx}].wc=+this.value">
+        </div>
+      </div>
+      <div class="ic-row">
+        <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">IC learning curve</span>
+        <input class="tri-inp" type="number" value="${f.ic}" min="0.01" max="1" step="0.01"
+          style="width:60px" onchange="fns[${idx}].ic=+this.value">
+        <span style="font-size:10px;color:var(--muted)">[0,1]</span>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+
+function validateP2(){
+  for(let idx=0;idx<N;idx++){
+    const f=fns[idx];
+    if(f.bs>f.ms||f.ms>f.ws){msg(2,`F${idx+1}: must satisfy B≤M≤W for duration`,'warn');return;}
+    if(f.bc>f.mc||f.mc>f.wc){msg(2,`F${idx+1}: must satisfy B≤M≤W for cost`,'warn');return;}
+    if(f.ms<=0){msg(2,`F${idx+1}: MLV duration must be > 0`,'warn');return;}
+  }
+  msg(2,'✓ Parameters valid for all functions','ok');
+  setDone(2,N+' functions parameterised');
+  i('n2').disabled=false;
+  i('ws3').classList.remove('locked');
+  renderTensor();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANE 3 — TENSOR M & IMPACT
+// ═══════════════════════════════════════════════════════════════════════
+
+function renderTensor(){
+  renderCouplingList();
+  renderTensorMatrix();
+  renderImpactMatrix();
+}
+
+function renderCouplingList(){
+  const el=i('coup-list');
+  if(!el)return;
+  let h='',cnt=0;
+  for(let ii=0;ii<N;ii++) for(let j=0;j<N;j++){
+    if(ii===j||!dsmB[ii]||!dsmB[ii][j])continue;
+    cnt++;
+    const vals=tensorM[ii][j]||[0,0,0,0,0,0];
+    const w=getWeights();
+    const norm=Math.sqrt(vals.reduce((s,v,k)=>s+w[k]*v*v,0));
+    let sliders='';
+    vals.forEach((v,k)=>{
+      sliders+=`<div class="f6-row asp${k}">
+        <span class="f6-lbl asp${k}">${ASPECTS[k]}</span>
+        <input class="f6-slider asp${k}" type="range" min="0" max="1" step="0.01" value="${v}"
+          style="--pct:${v*100}"
+          oninput="updTensor(${ii},${j},${k},+this.value);this.style.setProperty('--pct',this.value*100)"
+          title="${ASP_FULL[k]}">
+        <span class="f6-val" id="tv_${ii}_${j}_${k}" style="color:${ASP_COLORS[k]}">${v.toFixed(2)}</span>
+      </div>`;
+    });
+    h+=`<div class="coup-card">
+      <div class="coup-hdr">
+        <span class="coup-pair">F${ii+1}←F${j+1}</span>
+        <span class="coup-names">${(fns[ii]?.nm||'').slice(0,14)} ← ${(fns[j]?.nm||'').slice(0,14)}</span>
+      </div>
+      ${sliders}
+      <div class="f6-norm">‖C‖<sub>w</sub> = <span id="norm_${ii}_${j}">${norm.toFixed(3)}</span></div>
+      <div class="imp-row">
+        <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">Impact DSM<sub>ij2</sub></span>
+        <input class="imp-inp" type="number" min="0" max="1" step="0.01" value="${impactM[ii][j]}"
+          onchange="impactM[${ii}][${j}]=+this.value;renderTensorMatrix();renderImpactMatrix()">
+      </div>
+    </div>`;
+  }
+  el.innerHTML=cnt>0?h:'<div style="color:var(--muted);font-size:11px">No active pairs. Go back to step 1 and activate dependencies in the DSM.</div>';
+}
+
+function updTensor(ii,j,k,v){
+  if(!tensorM[ii]) return;
+  tensorM[ii][j][k]=v;
+  const el=i(`tv_${ii}_${j}_${k}`);if(el)el.textContent=v.toFixed(2);
+  const w=getWeights();
+  const norm=Math.sqrt(tensorM[ii][j].reduce((s,vv,kk)=>s+w[kk]*vv*vv,0));
+  const ne=i(`norm_${ii}_${j}`);if(ne)ne.textContent=norm.toFixed(3);
+  renderTensorMatrix();
+}
+
+function renderTensorMatrix(){
+  const wrap=i('tm-wrap');
+  if(!wrap)return;
+  const w=getWeights();
+  // compute max norm
+  let maxN=0;
+  for(let ii=0;ii<N;ii++) for(let j=0;j<N;j++){
+    if(ii===j)continue;
+    const c=tensorM[ii][j];
+    if(c){const n=Math.sqrt(c.reduce((s,v,k)=>s+w[k]*v*v,0));if(n>maxN)maxN=n;}
+  }
+  const CELL=28,LABEL=64;
+  let css=`<style>#tmg{display:grid;grid-template-columns:${LABEL}px repeat(${N},${CELL}px);gap:2px;font-family:'Space Mono',monospace;font-size:8px}
+  .tmch{width:${CELL}px;height:${CELL}px;display:flex;align-items:center;justify-content:center;background:var(--card2);color:var(--muted);border-radius:2px}
+  .tmrh{width:${LABEL}px;height:${CELL}px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;background:var(--card2);color:var(--muted);border-radius:2px}
+  .tmc{width:${CELL}px;height:${CELL}px;display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:8px;font-weight:700}
+  </style>`;
+  let h=css+'<div id="tmg"><div></div>';
+  for(let j=0;j<N;j++) h+=`<div class="tmch" title="${fns[j]?.nm||'F'+(j+1)}">F${j+1}</div>`;
+  for(let ii=0;ii<N;ii++){
+    h+=`<div class="tmrh" title="${fns[ii]?.nm||''}">F${ii+1} ${(fns[ii]?.nm||'').slice(0,7)}</div>`;
+    for(let j=0;j<N;j++){
+      if(ii===j){h+=`<div class="tmc" style="background:var(--b2);color:var(--muted)">&#9632;</div>`;continue;}
+      const c=tensorM[ii][j];
+      const active=dsmB[ii]&&dsmB[ii][j];
+      if(!active||!c||c.every(v=>v===0)){
+        h+=`<div class="tmc" style="background:var(--dim);color:var(--b3)"></div>`;continue;
+      }
+      const norm=Math.sqrt(c.reduce((s,v,k)=>s+w[k]*v*v,0));
+      const t=maxN>0?norm/maxN:0;
+      const r=Math.round(245*t+26*(1-t)),g=Math.round(158*t+40*(1-t)),bl=Math.round(11*(1-t));
+      const bg=`rgba(${r},${g},${bl},${0.3+0.6*t})`;
+      h+=`<div class="tmc" style="background:${bg};color:${t>0.4?'#000':'var(--text)'};cursor:pointer"
+            title="F${ii+1}←F${j+1}: ‖C‖=${norm.toFixed(3)}">${norm.toFixed(2)}</div>`;
+    }
+  }
+  h+='</div>';
+  wrap.innerHTML=h;
+}
+
+function renderImpactMatrix(){
+  const wrap=i('imp-wrap');
+  if(!wrap)return;
+  const CELL=30,LABEL=64;
+  let css=`<style>#impg{display:grid;grid-template-columns:${LABEL}px repeat(${N},${CELL}px);gap:2px;font-family:'Space Mono',monospace;font-size:8px}
+  .ich{width:${CELL}px;height:${CELL}px;display:flex;align-items:center;justify-content:center;background:var(--card2);color:var(--muted);border-radius:2px}
+  .irh{width:${LABEL}px;height:${CELL}px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;background:var(--card2);color:var(--muted);border-radius:2px}
+  .imc{width:${CELL}px;height:${CELL}px;display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:9px;font-weight:700}
+  </style>`;
+  let h=css+'<div id="impg"><div></div>';
+  for(let j=0;j<N;j++) h+=`<div class="ich">F${j+1}</div>`;
+  for(let ii=0;ii<N;ii++){
+    h+=`<div class="irh">F${ii+1}</div>`;
+    for(let j=0;j<N;j++){
+      if(ii===j){h+=`<div class="imc" style="background:var(--b2);color:var(--muted)">&#9632;</div>`;continue;}
+      const active=dsmB[ii]&&dsmB[ii][j];
+      if(!active){h+=`<div class="imc" style="background:var(--dim);color:var(--b3)"></div>`;continue;}
+      const v=impactM[ii][j]||0;
+      const t=v;
+      const bg=`rgba(59,130,246,${0.15+0.6*t})`;
+      const col=t>0.5?'#fff':'var(--muted)';
+      h+=`<div class="imc" style="background:${bg};color:${col}" title="Impact F${ii+1}←F${j+1}: ${v.toFixed(2)}">${v.toFixed(2)}</div>`;
+    }
+  }
+  h+='</div>';
+  wrap.innerHTML=h;
+}
+
+function validateP3(){
+  let pairs=0;
+  for(let ii=0;ii<N;ii++) for(let j=0;j<N;j++)
+    if(ii!==j&&dsmB[ii]&&dsmB[ii][j]&&tensorM[ii][j].some(v=>v>0))pairs++;
+  if(pairs===0){msg(3,'No pairs configured in tensor M','warn');return;}
+  msg(3,'✓ '+pairs+' tensor M pairs configured','ok');
+  setDone(3,pairs+' pairs');
+  i('n3').disabled=false;
+  i('ws4').classList.remove('locked');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANE 4 — FEBS PARAMETERS
+// ═══════════════════════════════════════════════════════════════════════
+
+function validateP4(){
+  const p=+i('pp').value,b=+i('beta').value;
+  if(p<=0||p>=100){msg(4,'p must be between 1 and 99','warn');return;}
+  if(b<=0){msg(4,'β must be > 0','warn');return;}
+  msg(4,'✓ Parameters confirmed','ok');
+  setDone(4,'p='+p+'% β='+b);
+  i('n4').disabled=false;
+  i('ws5').classList.remove('locked');
+  i('rb').disabled=false;
+  i('sb').disabled=false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANE 6 — SIMULATION & RESULTS
+// ═══════════════════════════════════════════════════════════════════════
+
+async function runSim(p_ov,beta_ov,pbase_ov,rMax_ov){
+  const p=p_ov??+i('pp').value,b=beta_ov??+i('beta').value;
+  const pb=pbase_ov??+i('pbase').value,rMax=rMax_ov??+i('rmax').value;
+  const rho=+i('rho').value;
+  const febs=febsInit(p,b,pb);
+  if(!febs){setS('No active coupling');return null;}
+  const P_mat=Array.from({length:N},()=>new Array(N).fill(0));
+  Object.entries(febs.P).forEach(([key,val])=>{const[ii,j]=key.split(',').map(Number);P_mat[ii][j]=val;});
+  febs_norms=febs.norms;febs_S=febs.S;febs_P=febs.P;
+  simS=[];simC=[];ganttD=[];
+  const cumFreq=new Array(N).fill(0);
+  if(!rMax_ov){i('rb').disabled=true;i('dot').className='dot run';}
+  setS('Running FEBS...');
+  const CHUNK=40;let r=0,stab=false;
+  while(r<rMax&&!stab){
+    const n=Math.min(CHUNK,rMax-r);
+    const us=lhs(n,N),uc=lhs(n,N);
+    for(let ii=0;ii<n;ii++){
+      const res=singleRun(P_mat,us[ii],uc[ii],rho,r+ii===0);
+      simS.push(res.S);simC.push(res.C);
+      res.freq.forEach((f,idx)=>cumFreq[idx]+=f);
+      if(r+ii===0)ganttD=res.gantt;
+    }
+    r+=n;
+    if(r>=200&&stable(simS,100,0.01))stab=true;
+    if(!rMax_ov){
+      i('pf').style.width=Math.round(r/rMax*100)+'%';
+      setS('Run '+r+'/'+rMax+(stab?' — stable':''));
+      await new Promise(r=>setTimeout(r,0));
+    }
+  }
+  febs_freq=cumFreq;
+  febs_IRR=computeIRR(febs.S,getEffectiveFreq(cumFreq,r),r);
+  if(!rMax_ov){
+    i('rb').disabled=false;i('dot').className='dot ok';
+    setS('FEBS complete — '+simS.length+' runs'+(stab?' (stable)':''));
+    i('pf').style.width='100%';
+    showResults(febs);
+  }
+  return{simS:[...simS],simC:[...simC],IRR:[...febs_IRR],theta:febs.theta,activePairs:febs.activePairs,p,b,pb};
+}
+
+function showResults(febs){
+  const S=[...simS].sort((a,b)=>a-b),C=[...simC].sort((a,b)=>a-b),n=S.length;
+  const ES=S.reduce((a,b)=>a+b,0)/n;
+  const sS=Math.sqrt(S.map(x=>(x-ES)**2).reduce((a,b)=>a+b,0)/n);
+  const EC=C.reduce((a,b)=>a+b,0)/n;
+  const sC=Math.sqrt(C.map(x=>(x-EC)**2).reduce((a,b)=>a+b,0)/n);
+  const ts=+i('ts').value,tc=+i('tc').value;
+  const ps=ts>0?S.filter(s=>s<=ts).length/n:null;
+  ['r-es','r-ss','r-ec','r-sc','r-n','r-theta','r-act','r-ps','r-irr'].forEach((id,k)=>{
+    const el=i(id);if(!el)return;
+    el.textContent=[ES.toFixed(1),sS.toFixed(1),EC.toFixed(0),sC.toFixed(0),n,
+      febs.theta.toFixed(3),febs.activePairs,ps!==null?(100*ps).toFixed(1)+'%':'—',
+      febs_IRR.filter(x=>x>0).length+'/'+N][k];
+  });
+  renderPipeline(febs);
+  drawIRR();
+  drawHist(S,'cv-s','Schedule (days)','#3b82f6',fns.reduce((a,f)=>a+f.ms,0));
+  drawHist(C,'cv-c','Costo ($k)','#f59e0b',fns.reduce((a,f)=>a+f.mc,0));
+  setDone(6,'E[S]='+ES.toFixed(1)+' IRR#1='+(fns[febs_IRR.map((v,ii)=>({v,i:ii})).sort((a,b)=>b.v-a.v)[0].i]?.nm||'F1').slice(0,6));
+}
+
+function drawIRR(){
+  const el=i('irr-cont');if(!el||!febs_IRR.length)return;
+  const sorted=[...febs_IRR.map((v,ii)=>({v,i:ii}))].sort((a,b)=>b.v-a.v);
+  const maxV=sorted[0]?.v||1;
+  let h='';
+  sorted.forEach(({v,i:ii},rank)=>{
+    const pct=Math.round(v/maxV*100);
+    const nm=fns[ii]?.nm||'F'+(ii+1);
+    h+=`<div class="irr-row${rank===0?' top':''}" style="border-left-color:${v>0?'var(--orange)':'var(--b3)'}">
+      <span class="irr-nm" style="font-family:'Space Mono',monospace;font-size:10px">F${ii+1} ${nm.slice(0,16)}</span>
+      <div class="irr-bar-wrap"><div class="irr-bar" style="width:${pct}%;background:${v>0?'var(--orange)':'var(--b3)'}"></div></div>
+      <span class="irr-val">${v.toFixed(2)}</span>
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+
+function drawHist(data,cvId,label,color,mlv){
+  const cv=i(cvId);if(!cv)return;
+  const W=cv.parentElement?.clientWidth||600,H=220;
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const BINS=40,mn=data[0],mx=data[data.length-1];
+  const bw=(mx-mn)/BINS;
+  const counts=new Array(BINS).fill(0);
+  data.forEach(v=>{let b=Math.floor((v-mn)/bw);if(b>=BINS)b=BINS-1;counts[b]++;});
+  const maxC=Math.max(...counts);
+  const PAD={l:50,r:20,t:20,b:40};
+  const gW=W-PAD.l-PAD.r,gH=H-PAD.t-PAD.b;
+  ctx.fillStyle='rgba(255,255,255,0.03)';ctx.fillRect(PAD.l,PAD.t,gW,gH);
+  const bpx=gW/BINS;
+  ctx.fillStyle=color+'60';
+  counts.forEach((c,b)=>{
+    const x=PAD.l+b*bpx,y=PAD.t+gH-(c/maxC*gH),h2=c/maxC*gH;
+    ctx.fillRect(x+1,y,bpx-2,h2);
+  });
+  ctx.strokeStyle=color;ctx.lineWidth=1.5;
+  const es=data.reduce((a,b)=>a+b,0)/data.length;
+  const esX=PAD.l+(es-mn)/bw*bpx;
+  ctx.beginPath();ctx.setLineDash([4,3]);ctx.moveTo(esX,PAD.t);ctx.lineTo(esX,PAD.t+gH);ctx.stroke();
+  ctx.setLineDash([]);
+  if(mlv>0){
+    const mlvX=PAD.l+(mlv-mn)/bw*bpx;
+    ctx.strokeStyle='var(--muted)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.setLineDash([2,4]);ctx.moveTo(mlvX,PAD.t);ctx.lineTo(mlvX,PAD.t+gH);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.fillStyle=color;ctx.font="bold 11px 'Space Mono'";
+  ctx.fillText('E='+es.toFixed(1),esX+4,PAD.t+16);
+  ctx.fillStyle='var(--muted)';ctx.font="10px 'Space Mono'";
+  ctx.fillText(mn.toFixed(0),PAD.l,PAD.t+gH+20);
+  ctx.fillText(mx.toFixed(0),PAD.l+gW-20,PAD.t+gH+20);
+  ctx.fillText(label,PAD.l+gW/2-30,PAD.t+gH+20);
+}
+
+async function runSens(){
+  const pVals=[50,75,90],bVals=[1.2,1.5,2.0];
+  sensResults=[];
+  const el=i('sens-cont');
+  if(el)el.innerHTML='<div style="color:var(--muted);font-size:11px">Calcolo 9 scenari...</div>';
+
+  // Salva lo stato della run principale PRIMA di eseguire la sensitivity
+  const _save = {
+    simS:[...simS], simC:[...simC], ganttD:[...ganttD],
+    febs_IRR:[...febs_IRR],
+    febs_norms:{...febs_norms}, febs_S:{...febs_S},
+    febs_P:{...febs_P}, febs_freq:[...febs_freq],
+    lastFebs: _lastFebs
+  };
+
+  // Run 9 scenarios with a local runner that does NOT update the UI
+  const pb=+i('pbase').value, rMax=Math.max(200,Math.round(+i('rmax').value/2));
+  for(const p of pVals) for(const b of bVals){
+    const res = await runSimLocal(p, b, pb, rMax);
+    if(res) sensResults.push({p,b,...res});
+  }
+
+  // Ripristina lo stato della run principale
+  simS=_save.simS; simC=_save.simC; ganttD=_save.ganttD;
+  febs_IRR=_save.febs_IRR;
+  febs_norms=_save.febs_norms; febs_S=_save.febs_S;
+  febs_P=_save.febs_P; febs_freq=_save.febs_freq;
+  _lastFebs=_save.lastFebs;
+
+  // Ridisegna IRR con i dati originali (non della sensitivity)
+  drawIRR();
+
+  renderSens();
+  sw('sens');
+}
+
+// Runner locale per sensitivity: non tocca le variabili globali UI
+async function runSimLocal(p_pct, beta, pbase, rMax){
+  const rho=+i('rho').value;
+  const febs=febsInit(p_pct, beta, pbase);
+  if(!febs) return null;
+  const P_mat=Array.from({length:N},()=>new Array(N).fill(0));
+  Object.entries(febs.P).forEach(([key,val])=>{const[ii,j]=key.split(',').map(Number);P_mat[ii][j]=val;});
+  const _simS=[], _simC=[];
+  const cumFreq=new Array(N).fill(0);
+  const CHUNK=40; let r=0, stab=false;
+  while(r<rMax&&!stab){
+    const n=Math.min(CHUNK,rMax-r);
+    const us=lhs(n,N),uc=lhs(n,N);
+    for(let ii=0;ii<n;ii++){
+      const res=singleRun(P_mat,us[ii],uc[ii],rho,false);
+      _simS.push(res.S);_simC.push(res.C);
+      res.freq.forEach((f,idx)=>cumFreq[idx]+=f);
+    }
+    r+=n;
+    if(r>=200&&stable(_simS,100,0.01))stab=true;
+    await new Promise(r=>setTimeout(r,0));
+  }
+  const IRR=computeIRR(febs.S,getEffectiveFreq(cumFreq,r),r);
+  return{simS:[..._simS],simC:[..._simC],IRR,theta:febs.theta,activePairs:febs.activePairs,p:p_pct,b:beta,pb:pbase};
+}
+
+function renderSens(){
+  const el=i('sens-cont');if(!el)return;
+  if(!sensResults.length){el.innerHTML='Run sensitivity analysis first.';return;}
+  const topFn=name=>febs_IRR&&febs_IRR.length?
+    (fns[febs_IRR.map((v,ii)=>({v,i:ii})).sort((a,b)=>b.v-a.v)[0]?.i]?.nm||'—'):'—';
+  let h=`<table style="border-collapse:collapse;font-family:'Space Mono',monospace;font-size:10px;width:100%">
+    <thead><tr style="color:var(--muted)">
+      <th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--b2)">p</th>
+      <th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--b2)">β</th>
+      <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">E[S]</th>
+      <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">σS</th>
+      <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">E[C]</th>
+      <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">θ</th>
+      <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">Attive</th>
+      <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">IRR max</th>
+      <th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--b2)">Nodo #1</th>
+    </tr></thead><tbody>`;
+  sensResults.forEach(r=>{
+    const S=[...r.simS].sort((a,b)=>a-b),C=[...r.simC].sort((a,b)=>a-b),n=S.length;
+    const ES=S.reduce((a,b)=>a+b,0)/n;
+    const sS=Math.sqrt(S.map(x=>(x-ES)**2).reduce((a,b)=>a+b,0)/n);
+    const EC=C.reduce((a,b)=>a+b,0)/n;
+    const maxIRR=r.IRR?Math.max(...r.IRR).toFixed(2):'—';
+    const topIdx=r.IRR?r.IRR.map((v,ii)=>({v,i:ii})).sort((a,b)=>b.v-a.v)[0]?.i:-1;
+    const topNm=topIdx>=0?(fns[topIdx]?.nm||'F'+(topIdx+1)).slice(0,12):'—';
+    h+=`<tr style="border-bottom:1px solid var(--dim)">
+      <td style="padding:5px 10px;color:var(--cyan)">${r.p}%</td>
+      <td style="padding:5px 10px;color:var(--purple)">${r.b}</td>
+      <td style="padding:5px 10px;text-align:right">${ES.toFixed(1)}</td>
+      <td style="padding:5px 10px;text-align:right;color:var(--muted)">${sS.toFixed(1)}</td>
+      <td style="padding:5px 10px;text-align:right">${EC.toFixed(0)}</td>
+      <td style="padding:5px 10px;text-align:right;color:var(--muted)">${r.theta.toFixed(3)}</td>
+      <td style="padding:5px 10px;text-align:right;color:var(--green)">${r.activePairs}</td>
+      <td style="padding:5px 10px;text-align:right;color:var(--orange)">${maxIRR}</td>
+      <td style="padding:5px 10px;color:var(--orange)">${topNm}</td>
+    </tr>`;
+  });
+  h+='</tbody></table>';
+  el.innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// NAVIGATION & WIZARD
+// ═══════════════════════════════════════════════════════════════════════
+
+function nav(n){
+  const _t=i('ws'+n);if(_t&&_t.classList.contains('locked'))return;
+  [1,2,3,4,5,6].forEach(k=>{
+    const p=i('p'+k);if(p)p.classList.toggle('on',k===n);
+    const w=i('ws'+k);if(w){
+      w.classList.remove('active');
+      if(k===n)w.classList.add('active');
+    }
+  });
+  if(n===2){renderTriGrid();}
+  if(n===3){renderTensor();}
+  if(n===5){renderFreqPane();}
+}
+
+function setDone(n,lbl){
+  const w=i('ws'+n),wn=i('wn'+n),wst=i('wst'+n);
+  if(w)w.classList.add('done');
+  if(wst){wst.textContent=lbl;wst.className='wst ok';}
+}
+
+function msg(pane,t,c){
+  const el=i('m'+pane);if(!el)return;
+  el.textContent=t;el.className='msg '+(c||'');
+}
+
+function sw(t){
+  document.querySelectorAll('.otab').forEach(tab=>tab.classList.toggle('on',tab.dataset.t===t));
+  document.querySelectorAll('.opane').forEach(p=>p.classList.toggle('on',p.id==='op-'+t));
+  if(t==='irr' && febs_IRR && febs_IRR.length) drawIRR();
+  if(t==='pipe' && _lastFebs) renderPipeline(_lastFebs);
+  if(t==='irr')drawIRR();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// LOAD AIRPORT / RESET
+// ═══════════════════════════════════════════════════════════════════════
+
+function loadAirport(){
+  // — prima pulisci tutto come un reset —
+  simS=[];simC=[];ganttD=[];febs_IRR=[];febs_norms={};febs_S={};febs_P={};febs_freq=[];
+  sensResults=[];_lastFebs=null;
+
+  // — azzera metriche e contenuti risultati —
+  ['r-es','r-ss','r-ec','r-sc','r-n','r-theta','r-act','r-ps','r-irr'].forEach(id=>{
+    const el=i(id);if(el)el.textContent='—';
+  });
+  const empty='<p style="color:var(--muted);font-size:11px">Run the simulation first.</p>';
+  ['irr-cont','sens-cont','pipe-cont'].forEach(id=>{const el=i(id);if(el)el.innerHTML=empty;});
+  ['cv-s','cv-c'].forEach(id=>{
+    const cv=i(id);
+    if(cv){const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);}
+  });
+  [2,3,4,5].forEach(k=>msg(k,'',''));
+
+  // — carica dati Airport —
+  fns=AIRPORT.fns.map(f=>({...f}));
+  N=AIRPORT.n;
+  dsmB=AIRPORT.dsm.map(r=>[...r]);
+  tensorM=AIRPORT.tensor.map(r=>r.map(c=>[...c]));
+  impactM=AIRPORT.impact.map(r=>[...r]);
+
+  // — wizard bar: tutti step done e unlocked —
+  [1,2,3,4,5,6].forEach(k=>{
+    const ws=i('ws'+k);
+    if(ws){ws.classList.remove('active','locked');ws.classList.add('done');}
+  });
+  setDone(1,N+' functions');setDone(2,'preloaded');setDone(3,'preloaded');setDone(4,'ready');setDone(5,'MC freq');
+  useEmpFreq=false;empiricalFreq=Array(N).fill(0);
+  i('ws5').classList.remove('locked');
+  ['n1','n2','n3','n4','rb','sb'].forEach(id=>{const el=i(id);if(el)el.disabled=false;});
+
+  // — render e nav —
+  renderFnList();renderDSM();
+  nav(1);
+  i('dot').className='dot';
+  i('pf').style.width='0%';
+  msg(1,'✓ Airport turnaround example loaded','ok');
+  setS('Airport turnaround loaded');
+}
+
+function resetAll(){
+  // — dati —
+  fns=[{nm:'F1',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
+       {nm:'F2',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
+       {nm:'F3',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8}];
+  N=3;
+  dsmB=Array.from({length:N},()=>new Array(N).fill(0));
+  tensorM=Array.from({length:N},()=>Array.from({length:N},()=>[0,0,0,0,0,0]));
+  impactM=Array.from({length:N},()=>new Array(N).fill(0));
+  simS=[];simC=[];ganttD=[];febs_IRR=[];febs_norms={};febs_S={};febs_P={};febs_freq=[];
+  sensResults=[];_lastFebs=null;
+
+  // — wizard bar: tutti i step tornano allo stato iniziale —
+  [1,2,3,4,5,6].forEach(k=>{
+    const ws=i('ws'+k);
+    if(ws){
+      ws.classList.remove('active','done','locked');
+      if(k===1) ws.classList.add('active');
+      else ws.classList.add('locked');
+    }
+    const wst=i('wst'+k);
+    if(wst){wst.textContent='—';wst.className='wst';}
+  });
+
+  // — bottoni next / run —
+  ['n1','n2','n3','n4','rb','sb'].forEach(id=>{const el=i(id);if(el)el.disabled=true;});
+
+  // — messaggi step —
+  [1,2,3,4,5].forEach(k=>msg(k,'',''));
+
+  // — metriche striscia risultati —
+  ['r-es','r-ss','r-ec','r-sc','r-n','r-theta','r-act','r-ps','r-irr'].forEach(id=>{
+    const el=i(id);if(el)el.textContent='—';
+  });
+
+  // — contenuti tab risultati —
+  const empty='<p style="color:var(--muted);font-size:11px">Run the simulation first.</p>';
+  ['irr-cont','sens-cont','pipe-cont'].forEach(id=>{const el=i(id);if(el)el.innerHTML=empty;});
+
+  // — canvas —
+  ['cv-s','cv-c'].forEach(id=>{
+    const cv=i(id);
+    if(cv){const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);}
+  });
+
+  // — progress bar e dot —
+  i('pf').style.width='0%';
+  i('dot').className='dot';
+  setS('');
+
+  // — reset to step 1 and re-render —
+  nav(1);
+  renderFnList();
+  renderDSM();
+}
+
+// ═══ BOOT ══════════════════════════════════════════════════════════════
+(function boot(){
+  fns=[
+    {nm:'F1',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
+    {nm:'F2',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
+    {nm:'F3',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
+  ];
+  N=fns.length;
+  dsmB=Array.from({length:N},()=>new Array(N).fill(0));
+  tensorM=Array.from({length:N},()=>Array.from({length:N},()=>[0,0,0,0,0,0]));
+  impactM=Array.from({length:N},()=>new Array(N).fill(0));
+  renderFnList();
+  renderDSM();
+})();
+// ═══ FEBS PIPELINE VISUALIZATION ══════════════════════════════════════
+
+// Stored febs object from last run
+let _lastFebs = null;
+
+function renderPipeline(febs) {
+  _lastFebs = febs;
+  const el = i('pipe-cont');
+  if (!el) return;
+
+  // ── Step boxes ──────────────────────────────────────────────────────
+  const steps = [
+    { lbl: 'Tensor M', sub: `${N}×${N}×6`, val: Object.keys(febs.norms).length + ' pairs with C<sub>ij</sub> ≠ 0', color: 'var(--purple)' },
+    { lbl: '‖C<sub>ij</sub>‖<sub>w</sub>', sub: 'Weighted Euclidean norm', val: Object.keys(febs.norms).length + ' norms computed', color: 'var(--cyan)' },
+    { lbl: 'θ = F⁻¹(p)', sub: 'Adaptive threshold', val: 'θ = ' + febs.theta.toFixed(3) + ' &nbsp;(p=' + febs.p + '%)', color: 'var(--yellow)' },
+    { lbl: 'S<sub>ij</sub>', sub: 'Coupling intensity', val: febs.activePairs + ' active pairs out of ' + Object.keys(febs.norms).length, color: 'var(--orange)' },
+    { lbl: 'P<sub>ij</sub>', sub: 'Rework probability', val: 'p<sub>base</sub>=' + febs.pb + ' · β=' + febs.b, color: 'var(--inp)' },
+    { lbl: 'MC B-E', sub: 'Monte Carlo', val: simS.length + ' runs → E[S], σ_S, E[C], σ_C', color: 'var(--green)' },
+    { lbl: 'IRR<sub>i</sub>', sub: 'Functional Resonance Risk', val: 'max = ' + Math.max(...febs_IRR).toFixed(2), color: 'var(--orange)' },
+  ];
+
+  let stepsHtml = '<div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:20px">';
+  steps.forEach((s, k) => {
+    stepsHtml += `
+      <div style="background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:10px 14px;min-width:130px;position:relative">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:${s.color};margin-bottom:3px">${s.lbl}</div>
+        <div style="font-size:9px;color:var(--muted);margin-bottom:4px">${s.sub}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text)">${s.val}</div>
+      </div>`;
+    if (k < steps.length - 1)
+      stepsHtml += `<div style="font-size:18px;color:var(--b3);padding:0 4px">›</div>`;
+  });
+  stepsHtml += '</div>';
+
+  // ── Norm table ───────────────────────────────────────────────────────
+  const pairs = febs.pairs.slice().sort((a, b) => b.norm - a.norm);
+  const theta = febs.theta;
+  const maxN = pairs[0]?.norm || 1;
+
+  let rows = '';
+  pairs.forEach(({ i: ii, j, norm }, rank) => {
+    const key = `${ii},${j}`;
+    const sval = febs.S[key] || 0;
+    const pval = febs.P[key] || 0;
+    const active = norm >= theta;
+    const pct = Math.round(norm / maxN * 100);
+    const clr = active ? 'var(--orange)' : 'var(--muted)';
+    const nmA = fns[ii]?.nm || 'F' + (ii + 1);
+    const nmB = fns[j]?.nm || 'F' + (j + 1);
+    const imp = (impactM[ii] && impactM[ii][j]) ? impactM[ii][j].toFixed(2) : '0.00';
+
+    // Aspect breakdown for this coupling
+    const c_ij = tensorM[ii][j] || [0,0,0,0,0,0];
+    const aspBars = ASPECTS.map((a, k) => {
+      const v = c_ij[k] || 0;
+      return `<span title="${ASP_FULL[k]}=${v.toFixed(2)}" style="display:inline-block;width:14px;height:${Math.round(v*16)}px;background:${ASP_COLORS[k]};border-radius:1px;vertical-align:bottom;margin-right:1px"></span>`;
+    }).join('');
+
+    rows += `<tr style="border-bottom:1px solid var(--dim)">
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:5px 8px;text-align:center">${rank + 1}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:${clr};padding:5px 8px">F${ii+1}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);padding:5px 4px">←</td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;color:${clr};padding:5px 8px">F${j+1}</td>
+      <td style="font-size:9px;color:var(--muted);padding:5px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${nmA.slice(0,12)} ← ${nmB.slice(0,12)}</td>
+      <td style="padding:5px 8px;text-align:right;font-family:'Space Mono',monospace;font-size:10px;color:${clr}">${norm.toFixed(3)}</td>
+      <td style="padding:5px 8px;width:100px">
+        <div style="height:6px;background:var(--b2);border-radius:3px;overflow:hidden">
+          <div style="height:100%;background:${clr};width:${pct}%;border-radius:3px"></div>
+        </div>
+      </td>
+      <td style="padding:5px 8px;text-align:center">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:3px;background:${active ? '#1e0a00' : 'var(--b2)'};color:${active ? 'var(--orange)' : 'var(--muted)'}">${active ? '✓' : '—'}</span>
+      </td>
+      <td style="padding:5px 8px;text-align:right;font-family:'Space Mono',monospace;font-size:10px;color:var(--cyan)">${pval > 0 ? pval.toFixed(3) : '—'}</td>
+      <td style="padding:5px 8px;text-align:right;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">${imp}</td>
+      <td style="padding:5px 12px">${aspBars}</td>
+    </tr>`;
+  });
+
+  const tableHtml = `
+    <div style="margin-bottom:10px;display:flex;gap:16px;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);flex-wrap:wrap">
+      <span>θ = <span style="color:var(--cyan)">${theta.toFixed(3)}</span></span>
+      <span>Active pairs: <span style="color:var(--orange)">${febs.activePairs}</span> / ${pairs.length}</span>
+      <span>β = <span style="color:var(--yellow)">${febs.b}</span></span>
+      <span>p<sub>base</sub> = <span style="color:var(--green)">${febs.pb}</span></span>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:1px solid var(--b2)">
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:center">#</th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px" colspan="3">Coppia</th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px">Nomi</th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:right">‖C‖<sub>w</sub></th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;min-width:100px">Barra</th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:center">S<sub>ij</sub></th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:right">P<sub>ij</sub></th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:right">Imp.</th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px">FRAME-6</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>`;
+
+  el.innerHTML = stepsHtml + tableHtml;
+}
+
+</script>
+</body>
+</html>

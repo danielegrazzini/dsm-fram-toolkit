@@ -1,0 +1,1158 @@
+<!--
+  B-E DSM Simulator
+  A browser-based reimplementation of the Monte Carlo process-architecture
+  cost/schedule risk model described in:
+    T. R. Browning and S. D. Eppinger, "Modeling Impacts of Process
+    Architecture on Cost and Schedule Risk in Product Development,"
+    IEEE Transactions on Engineering Management, vol. 49, no. 4,
+    pp. 428-442, Nov. 2002.
+  and cross-validated against:
+    T. R. Browning, "Modeling and Analyzing Cost, Schedule, and
+    Performance in Complex System Product Development," Ph.D.
+    dissertation, Massachusetts Institute of Technology, 1998.
+
+  This is an independent, unofficial reimplementation created for
+  educational and research purposes. It is not affiliated with, and has
+  not been reviewed or endorsed by, the original authors.
+
+  Copyright (c) 2026 Daniele Grazzini, Independent Researcher
+
+  MIT License
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B-E DSM Simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+:root{
+  --bg:#06080f;--panel:#090c16;--card:#0e1120;--card2:#131825;
+  --b1:#171e30;--b2:#1e2840;--b3:#263050;
+  --blue:#4a9eff;--green:#22c97a;--orange:#f5952a;--red:#e84545;
+  --purple:#9d7cf4;--cyan:#22d3ee;--yellow:#f0d060;
+  --text:#dce4f5;--muted:#7a8aaa;--dim:#1e2535;
+  --cell-w:38px;--cell-h:30px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* ══ HEADER ══ */
+.hdr{background:var(--panel);border-bottom:2px solid var(--b2);height:50px;display:flex;align-items:center;flex-shrink:0;}
+.hdr-brand{padding:0 18px;border-right:1px solid var(--b2);display:flex;flex-direction:column;justify-content:center;gap:1px;}
+.hdr-brand-name{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--blue);letter-spacing:1.5px;}
+.hdr-brand-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.hdr-mid{flex:1;display:flex;align-items:center;gap:12px;padding:0 16px;}
+.hdr-proj input{background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;outline:none;width:220px;transition:border-color .15s;}
+.hdr-proj input:focus{border-bottom-color:var(--blue);}
+.badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 9px;border-radius:3px;border:1px solid;}
+.badge-arch{color:var(--orange);border-color:#2a1500;background:#080300;}
+.badge-n{color:var(--muted);border-color:var(--b2);background:var(--card);}
+.hdr-right{padding:0 14px;display:flex;gap:8px;}
+.hbtn{font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 12px;border-radius:3px;border:1px solid var(--b2);background:var(--card);color:var(--muted);cursor:pointer;transition:all .1s;}
+.hbtn:hover{color:var(--text);border-color:var(--muted);}
+.hbtn.save{color:var(--green);border-color:#0a3015;background:#020a05;}
+.hbtn.save:hover{color:#4feba0;}
+
+/* ══ MACRO TABS ══ */
+.macro-tabs{background:var(--panel);border-bottom:1px solid var(--b2);display:flex;padding:0 18px;flex-shrink:0;}
+.mtab{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:10px 20px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;letter-spacing:.5px;transition:all .15s;}
+.mtab:hover{color:var(--text);}
+.mtab.on{color:var(--blue);border-bottom-color:var(--blue);}
+.mtab.out.on{color:var(--orange);border-bottom-color:var(--orange);}
+
+/* ══ MAIN BODY ══ */
+.body-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+.macro-pane{display:none;flex:1;min-height:0;overflow:hidden;}
+.macro-pane.on{display:flex;}
+
+/* ══ INPUT MACRO PANE ══ */
+/* sidebar: params + run */
+.inp-sidebar{width:270px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--b2);display:flex;flex-direction:column;overflow:hidden;}
+.inp-sidebar-scroll{flex:1;overflow-y:auto;padding:14px;}
+.inp-sidebar-foot{padding:12px 14px;border-top:1px solid var(--b2);}
+/* content area */
+.inp-content{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+/* sub-tabs */
+.subtabs{background:var(--card);border-bottom:1px solid var(--b2);display:flex;padding:0 16px;flex-shrink:0;}
+.stab{font-family:'JetBrains Mono',monospace;font-size:10px;padding:8px 14px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.8px;transition:all .12s;}
+.stab:hover{color:var(--text);}
+.stab.on{color:var(--blue);border-bottom-color:var(--blue);}
+/* sub-panes */
+.subpane{display:none;flex:1;overflow-y:auto;padding:16px 18px;min-height:0;}
+.subpane.on{display:block;}
+
+/* ══ SECTION LABEL ══ */
+.slabel{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;}
+
+/* ══ ACTS TABLE ══ */
+.acts-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.n-ctrl{display:flex;align-items:center;gap:6px;}
+.nb{width:26px;height:26px;background:var(--card);border:1px solid var(--b2);color:var(--text);font-size:16px;cursor:pointer;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;transition:border-color .1s;}
+.nb:hover{border-color:var(--blue);color:var(--blue);}
+.nv{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--blue);min-width:26px;text-align:center;}
+.ex-group{display:flex;gap:6px;margin-left:auto;}
+.ex{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 9px;border-radius:3px;border:1px solid var(--b1);background:var(--card);color:var(--muted);cursor:pointer;transition:all .1s;}
+.ex:hover{color:var(--text);border-color:var(--muted);}
+.ex.ucav{color:var(--orange);border-color:#2a1200;}
+.ex.mit{color:var(--green);border-color:#0a2010;}
+.ex.new{color:var(--text);border-color:var(--muted);font-weight:700;}
+.ex.new:hover{color:var(--red);border-color:var(--red);}
+
+table.at{border-collapse:collapse;width:100%;}
+table.at th{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:5px 4px;border-bottom:2px solid var(--b2);text-align:center;white-space:nowrap;}
+table.at th.left{text-align:left;}
+table.at td{padding:2px 2px;}
+table.at td.idx{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);padding:0 6px;text-align:right;}
+table.at tr:hover td{background:#0c0f1c;}
+table.at input{background:var(--card);border:1px solid var(--b1);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 5px;border-radius:2px;width:100%;transition:border-color .1s;}
+table.at input:focus{outline:none;border-color:var(--blue);background:#081220;}
+table.at input.dur{width:50px;text-align:right;color:var(--blue);}
+table.at input.cst{width:50px;text-align:right;color:var(--orange);}
+table.at input.ic{width:50px;text-align:right;color:var(--purple);}
+table.at input.nm{width:90px;}
+
+/* ══ MATRIX ══ */
+.mx-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.mx-help{font-size:12px;color:var(--muted);}
+.mx-wrap{overflow:auto;}
+table.mx{border-collapse:collapse;}
+table.mx th.col-h{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);padding:2px 3px;text-align:center;min-width:var(--cell-w);}
+table.mx td.row-l{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);padding:2px 8px 2px 2px;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis;}
+input.mc{display:block;width:var(--cell-w);height:var(--cell-h);background:var(--card);border:1px solid var(--b1);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;text-align:center;border-radius:2px;cursor:pointer;transition:background .1s,border-color .1s;outline:none;padding:0;}
+input.mc:focus{border-color:var(--blue);background:#060e1c;position:relative;z-index:2;}
+input.mc.diag{background:var(--bg);color:var(--dim);pointer-events:none;cursor:default;border-color:var(--b1);}
+input.mc.locked{background:#08090e;color:#22283a;pointer-events:none;cursor:default;border-color:#0e1220;}
+input.mc.filled{background:#060f1e;border-color:#1e3a60;color:#6ab8ff;}
+input.mc.bin1{background:#050e08;border-color:#0e3018;color:var(--green);}
+input.mc.err{border-color:var(--red);}
+input.mc:hover:not(.diag):not(.locked){border-color:var(--b3);}
+
+/* ══ PARAMS SIDEBAR ══ */
+.param-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.param-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);flex:1;}
+.param-input{background:var(--card);border:1px solid var(--b2);color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 7px;border-radius:3px;width:78px;text-align:right;outline:none;}
+.param-input:focus{border-color:var(--blue);}
+.tog{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 10px;border-radius:3px;border:1px solid var(--b2);background:var(--card);color:var(--muted);cursor:pointer;min-width:40px;}
+.tog.on{border-color:var(--green);background:#021008;color:var(--green);}
+.divider{height:1px;background:var(--b2);margin:10px 0;}
+.summary-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b1);font-family:'JetBrains Mono',monospace;font-size:11px;}
+.summary-row:last-child{border-bottom:none;}
+.sk{color:var(--muted);}
+.sv{color:var(--text);}
+
+.btn-run{width:100%;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:10px;border-radius:3px;border:none;background:var(--blue);color:#000;cursor:pointer;letter-spacing:.5px;transition:all .1s;margin-bottom:6px;}
+.btn-run:hover{background:#6ab3ff;}
+.btn-run:disabled{background:#1a2235;color:var(--muted);cursor:not-allowed;}
+.arch-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:6px;text-align:center;}
+.prog{height:3px;background:var(--b2);border-radius:2px;overflow:hidden;}
+.pf{height:100%;background:var(--blue);transition:width .15s;border-radius:2px;}
+
+/* ══ ARCH PANEL ══ */
+.arch-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.arch-item{background:var(--card);border:1px solid var(--b1);border-radius:3px;padding:10px 12px;display:flex;align-items:center;gap:10px;transition:border-color .1s;}
+.arch-item.active{border-color:var(--blue);background:#04101e;}
+.arch-item-info{flex:1;min-width:0;}
+.arch-item-name{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);margin-bottom:2px;}
+.arch-item-v{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
+.arch-item-status{font-family:'JetBrains Mono',monospace;font-size:10px;}
+.arch-item-status.done{color:var(--green);}
+.arch-item-status.none{color:var(--muted);}
+.arch-btn{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 9px;border-radius:3px;border:1px solid var(--b2);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .1s;white-space:nowrap;}
+.arch-btn:hover{color:var(--text);border-color:var(--muted);}
+.arch-btn.sim{color:var(--blue);border-color:#0a2040;background:#010610;}
+.arch-btn.del{color:var(--red);border-color:#200808;background:#050202;}
+
+.new-arch-box{background:var(--card);border:1px dashed var(--b3);border-radius:3px;padding:14px;}
+.na-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.na-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);width:55px;flex-shrink:0;}
+.na-inp{flex:1;background:var(--bg);border:1px solid var(--b2);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 8px;border-radius:3px;outline:none;}
+.na-inp:focus{border-color:var(--blue);}
+.na-btns{display:flex;gap:8px;margin-top:4px;}
+.na-add{font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 14px;border-radius:3px;border:none;background:var(--blue);color:#000;cursor:pointer;font-weight:700;}
+.na-add:hover{background:#6ab3ff;}
+.na-secondary{font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 12px;border-radius:3px;border:1px solid var(--b2);background:var(--card);color:var(--muted);cursor:pointer;}
+.na-secondary:hover{color:var(--text);}
+.na-err{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--red);margin-top:6px;min-height:16px;}
+
+/* ══ OUTPUT MACRO PANE ══ */
+.out-wrap{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+/* metrics strip */
+.metrics-strip{background:var(--panel);border-bottom:1px solid var(--b2);padding:10px 18px;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.met{background:var(--card);border:1px solid var(--b2);border-radius:3px;padding:8px 12px;min-width:88px;}
+.met-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;}
+.met-value{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);line-height:1;}
+.met-ref{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);margin-top:3px;}
+.met.hi{border-color:#0a2818;background:#020f06;}
+.met.hi .met-label{color:var(--green);}
+.met.hi .met-value{color:var(--green);}
+/* output sub-tabs */
+.out-subtabs{background:var(--card);border-bottom:1px solid var(--b2);display:flex;padding:0 18px;flex-shrink:0;}
+.ostab{font-family:'JetBrains Mono',monospace;font-size:10px;padding:8px 14px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.7px;transition:all .12s;}
+.ostab:hover{color:var(--text);}
+.ostab.on{color:var(--orange);border-bottom-color:var(--orange);}
+/* output content */
+.out-content{flex:1;overflow:auto;padding:18px 20px;min-height:0;}
+.opane{display:none;}.opane.on{display:block;}
+canvas{display:block;max-width:100%;}
+
+/* ══ OVERVIEW GRID ══ */
+.ov-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ov-card{background:var(--card);border:1px solid var(--b2);border-radius:3px;padding:14px;}
+.ov-title{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;}
+.io-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--b1);font-family:'JetBrains Mono',monospace;font-size:11px;}
+.io-row:last-child{border-bottom:none;}
+.io-k{color:var(--muted);}
+.io-v{color:var(--text);}
+.io-hi{color:var(--orange);}
+
+/* ══ CRITICALITY ══ */
+table.crt{width:100%;border-collapse:collapse;}
+table.crt th{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:6px 8px;border-bottom:1px solid var(--b2);text-align:left;}
+table.crt td{font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 8px;border-bottom:1px solid var(--b1);}
+.cbar{height:6px;border-radius:2px;min-width:2px;}
+
+/* ══ COMPARE TABLE ══ */
+table.rtt{width:100%;border-collapse:collapse;}
+table.rtt th{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:7px 10px;border-bottom:2px solid var(--b2);text-align:center;}
+table.rtt th.left{text-align:left;}
+table.rtt td{font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 10px;border-bottom:1px solid var(--b1);text-align:center;}
+table.rtt td.label{text-align:left;color:var(--muted);font-size:10px;}
+table.rtt td.best{color:var(--green);font-weight:700;}
+.note-box{background:#040a04;border:1px solid #0a2810;border-radius:3px;padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-top:12px;}
+
+/* ══ STATUS BAR ══ */
+.statusbar{height:26px;background:var(--panel);border-top:1px solid var(--b2);display:flex;align-items:center;gap:10px;padding:0 16px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted);}
+.dot.run{background:var(--orange);animation:pulse .5s infinite;}
+.dot.ok{background:var(--green);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-brand-name">B-E DSM SIMULATOR</div>
+    <div class="hdr-brand-sub">IEEE TEM 49(4) 2002 · by Daniele Grazzini</div>
+  </div>
+  <div class="hdr-mid">
+    <div class="hdr-proj"><input id="proj-name" value="My Project" spellcheck="false"></div>
+    <div class="badge badge-arch" id="hdr-arch">Arch. 1 baseline</div>
+    <div class="badge badge-n" id="hdr-n">n = 14</div>
+  </div>
+  <div class="hdr-right">
+    <button class="hbtn save" onclick="exportJSON()">↓ Export JSON</button>
+    <button class="hbtn" onclick="importJSON()">↑ Import JSON</button>
+    <input type="file" id="file-import" accept=".json" style="display:none" onchange="handleImport(event)">
+  </div>
+</div>
+
+<!-- MACRO TABS -->
+<div class="macro-tabs">
+  <div class="mtab on" id="mt-input" onclick="showMacro('input')">⌨ INPUT</div>
+  <div class="mtab out" id="mt-output" onclick="showMacro('output')">📊 OUTPUT</div>
+</div>
+
+<!-- BODY -->
+<div class="body-wrap">
+
+  <!-- ══ INPUT PANE ══ -->
+  <div class="macro-pane on" id="mp-input">
+
+    <!-- SIDEBAR: sim params + RUN -->
+    <div class="inp-sidebar">
+      <div class="inp-sidebar-scroll">
+        <div class="slabel">Parameters</div>
+
+        <div class="param-row"><span class="param-label">Max run r</span><input class="param-input" id="rmax" type="number" value="1100" min="50" max="5000"></div>
+        <div class="param-row"><span class="param-label">Batch b</span><input class="param-input" id="batch" type="number" value="100"></div>
+        <div class="param-row"><span class="param-label">α stability</span><input class="param-input" id="alpha" type="number" value="0.01" step="0.001"></div>
+        <div class="param-row"><span class="param-label">ρ corr C-S</span><input class="param-input" id="rho" type="number" value="0.9" step="0.05"></div>
+        <div class="param-row"><span class="param-label">Target T_C ($k)</span><input class="param-input" id="tc" type="number" value="630"></div>
+        <div class="param-row"><span class="param-label">Target T_S (gg)</span><input class="param-input" id="ts" type="number" value="130"></div>
+        <div class="param-row"><span class="param-label">κ_C</span><input class="param-input" id="kc" type="number" value="1" step="0.1"></div>
+        <div class="param-row"><span class="param-label">κ_S</span><input class="param-input" id="ks" type="number" value="1" step="0.1"></div>
+        <div class="param-row"><span class="param-label">LHS</span><button class="tog on" id="lb" onclick="togOpt('lhs')">ON</button></div>
+        <div class="param-row"><span class="param-label">Stability</span><button class="tog on" id="sb" onclick="togOpt('stab')">ON</button></div>
+
+        <div class="divider"></div>
+        <div class="slabel">Summary</div>
+        <div id="sim-summary"></div>
+      </div>
+
+      <div class="inp-sidebar-foot">
+        <div class="arch-label" id="sim-arch-label">—</div>
+        <button class="btn-run" id="rb" onclick="runSim()">▶  RUN SIMULATION</button>
+        <div class="prog"><div class="pf" id="pf" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div class="inp-content">
+      <div class="subtabs">
+        <div class="stab on" id="st-acts" onclick="showSTab('acts')">Activities</div>
+        <div class="stab" id="st-dsm" onclick="showSTab('dsm')">Binary DSM</div>
+        <div class="stab" id="st-prob" onclick="showSTab('prob')">Probability</div>
+        <div class="stab" id="st-imp" onclick="showSTab('imp')">Impact</div>
+        <div class="stab" id="st-arch" onclick="showSTab('arch')">Architectures</div>
+      </div>
+
+      <!-- ACTIVITIES -->
+      <div class="subpane on" id="sp-acts">
+        <div class="acts-toolbar">
+          <div class="slabel" style="margin:0">Activities</div>
+          <div class="n-ctrl">
+            <button class="nb" onclick="rmAct()">−</button>
+            <div class="nv" id="nv">14</div>
+            <button class="nb" onclick="addAct()">+</button>
+            <span style="font-size:11px;color:var(--muted);margin-left:4px;">(2–20)</span>
+          </div>
+          <div class="ex-group">
+            <button class="ex new" onclick="newCase()">+ New Case</button>
+            <button class="ex ucav" onclick="loadEx('ucav')">UCAV 2002</button>
+            <button class="ex mit" onclick="loadEx('mit')">MIT v2.1</button>
+            <button class="ex" onclick="loadEx('air')">Airport</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="at">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="left">Name</th>
+                <th colspan="3" style="color:var(--blue);font-size:10px;">Duration (days)</th>
+                <th colspan="3" style="color:var(--orange);font-size:10px;">Cost ($k)</th>
+                <th style="color:var(--purple);font-size:10px;">IC</th>
+              </tr>
+              <tr>
+                <th></th><th></th>
+                <th style="color:var(--blue)">BCV</th><th style="color:var(--blue)">MLV</th><th style="color:var(--blue)">WCV</th>
+                <th style="color:var(--orange)">BCV</th><th style="color:var(--orange)">MLV</th><th style="color:var(--orange)">WCV</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="acts-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DSM BINARIA -->
+      <div class="subpane" id="sp-dsm">
+        <div class="mx-toolbar">
+          <div class="slabel" style="margin:0">Binary DSM</div>
+          <span class="mx-help">1 = dependency declared · governs prob and impact · TAB/arrows to navigate</span>
+        </div>
+        <div class="mx-wrap" id="dsm-wrap"></div>
+      </div>
+
+      <!-- PROBABILITY -->
+      <div class="subpane" id="sp-prob">
+        <div class="mx-toolbar">
+          <div class="slabel" style="margin:0">Probability DSM<sub>ij1</sub></div>
+          <span class="mx-help">P(rework from j→i) · [0, 1] · grey cells = no DSM dependency</span>
+        </div>
+        <div class="mx-wrap" id="prob-wrap"></div>
+      </div>
+
+      <!-- IMPATTO -->
+      <div class="subpane" id="sp-imp">
+        <div class="mx-toolbar">
+          <div class="slabel" style="margin:0">Impatto DSM<sub>ij2</sub></div>
+          <span class="mx-help">Fraction to redo · [0, 1] · grey cells = no DSM dependency</span>
+        </div>
+        <div class="mx-wrap" id="imp-wrap"></div>
+      </div>
+
+      <!-- ARCHITETTURE -->
+      <div class="subpane" id="sp-arch">
+        <div class="slabel">Saved Architectures</div>
+        <div class="arch-list" id="arch-list"></div>
+
+        <div class="new-arch-box">
+          <div class="slabel" style="margin-bottom:12px;">+ New Architecture (Partitioning)</div>
+          <div class="na-row">
+            <span class="na-lbl">Name</span>
+            <input class="na-inp" id="na-name" placeholder="E.g.: Arch. 2 — Act13 moved earlier">
+          </div>
+          <div class="na-row">
+            <span class="na-lbl">Vector V</span>
+            <input class="na-inp" id="na-vec" placeholder="E.g.: 1,2,3,13,4,5,6,7,8,9,10,11,12,14">
+          </div>
+          <div class="na-btns">
+            <button class="na-add" onclick="addArch()">Save Architecture</button>
+            <button class="na-secondary" onclick="saveBaselineArch()">Save Baseline (current order)</button>
+          </div>
+          <div class="na-err" id="na-err"></div>
+        </div>
+      </div>
+
+    </div><!-- inp-content -->
+  </div><!-- mp-input -->
+
+  <!-- ══ OUTPUT PANE ══ -->
+  <div class="macro-pane" id="mp-output">
+    <div class="out-wrap">
+
+      <!-- METRICS STRIP -->
+      <div class="metrics-strip">
+        <div class="met"><div class="met-label">E[C] $k</div><div class="met-value" id="m-ec">—</div><div class="met-ref">paper 637</div></div>
+        <div class="met"><div class="met-label">σ_C $k</div><div class="met-value" id="m-sc">—</div><div class="met-ref">paper 63</div></div>
+        <div class="met"><div class="met-label">E[S] days</div><div class="met-value" id="m-es">—</div><div class="met-ref">paper 138</div></div>
+        <div class="met"><div class="met-label">σ_S days</div><div class="met-value" id="m-ss">—</div><div class="met-ref">paper 14</div></div>
+        <div class="met"><div class="met-label">γ_C skew</div><div class="met-value" id="m-gc">—</div><div class="met-ref">paper 0.58</div></div>
+        <div class="met"><div class="met-label">γ_S skew</div><div class="met-value" id="m-gs">—</div><div class="met-ref">paper 0.55</div></div>
+        <div class="met"><div class="met-label">P_C</div><div class="met-value" id="m-pc">—</div><div class="met-ref">paper 0.51</div></div>
+        <div class="met"><div class="met-label">P_S</div><div class="met-value" id="m-ps">—</div><div class="met-ref">paper 0.67</div></div>
+        <div class="met hi"><div class="met-label">R_C</div><div class="met-value" id="m-rc">—</div><div class="met-ref">paper 2654</div></div>
+        <div class="met hi"><div class="met-label">R_S</div><div class="met-value" id="m-rs">—</div><div class="met-ref">paper 255</div></div>
+        <div class="met"><div class="met-label">Run</div><div class="met-value" id="m-r">—</div><div class="met-ref" id="m-arch-tag">—</div></div>
+      </div>
+
+      <!-- OUTPUT SUB-TABS -->
+      <div class="out-subtabs">
+        <div class="ostab on" id="ot-overview" onclick="showOTab('overview')">Overview</div>
+        <div class="ostab" id="ot-sched" onclick="showOTab('sched')">Schedule PDF</div>
+        <div class="ostab" id="ot-cost" onclick="showOTab('cost')">Cost PDF</div>
+        <div class="ostab" id="ot-joint" onclick="showOTab('joint')">Joint C-S</div>
+        <div class="ostab" id="ot-crit" onclick="showOTab('crit')">Criticality</div>
+        <div class="ostab" id="ot-gantt" onclick="showOTab('gantt')">Single Run</div>
+        <div class="ostab" id="ot-compare" onclick="showOTab('compare')">Compare Arch.</div>
+      </div>
+
+      <!-- OUTPUT CONTENT -->
+      <div class="out-content">
+
+        <div class="opane on" id="op-overview">
+          <div class="ov-grid">
+            <div class="ov-card">
+              <div class="ov-title">Current Input</div>
+              <div id="ov-inputs"><p style="color:var(--muted);font-size:12px;">Load an example or configure activities in the INPUT tab.</p></div>
+            </div>
+            <div class="ov-card">
+              <div class="ov-title">Output vs Paper</div>
+              <div id="ov-outputs"><p style="color:var(--muted);font-size:12px;">Run the simulation (INPUT tab → RUN) to see results.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="opane" id="op-sched">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Schedule distribution — histogram + CDF (paper Fig. 8 bottom)</div>
+          <canvas id="cv-s"></canvas>
+        </div>
+
+        <div class="opane" id="op-cost">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Cost distribution — histogram + CDF (paper Fig. 8 top)</div>
+          <canvas id="cv-c"></canvas>
+        </div>
+
+        <div class="opane" id="op-joint">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Joint Cost-Schedule scatter (paper Fig. 9) — colored by overrun quadrant</div>
+          <canvas id="cv-j"></canvas>
+        </div>
+
+        <div class="opane" id="op-crit">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Interface Criticality — analytical (paper eq.10, Fig. 7)</div>
+          <div id="crit-c"><p style="color:var(--muted);">Run the simulation to calculate.</p></div>
+        </div>
+
+        <div class="opane" id="op-gantt">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Work vector W — single sample run (paper Fig. 5)</div>
+          <canvas id="cv-g"></canvas>
+        </div>
+
+        <div class="opane" id="op-compare">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Architecture comparison — Table V style from the paper</div>
+          <div id="compare-c"><p style="color:var(--muted);">Simulate multiple architectures to compare them here.</p></div>
+        </div>
+
+      </div><!-- out-content -->
+    </div><!-- out-wrap -->
+  </div><!-- mp-output -->
+
+</div><!-- body-wrap -->
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="dot" id="dot"></div>
+  <span id="stxt">Ready — load UCAV 2002 (Activities tab) and press RUN</span>
+  <span style="margin-left:auto;color:var(--dim);">© 2026 Daniele Grazzini, Independent Researcher · MIT License</span>
+</div>
+
+<script>
+'use strict';
+// ══ STATE ══
+let N=14, acts=[], dsmBin=[], probM=[], impM=[];
+let architectures=[], currentArchIdx=0;
+let curSimS=[], curSimC=[], curGantt=[];
+let useLHS=true, useStab=true;
+
+// ══ DATASETS ══
+const DS={
+ucav:{n:14,acts:[
+  {nm:'1-DR&O',bs:1.9,ms:2,ws:3,bc:8.6,mc:9,wc:13.5,ic:0.35},
+  {nm:'2-DesArch',bs:4.75,ms:5,ws:8.75,bc:5.3,mc:5.63,wc:9.84,ic:0.20},
+  {nm:'3-SurfMod',bs:2.66,ms:2.8,ws:4.2,bc:3,mc:3.15,wc:4.73,ic:0.60},
+  {nm:'4-Aero',bs:9,ms:10,ws:12.5,bc:6.8,mc:7.5,wc:9.38,ic:0.33},
+  {nm:'5-StrGeom',bs:14.3,ms:15,ws:26.3,bc:128,mc:135,wc:236,ic:0.40},
+  {nm:'6-FEM',bs:9,ms:10,ws:11,bc:10,mc:11.3,wc:12.4,ic:1.00},
+  {nm:'7-StrDes',bs:7.2,ms:8,ws:10,bc:11,mc:12,wc:15,ic:0.35},
+  {nm:'8-W&I',bs:4.75,ms:5,ws:8.75,bc:8.9,mc:9.38,wc:16.4,ic:1.00},
+  {nm:'9-S&C',bs:18,ms:20,ws:22,bc:20,mc:22.5,wc:24.8,ic:0.25},
+  {nm:'10-Freebody',bs:9.5,ms:10,ws:17.5,bc:21,mc:22.5,wc:39.4,ic:0.50},
+  {nm:'11-IntLoad',bs:14.3,ms:15,ws:26.3,bc:21,mc:22.5,wc:39.4,ic:0.75},
+  {nm:'12-StrEval',bs:13.5,ms:15,ws:18.8,bc:41,mc:45,wc:56.3,ic:0.30},
+  {nm:'13-Manuf',bs:30,ms:32.5,ws:36,bc:214,mc:232,wc:257,ic:0.28},
+  {nm:'14-Proposal',bs:4.5,ms:5,ws:6.25,bc:20,mc:22.5,wc:28.1,ic:0.70},
+],
+prob:[[0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0.4,0,0,0,0,0,0,0.2,0,0,0,0,0,0],[0,0.5,0,0.4,0,0,0,0,0,0,0,0,0,0],[0.3,0,0.5,0,0,0,0,0,0,0,0,0,0,0],[0.4,0,0.5,0,0,0.1,0,0.1,0,0,0,0.3,0.1,0],[0.1,0,0,0,0.4,0,0,0,0,0,0,0,0,0],[0.4,0,0,0,0,0.4,0,0,0,0,0,0,0,0],[0,0,0,0,0,0.5,0,0,0,0,0.5,0,0,0],[0.4,0,0.5,0.5,0,0,0,0.5,0,0,0,0,0,0],[0,0,0,0.1,0,0.5,0.2,0.1,0,0,0.4,0,0,0],[0,0,0,0,0,0.5,0.5,0.5,0,0.5,0,0,0,0],[0.4,0,0,0,0,0.4,0.5,0,0,0.5,0.4,0,0,0],[0.5,0,0,0,0.5,0,0,0,0,0,0,0.4,0,0],[0.3,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0]],
+imp:[[0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0.5,0,0,0,0,0,0,0.1,0,0,0,0,0,0],[0,0.3,0,0.5,0,0,0,0,0,0,0,0,0,0],[0.4,0,0.8,0,0,0,0,0,0,0,0,0,0,0],[0.1,0,0.1,0,0,0.1,0,0,0,0,0,0.3,0.1,0],[0.1,0,0,0,0.3,0,0,0,0,0,0,0,0,0],[0.5,0,0,0,0,0.8,0,0,0,0,0,0,0,0],[0,0,0,0,0,0.5,0,0,0,0,0.5,0,0,0],[0.3,0,0.3,0.3,0,0,0,0.3,0,0,0,0,0,0],[0,0,0,0.1,0,0.5,0.4,0.3,0,0,0.3,0,0,0],[0,0,0,0,0,0.5,0.5,0.3,0,0.3,0,0,0,0],[0.5,0,0,0,0,0.3,0.5,0,0,0.5,0.5,0,0,0],[0.9,0,0,0,0.9,0,0,0,0,0,0,0.3,0,0],[0.5,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0]],
+paper:{EC:637,sC:63,ES:138,sS:14,gC:0.58,gS:0.55,PC:0.51,PS:0.67,RC:2654,RS:255,TC:630,TS:130,r:1100}
+},
+mit:{n:12,acts:[
+  {nm:'Act-1',bs:14,ms:15,ws:20,bc:14,mc:15,wc:20,ic:1},{nm:'Act-2',bs:1,ms:2,ws:4,bc:1,mc:2,wc:4,ic:1},
+  {nm:'Act-3',bs:7,ms:8,ws:10,bc:7,mc:8,wc:10,ic:1},{nm:'Act-4',bs:1,ms:2,ws:3,bc:1,mc:2,wc:3,ic:1},
+  {nm:'Act-5',bs:20,ms:25,ws:30,bc:20,mc:25,wc:30,ic:1},{nm:'Act-6',bs:1,ms:1,ws:1,bc:1,mc:1,wc:1,ic:1},
+  {nm:'Act-7',bs:8,ms:10,ws:10,bc:8,mc:10,wc:10,ic:1},{nm:'Act-8',bs:24,ms:25,ws:27,bc:24,mc:25,wc:27,ic:1},
+  {nm:'Act-9',bs:1,ms:2,ws:3,bc:1,mc:2,wc:3,ic:1},{nm:'Act-10',bs:1,ms:1,ws:1,bc:1,mc:1,wc:1,ic:1},
+  {nm:'Act-11',bs:8,ms:10,ws:10,bc:8,mc:10,wc:10,ic:1},{nm:'Act-12',bs:1,ms:2,ws:3,bc:1,mc:2,wc:3,ic:1},
+],
+prob:[[0,0,0,0,0,0,0,0,0,0.9,0,0],[0,0,0,0,0,0,0,0.8,0,0,0.7,0],[0,0,0,0,0,0,0,0,0,0,0,0.9],[0.5,0,0,0,0,0,0.6,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0.4],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0.3,0,0,0,0,0,0.6,0],[0,0,0.9,0,0.6,0,0,0,0,0,0,0],[0.7,0,0,0,0,0,0.6,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0.8,0,0,0,0.1,0,0.9,0,0,0,0]],
+imp:[[0,0,0,0,0,0,0,0,0,0.9,0,0],[0,0,0,0,0,0,0,0.8,0,0,0.7,0],[0,0,0,0,0,0,0,0,0,0,0,0.4],[0.5,0,0,0,0,0,0.6,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,1],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0.3,0,0,0,0,0,1,0],[0,0,0.9,0,0.6,0,0,0,0,0,0,0],[0.7,0,0,0,0,0,0.6,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0.8,0,0,0,1,0,1,0,0,0,0]],
+},
+air:{n:5,acts:[
+  {nm:'ATC land',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
+  {nm:'Deboard',bs:15,ms:20,ws:30,bc:15,mc:20,wc:30,ic:0.7},
+  {nm:'Refuel',bs:10,ms:15,ws:25,bc:10,mc:15,wc:25,ic:0.6},
+  {nm:'Board',bs:20,ms:25,ws:35,bc:20,mc:25,wc:35,ic:0.7},
+  {nm:'ATC dep',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
+],
+prob:[[0,0,0,0,0],[0.4,0,0,0,0],[0.2,0.3,0,0,0],[0,0.35,0.4,0,0],[0.15,0.2,0.25,0.2,0]],
+imp:[[0,0,0,0,0],[0.3,0,0,0,0],[0.2,0.4,0,0,0],[0,0.3,0.5,0,0],[0.2,0.3,0.4,0.3,0]],
+}};
+
+// ══ MATH CORE (identical to v4) ══
+function triICDF(u,a,b,c){const F=(b-a)/(c-a);return u<=F?a+Math.sqrt(u*(b-a)*(c-a)):c-Math.sqrt((1-u)*(c-a)*(c-b));}
+function phiInv(p){p=Math.max(1e-10,Math.min(1-1e-10,p));const a=[2.515517,0.802853,0.010328],b=[1.432788,0.189269,0.001308];const t=p<0.5?Math.sqrt(-2*Math.log(p)):Math.sqrt(-2*Math.log(1-p));const z=t-(a[0]+a[1]*t+a[2]*t*t)/(1+b[0]*t+b[1]*t*t+b[2]*t*t*t);return p<0.5?-z:z;}
+function phi(z){return 0.5*(1+erf(z/Math.SQRT2));}
+function erf(x){const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+p*x);return s*(1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x));}
+function corrU(us,uc,rho){return phi(rho*phiInv(us)+Math.sqrt(1-rho*rho)*phiInv(uc));}
+function lhs(n,k){const c=[];for(let j=0;j<k;j++){const col=Array.from({length:n},(_,i)=>(i+Math.random())/n);for(let i=col.length-1;i>0;i--){const j2=Math.floor(Math.random()*(i+1));[col[i],col[j2]]=[col[j2],col[i]];}c.push(col);}return Array.from({length:n},(_,i)=>c.map(col=>col[i]));}
+function skew(v,m,s){return s?v.reduce((a,x)=>a+(x-m)**3,0)/(v.length*s**3):0;}
+// Stability criterion Eq. (8)-(9) from the paper: compares the CUMULATIVE
+// mean/variance computed over all r runs against that computed over the
+// first r-b runs (i.e., before the last batch), not two isolated consecutive batches.
+function stable(S,b,a){
+  const r=S.length;if(r<2*b)return false;
+  const rb=r-b;
+  const prev=S.slice(0,rb); // first r-b runs (state "one batch ago")
+  const mr=S.reduce((s,x)=>s+x,0)/r;           // E[X_r]  (cumulative over all r runs)
+  const mp=prev.reduce((s,x)=>s+x,0)/rb;       // E[X_{r-b}] (cumulative over the first r-b runs)
+  if(!mp||Math.abs(mr-mp)/Math.abs(mp)>=a)return false;
+  const vr=S.reduce((s,x)=>s+(x-mr)**2,0)/r;   // Var[X_r]
+  const vp=prev.reduce((s,x)=>s+(x-mp)**2,0)/rb;// Var[X_{r-b}]
+  return !vp||Math.abs(vr-vp)/vp<a;
+}
+
+function bandingWith(W,WN,pm,n){
+  // Per Browning & Eppinger (2002), Table IV, work policy point 3:
+  // "only adjacent activities in V may work concurrently" (footnote 8:
+  // "adjacent when ignoring completed activities"). The scan must STOP
+  // permanently as soon as an unfinished, dependency-blocked activity is
+  // found — it must NOT skip past it to test further downstream activities,
+  // or non-contiguous activities could become simultaneously active.
+  for(let i=0;i<n;i++)WN[i]=false;
+  let f=-1;
+  for(let i=0;i<n;i++){if(W[i]>0){WN[i]=true;f=i;break;}}
+  if(f<0)return;
+  for(let j=f+1;j<n;j++){
+    if(W[j]<=0)continue; // finished activity: ignored, chain continues past it
+    let dep=false;
+    for(let k=f;k<j;k++){if(pm[j][k]>0&&W[k]>0){dep=true;break;}}
+    if(dep)break; // blocked: active set is now finalized, stop scanning further
+    WN[j]=true;
+  }
+}
+
+function singleRunWith(u_s,u_c,rho,rec,n,actsA,pm,im){
+  const W=new Array(n).fill(1),WN=new Array(n).fill(false);
+  const ActS=actsA.map((a,i)=>triICDF(u_s[i],a.bs,a.ms,a.ws));
+  const ActC=actsA.map((a,i)=>triICDF(corrU(u_s[i],u_c[i],rho),a.bc,a.mc,a.wc));
+  const Wd=new Array(n).fill(0);
+  let S=0,gantt=rec?Array.from({length:n},()=>[]):null;
+  const maxS=ActS.reduce((a,b)=>a+b,0)*30;
+  while(W.some(w=>w>0)&&S<maxS){
+    bandingWith(W,WN,pm,n);
+    let minDt=Infinity;
+    for(let i=0;i<n;i++){if(WN[i]&&ActS[i]>0){const rem=W[i]*ActS[i];if(rem<minDt)minDt=rem;}}
+    if(!isFinite(minDt))break;
+    S+=minDt;
+    const completed=[];
+    for(let i=0;i<n;i++){
+      if(WN[i]){const frac=minDt/ActS[i];W[i]=Math.max(0,W[i]-frac);Wd[i]+=frac;if(W[i]<0.001){W[i]=0;completed.push(i);}}
+      if(gantt)gantt[i].push(WN[i]?+W[i].toFixed(3):null);
+    }
+    for(const ci of completed){
+      for(let j=0;j<ci;j++){
+        if(pm[j][ci]>0&&Math.random()<=pm[j][ci]){
+          W[j]+=im[j][ci]*actsA[j].ic;if(W[j]>1)W[j]=0.9;
+          // Per Browning's PhD dissertation (MIT 1998, Ch.6 §3.3 and §3.5):
+          // "Rework in an upstream activity can also cause second-order rework in
+          // INTERIM activities (activities between the upstream, reworked activity
+          // and the downstream activity that caused the rework)". The scope is therefore
+          // limited to the interim activities (j, ci) and does NOT extend
+          // beyond activity ci that triggered the iteration.
+          for(let k=j+1;k<ci;k++){
+            if(pm[k][j]>0&&Math.random()<=pm[k][j]){
+              if(W[k]===1)W[k]=2;W[k]+=im[k][j]*actsA[k].ic;if(W[k]>=2)W[k]=1;if(W[k]>1)W[k]=0.9;
+            }
+          }
+        }
+      }
+    }
+  }
+  return{S,C:ActC.reduce((s,c,i)=>s+c*Wd[i],0),gantt};
+}
+
+// ══ INIT STATE ══
+function initState(n){
+  N=n;
+  while(acts.length<N)acts.push({nm:'A'+(acts.length+1),bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8});
+  acts=acts.slice(0,N);
+  const nb=[],ni=[],nd=[];
+  for(let i=0;i<N;i++){
+    nb.push([]);ni.push([]);nd.push([]);
+    for(let j=0;j<N;j++){
+      nb[i].push(dsmBin[i]&&dsmBin[i][j]!==undefined?dsmBin[i][j]:0);
+      ni[i].push(impM[i]&&impM[i][j]!==undefined?impM[i][j]:0);
+      nd[i].push(probM[i]&&probM[i][j]!==undefined?probM[i][j]:0);
+    }
+  }
+  dsmBin=nb;probM=nd;impM=ni;
+}
+
+// ══ RENDER ══
+function renderAll(){
+  document.getElementById('nv').textContent=N;
+  document.getElementById('hdr-n').textContent='n = '+N;
+  renderActs();renderDSM();renderProbMx();renderImpMx();updateSummary();renderArchList();
+}
+
+function renderActs(){
+  const tb=document.getElementById('acts-body');tb.innerHTML='';
+  acts.forEach((a,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="idx">${i+1}</td>
+      <td><input class="nm" value="${a.nm}" onchange="acts[${i}].nm=this.value;renderDSM();renderProbMx();renderImpMx();updateSummary()"></td>
+      <td><input class="dur" type="number" value="${a.bs}" step="0.1" onchange="acts[${i}].bs=+this.value;updateSummary()"></td>
+      <td><input class="dur" type="number" value="${a.ms}" step="0.1" onchange="acts[${i}].ms=+this.value;updateSummary()"></td>
+      <td><input class="dur" type="number" value="${a.ws}" step="0.1" onchange="acts[${i}].ws=+this.value;updateSummary()"></td>
+      <td><input class="cst" type="number" value="${a.bc}" step="0.5" onchange="acts[${i}].bc=+this.value;updateSummary()"></td>
+      <td><input class="cst" type="number" value="${a.mc}" step="0.5" onchange="acts[${i}].mc=+this.value;updateSummary()"></td>
+      <td><input class="cst" type="number" value="${a.wc}" step="0.5" onchange="acts[${i}].wc=+this.value;updateSummary()"></td>
+      <td><input class="ic" type="number" value="${a.ic}" step="0.05" min="0" max="1" onchange="acts[${i}].ic=+this.value"></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function renderDSM(){renderMatrix('dsm-wrap',dsmBin,'b',true);}
+function renderProbMx(){renderMatrix('prob-wrap',probM,'p',false);}
+function renderImpMx(){renderMatrix('imp-wrap',impM,'m',false);}
+
+function renderMatrix(wrapId,mx,prefix,isBin){
+  const w=document.getElementById(wrapId);
+  let h=`<table class="mx"><thead><tr><th></th>`;
+  for(let j=0;j<N;j++)h+=`<th class="col-h">${j+1}</th>`;
+  h+=`</tr></thead><tbody>`;
+  for(let i=0;i<N;i++){
+    h+=`<tr><td class="row-l">${acts[i].nm.slice(0,10)}</td>`;
+    for(let j=0;j<N;j++){
+      const diag=i===j,locked=!isBin&&dsmBin[i][j]===0,v=mx[i][j]||0;
+      const step=isBin?'1':'0.05';
+      if(diag){
+        h+=`<td><input class="mc diag" value="—" disabled></td>`;
+      } else if(locked){
+        h+=`<td><input class="mc locked" value="" disabled></td>`;
+      } else {
+        const cls='mc'+(v>0?(isBin?' bin1':' filled'):'');
+        h+=`<td><input class="${cls}" type="number" min="0" max="1" step="${step}" value="${v||''}"
+          data-px="${prefix}" data-i="${i}" data-j="${j}"
+          onchange="handleMxChange(this,${i},${j},'${prefix}')"
+          onkeydown="mxKeyNav(event,${i},${j},'${prefix}')"></td>`;
+      }
+    }
+    h+=`</tr>`;
+  }
+  h+=`</tbody></table>`;w.innerHTML=h;
+}
+
+function handleMxChange(el,i,j,prefix){
+  let v=parseFloat(el.value);if(isNaN(v))v=0;
+  if(prefix==='b'){
+    v=v>=0.5?1:0;el.value=v;dsmBin[i][j]=v;
+    if(v===0){probM[i][j]=0;impM[i][j]=0;}
+    renderProbMx();renderImpMx();
+  } else if(prefix==='p'){
+    v=Math.max(0,Math.min(1,v));el.value=v;probM[i][j]=v;
+  } else {
+    v=Math.max(0,Math.min(1,v));el.value=v;impM[i][j]=v;
+  }
+  el.className='mc'+(v>0?(prefix==='b'?' bin1':' filled'):'');
+  updateSummary();
+}
+
+function mxKeyNav(e,i,j,prefix){
+  let ni=i,nj=j;
+  if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();nj++;if(nj>=N){nj=0;ni++;}}
+  else if(e.key==='Tab'&&e.shiftKey){e.preventDefault();nj--;if(nj<0){nj=N-1;ni--;}}
+  else if(e.key==='ArrowRight'){e.preventDefault();nj++;}
+  else if(e.key==='ArrowLeft'){e.preventDefault();nj--;}
+  else if(e.key==='ArrowDown'||e.key==='Enter'){e.preventDefault();ni++;}
+  else if(e.key==='ArrowUp'){e.preventDefault();ni--;}
+  else return;
+  ni=((ni%N)+N)%N;nj=((nj%N)+N)%N;
+  let tries=0;
+  while(tries++<N*N){
+    if(ni===nj){nj++;if(nj>=N){nj=0;ni++;}ni=((ni%N)+N)%N;nj=((nj%N)+N)%N;}
+    else if(prefix!=='b'&&dsmBin[ni][nj]===0){nj++;if(nj>=N){nj=0;ni++;}ni=((ni%N)+N)%N;nj=((nj%N)+N)%N;}
+    else break;
+  }
+  const wrapId=prefix==='b'?'dsm-wrap':prefix==='p'?'prob-wrap':'imp-wrap';
+  const el=document.getElementById(wrapId).querySelector(`[data-px="${prefix}"][data-i="${ni}"][data-j="${nj}"]`);
+  if(el){el.focus();el.select();}
+}
+
+function updateSummary(){
+  const sumES=acts.reduce((a,x)=>a+(x.bs+x.ms+x.ws)/3,0);
+  const sumEC=acts.reduce((a,x)=>a+(x.bc+x.mc+x.wc)/3,0);
+  const nz=probM.flat().filter(v=>v>0).length;
+  const nd=dsmBin.flat().filter(v=>v>0).length;
+  const rows=[['n activities',N],['DSM dependencies',nd],['Σ E[S_i]',sumES.toFixed(1)+' d'],['Σ E[C_i]','$'+sumEC.toFixed(0)+'k'],['Entry prob>0',nz]];
+  document.getElementById('sim-summary').innerHTML=rows.map(([k,v])=>`<div class="summary-row"><span class="sk">${k}</span><span class="sv">${v}</span></div>`).join('');
+  document.getElementById('ov-inputs').innerHTML=
+    ioRow('n activities',N)+ioRow('Sampling',useLHS?'LHS':'Random')+
+    ioRow('ρ C-S',document.getElementById('rho').value)+
+    ioRow('DSM dependencies',nd)+ioRow('Prob entries>0',nz)+
+    `<div style="margin-top:6px;padding-top:5px;border-top:1px solid var(--b1);">`+
+    ioRow('Σ E[S_i]',sumES.toFixed(1)+' d')+ioRow('Σ E[C_i]','$'+sumEC.toFixed(0)+'k')+`</div>`;
+  if(architectures.length>0){
+    const a=architectures[currentArchIdx];
+    document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;
+    document.getElementById('hdr-arch').textContent=a.name;
+  }
+}
+
+function ioRow(k,v){return `<div class="io-row"><span class="io-k">${k}</span><span class="io-v">${v}</span></div>`;}
+function ioRowOut(k,v,ref){const rs=ref?`<span style="color:var(--muted);font-size:10px;margin-left:8px;">paper: ${ref}</span>`:'';return `<div class="io-row"><span class="io-k">${k}</span><span><span class="io-hi">${v}</span>${rs}</span></div>`;}
+
+// ══ ARCHITECTURE MANAGEMENT ══
+function saveBaselineArch(){
+  const name=document.getElementById('na-name').value.trim()||('Arch. '+(architectures.length+1)+' baseline');
+  architectures.push({name,V:Array.from({length:N},(_,i)=>i+1),acts_seq:acts.map(a=>({...a})),prob_seq:probM.map(r=>[...r]),imp_seq:impM.map(r=>[...r]),results:null});
+  currentArchIdx=architectures.length-1;renderArchList();setStatus('Saved: '+name);
+  document.getElementById('na-name').value='';
+}
+function addArch(){
+  const name=document.getElementById('na-name').value.trim();
+  const vecStr=document.getElementById('na-vec').value.trim();
+  const errEl=document.getElementById('na-err');errEl.textContent='';
+  if(!name){errEl.textContent='Enter a name.';return;}
+  if(!vecStr){errEl.textContent='Enter vector V.';return;}
+  const V=vecStr.split(',').map(s=>parseInt(s.trim()));
+  if(V.length!==N||V.some(isNaN)){errEl.textContent=`V must have ${N} integers.`;return;}
+  const sorted=[...V].sort((a,b)=>a-b);
+  for(let i=0;i<N;i++){if(sorted[i]!==i+1){errEl.textContent='V must contain 1…'+N+' with no duplicates.';return;}}
+  architectures.push({name,V,acts_seq:V.map(v=>({...acts[v-1]})),prob_seq:V.map(vi=>V.map(vj=>probM[vi-1][vj-1])),imp_seq:V.map(vi=>V.map(vj=>impM[vi-1][vj-1])),results:null});
+  currentArchIdx=architectures.length-1;renderArchList();setStatus('Added: '+name);
+  document.getElementById('na-name').value='';document.getElementById('na-vec').value='';
+}
+function renderArchList(){
+  const el=document.getElementById('arch-list');
+  if(!architectures.length){el.innerHTML='<p style="color:var(--muted);font-size:12px;">No architectures yet. Save the baseline to start.</p>';return;}
+  el.innerHTML=architectures.map((a,idx)=>`
+    <div class="arch-item${idx===currentArchIdx?' active':''}">
+      <div class="arch-item-info">
+        <div class="arch-item-name">${a.name}</div>
+        <div class="arch-item-v">V = [${a.V.join(',')}]</div>
+      </div>
+      <span class="arch-item-status ${a.results?'done':'none'}">${a.results?'✓ simulated':'—'}</span>
+      <button class="arch-btn sim" onclick="selectAndSim(${idx})">▶ Simulate</button>
+      <button class="arch-btn" onclick="selectArch(${idx})">Select</button>
+      <button class="arch-btn del" onclick="delArch(${idx})">✕</button>
+    </div>`).join('');
+}
+function selectArch(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];if(a.results)showStoredResults(a);document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;}
+function delArch(idx){architectures.splice(idx,1);if(currentArchIdx>=architectures.length)currentArchIdx=Math.max(0,architectures.length-1);renderArchList();}
+function selectAndSim(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;runSim();}
+
+// ══ SIMULATION ══
+async function runSim(){
+  const rMax=+document.getElementById('rmax').value||1100;
+  const b=+document.getElementById('batch').value||100;
+  const alpha=+document.getElementById('alpha').value||0.01;
+  const rho=+document.getElementById('rho').value||0.9;
+  const CHUNK=40;
+  let runActs,runProb,runImp,archName;
+  if(architectures.length>0){const a=architectures[currentArchIdx];runActs=a.acts_seq;runProb=a.prob_seq;runImp=a.imp_seq;archName=a.name;}
+  else{runActs=acts;runProb=probM;runImp=impM;archName='(baseline not saved)';}
+  const n=runActs.length;
+  curSimS=[];curSimC=[];curGantt=[];
+  document.getElementById('rb').disabled=true;document.getElementById('dot').className='dot run';
+  setStatus('Simulation running...');
+  // True LHS: stratification must be generated ONCE over all rMax planned
+  // rows (not re-stratified at every 40-run chunk), otherwise the uniform
+  // coverage property of the Latin Hypercube over the whole sample is lost.
+  // If early stopping for stability kicks in first, only the first r rows of
+  // this matrix will be used (a prefix of a larger LHS: slightly less uniform
+  // coverage than an LHS dedicated to r rows, but still correct and still
+  // preferable to re-stratifying from scratch every time).
+  const usAll=useLHS?lhs(rMax,n):null;
+  const ucAll=useLHS?lhs(rMax,n):null;
+  let r=0,stab=false;
+  while(r<rMax&&!stab){
+    const chunk=Math.min(CHUNK,rMax-r);
+    const us=useLHS?usAll.slice(r,r+chunk):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));
+    const uc=useLHS?ucAll.slice(r,r+chunk):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));
+    for(let i=0;i<chunk;i++){const res=singleRunWith(us[i],uc[i],rho,r+i===0,n,runActs,runProb,runImp);curSimS.push(res.S);curSimC.push(res.C);if(r+i===0)curGantt=res.gantt||[];}
+    r+=chunk;if(useStab&&r>=2*b&&stable(curSimS,b,alpha))stab=true;
+    document.getElementById('pf').style.width=`${Math.round(r/rMax*100)}%`;
+    setStatus(`Run ${r}/${rMax}${stab?' — stabile':''} — ${archName}`);
+    await new Promise(res=>setTimeout(res,0));
+  }
+  document.getElementById('rb').disabled=false;document.getElementById('dot').className='dot ok';
+  setStatus(`Completed ${curSimS.length} runs${stab?' (stability)':''} — ${archName}`);
+  document.getElementById('pf').style.width='100%';
+  const res=computeMetrics(curSimS,curSimC);
+  if(architectures.length>0){architectures[currentArchIdx].results={...res,runs:curSimS.length,stab};architectures[currentArchIdx].simS=[...curSimS];architectures[currentArchIdx].simC=[...curSimC];renderArchList();}
+  showResultsData(res,curSimS,curSimC,curGantt,archName,curSimS.length,n,runActs,runProb,runImp);
+  showMacro('output');
+}
+
+function computeMetrics(S_arr,C_arr){
+  const S=[...S_arr].sort((a,b)=>a-b),C=[...C_arr].sort((a,b)=>a-b),n=S.length;
+  const TC=+document.getElementById('tc').value||630,TS=+document.getElementById('ts').value||130;
+  const kC=+document.getElementById('kc').value||1,kS=+document.getElementById('ks').value||1;
+  const ES=S.reduce((a,b)=>a+b,0)/n,EC=C.reduce((a,b)=>a+b,0)/n;
+  const sS=Math.sqrt(S.map(x=>(x-ES)**2).reduce((a,b)=>a+b,0)/n);
+  const sC=Math.sqrt(C.map(x=>(x-EC)**2).reduce((a,b)=>a+b,0)/n);
+  const gS=skew(S_arr,ES,sS),gC=skew(C_arr,EC,sC);
+  const PS=S_arr.filter(s=>s>TS).length/n,PC=C_arr.filter(c=>c>TC).length/n;
+  const RS=kS*S_arr.filter(s=>s>TS).reduce((a,s)=>a+(s-TS)**2,0)/n;
+  const RC=kC*C_arr.filter(c=>c>TC).reduce((a,c)=>a+(c-TC)**2,0)/n;
+  return{ES,EC,sS,sC,gS,gC,PS,PC,RS,RC,TC,TS};
+}
+
+function showStoredResults(arch){
+  if(!arch.results)return;const r=arch.results;
+  setMetrics(r.EC,r.sC,r.ES,r.sS,r.gC,r.gS,r.PC,r.PS,r.RC,r.RS,r.runs);
+  document.getElementById('m-arch-tag').textContent=arch.name;
+  if(arch.simS){drawHist('cv-s',[...arch.simS].sort((a,b)=>a-b),r.TS||130,'#4a9eff','Schedule (days)');drawHist('cv-c',[...arch.simC].sort((a,b)=>a-b),r.TC||630,'#f5952a','Cost ($k)');drawJoint(arch.simS,arch.simC,r.TS||130,r.TC||630);}
+}
+
+function showResultsData(res,S_arr,C_arr,gantt,archName,runs,n,rA,rP,rI){
+  const{ES,EC,sS,sC,gS,gC,PS,PC,RS,RC,TC,TS}=res;
+  setMetrics(EC,sC,ES,sS,gC,gS,PC,PS,RC,RS,runs);
+  document.getElementById('m-arch-tag').textContent=archName;
+  const S=[...S_arr].sort((a,b)=>a-b),C=[...C_arr].sort((a,b)=>a-b);
+  drawHist('cv-s',S,TS,'#4a9eff','Schedule (days)');
+  drawHist('cv-c',C,TC,'#f5952a','Cost ($k)');
+  drawJoint(S_arr,C_arr,TS,TC);
+  drawCrit(rA,rP,rI,n);
+  if(gantt&&gantt.length)drawGantt(gantt,n,rA);
+  drawOverview(ES,sS,EC,sC,gS,gC,PS,PC,RS,RC,runs);
+  drawCompare();
+}
+
+function setMetrics(EC,sC,ES,sS,gC,gS,PC,PS,RC,RS,runs){
+  const f=(id,v,d)=>{const e=document.getElementById(id);if(e)e.textContent=typeof v==='number'?v.toFixed(d):v;};
+  f('m-ec',EC,0);f('m-sc',sC,0);f('m-es',ES,1);f('m-ss',sS,1);
+  f('m-gc',gC,2);f('m-gs',gS,2);f('m-pc',PC,3);f('m-ps',PS,3);
+  f('m-rc',RC,0);f('m-rs',RS,0);document.getElementById('m-r').textContent=runs;
+}
+
+// ══ CHARTS ══
+function drawHist(id,S,tgt,col,xlabel){
+  const cv=document.getElementById(id);cv.width=cv.parentElement.clientWidth||800;cv.height=300;
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  const W=cv.width,H=cv.height,p={t:22,r:60,b:36,l:56};
+  const pw=W-p.l-p.r,ph=H-p.t-p.b,n=S.length,mn=S[0],mx=S[n-1];
+  const bins=Math.min(40,Math.ceil(Math.sqrt(n))),bw=(mx-mn)/bins||1;
+  const cts=new Array(bins).fill(0);S.forEach(v=>{const b=Math.min(bins-1,Math.floor((v-mn)/bw));cts[b]++;});
+  const maxC=Math.max(...cts);
+  ctx.strokeStyle='#1b2236';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){const y=p.t+(1-i/5)*ph;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+pw,y);ctx.stroke();}
+  cts.forEach((c,i)=>{
+    const x=p.l+(i/bins)*pw,bwp=pw/bins-.5,a=.35+.55*(c/maxC);
+    ctx.fillStyle=`${col}${Math.round(a*255).toString(16).padStart(2,'0')}`;
+    ctx.fillRect(x,p.t+ph-(c/maxC)*ph,bwp,(c/maxC)*ph);
+  });
+  const mean=S.reduce((a,b)=>a+b,0)/n;
+  ctx.strokeStyle='#22c97a';ctx.lineWidth=2;ctx.beginPath();
+  S.forEach((v,i)=>{const x=p.l+((v-mn)/(mx-mn||1))*pw,y=p.t+ph-((i+1)/n)*ph;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
+  const xm=p.l+((mean-mn)/(mx-mn||1))*pw;
+  ctx.strokeStyle='#9d7cf4';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(xm,p.t);ctx.lineTo(xm,p.t+ph);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#9d7cf4';ctx.font='10px JetBrains Mono';ctx.fillText('μ='+mean.toFixed(0),xm+3,p.t+13);
+  const xt=p.l+((tgt-mn)/(mx-mn||1))*pw;
+  if(xt>p.l&&xt<p.l+pw){
+    ctx.strokeStyle='#f5952a';ctx.lineWidth=1.5;ctx.setLineDash([5,3]);
+    ctx.beginPath();ctx.moveTo(xt,p.t);ctx.lineTo(xt,p.t+ph);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#f5952a';ctx.fillText('T='+tgt,xt+3,p.t+26);
+  }
+  ctx.strokeStyle='#263050';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(p.l,p.t);ctx.lineTo(p.l,p.t+ph);ctx.lineTo(p.l+pw,p.t+ph);ctx.stroke();
+  ctx.fillStyle='#5e6d8f';ctx.font='10px JetBrains Mono';
+  ctx.fillText(mn.toFixed(0),p.l,p.t+ph+16);ctx.fillText(mx.toFixed(0),p.l+pw-24,p.t+ph+16);
+  ctx.fillText(xlabel,p.l+pw/2-40,H-4);
+  ctx.fillStyle='#22c97a';ctx.fillText('— CDF',p.l+pw+4,p.t+13);
+}
+
+function drawJoint(S,C,TS,TC){
+  const cv=document.getElementById('cv-j');cv.width=cv.parentElement.clientWidth||800;cv.height=320;
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  const W=cv.width,H=cv.height,p={t:20,r:20,b:38,l:64};
+  const pw=W-p.l-p.r,ph=H-p.t-p.b;
+  const Sm=Math.min(...S),Sx=Math.max(...S),Cm=Math.min(...C),Cx=Math.max(...C);
+  const n=Math.min(800,S.length);
+  for(let i=0;i<n;i++){
+    const x=p.l+((S[i]-Sm)/(Sx-Sm||1))*pw,y=p.t+ph-((C[i]-Cm)/(Cx-Cm||1))*ph;
+    ctx.fillStyle=S[i]>TS&&C[i]>TC?'rgba(232,69,69,.65)':S[i]>TS?'rgba(245,149,42,.5)':C[i]>TC?'rgba(157,124,244,.5)':'rgba(74,158,255,.22)';
+    ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();
+  }
+  const xT=p.l+((TS-Sm)/(Sx-Sm||1))*pw,yT=p.t+ph-((TC-Cm)/(Cx-Cm||1))*ph;
+  ctx.strokeStyle='rgba(245,149,42,.7)';ctx.lineWidth=1;ctx.setLineDash([5,3]);
+  if(xT>p.l&&xT<p.l+pw){ctx.beginPath();ctx.moveTo(xT,p.t);ctx.lineTo(xT,p.t+ph);ctx.stroke();}
+  if(yT>p.t&&yT<p.t+ph){ctx.beginPath();ctx.moveTo(p.l,yT);ctx.lineTo(p.l+pw,yT);ctx.stroke();}
+  ctx.setLineDash([]);
+  ctx.strokeStyle='#263050';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(p.l,p.t);ctx.lineTo(p.l,p.t+ph);ctx.lineTo(p.l+pw,p.t+ph);ctx.stroke();
+  ctx.fillStyle='#5e6d8f';ctx.font='11px JetBrains Mono';
+  ctx.fillText('Schedule (days)',p.l+pw/2-55,H-6);
+  ctx.save();ctx.translate(14,p.t+ph/2+30);ctx.rotate(-Math.PI/2);ctx.fillText('Cost ($k)',0,0);ctx.restore();
+  ctx.fillText(Sm.toFixed(0),p.l,p.t+ph+16);ctx.fillText(Sx.toFixed(0),p.l+pw-28,p.t+ph+16);
+  [['Both over','rgba(232,69,69,.9)'],['Schedule over','rgba(245,149,42,.9)'],['Cost over','rgba(157,124,244,.9)'],['On target','rgba(74,158,255,.7)']].forEach(([l,c],i)=>{
+    ctx.fillStyle=c;ctx.beginPath();ctx.arc(p.l+7,p.t+12+i*16,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#7a8aaa';ctx.fillText(l,p.l+14,p.t+16+i*16);
+  });
+}
+
+function drawCrit(rA,pm,im,n){
+  const pairs=[];
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+    if(i===j)continue;const p=pm[i][j]||0,imp=im[i][j]||0;
+    if(p>0&&imp>0){const icj=rA[j].ic,msj=rA[j].ms;pairs.push({i,j,p,im:imp,icj,msj,crit:p*imp*icj*msj,lbl:`${rA[i].nm} ← ${rA[j].nm}`});}
+  }
+  pairs.sort((a,b)=>b.crit-a.crit);
+  if(!pairs.length){document.getElementById('crit-c').innerHTML='<p style="color:var(--muted)">No non-zero entries.</p>';return;}
+  const mx=pairs[0].crit;
+  const byA=new Array(n).fill(0);pairs.forEach(p=>byA[p.i]+=p.crit);
+  const ar=[...rA.map((a,i)=>({nm:a.nm,v:byA[i]}))].sort((a,b)=>b.v-a.v);const ma=ar[0].v||1;
+  let h=`<table class="crt"><thead><tr><th>Interface</th><th>Prob</th><th>Impact</th><th>IC_j</th><th>ActS_j</th><th>Criticality</th><th style="min-width:100px"></th></tr></thead><tbody>`;
+  pairs.slice(0,20).forEach((p,idx)=>{
+    const col=idx===0?'var(--orange)':'var(--blue)';const bw=Math.round((p.crit/mx)*100);
+    h+=`<tr><td style="color:${col};font-weight:${idx===0?700:400}">${p.lbl}</td><td>${p.p.toFixed(2)}</td><td>${p.im.toFixed(2)}</td><td>${p.icj.toFixed(2)}</td><td>${p.msj}</td><td style="color:${col}">${p.crit.toFixed(3)}</td><td><div class="cbar" style="width:${bw}px;background:${col}"></div></td></tr>`;
+  });
+  h+=`</tbody></table><div style="margin-top:16px;"><div style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Activity rank — Σ incoming criticality</div>
+  <table class="crt"><thead><tr><th>Rank</th><th>Activity</th><th>Σ Criticality</th><th style="min-width:140px"></th></tr></thead><tbody>`;
+  ar.forEach((a,idx)=>{const col=idx===0?'var(--orange)':'var(--green)';const bw=Math.round((a.v/ma)*140);h+=`<tr><td style="color:${col}">${idx+1}</td><td style="color:${col};font-weight:${idx===0?700:400}">${a.nm}</td><td style="color:${col}">${a.v.toFixed(3)}</td><td><div class="cbar" style="width:${bw}px;background:${col}"></div></td></tr>`;});
+  h+=`</tbody></table></div>`;document.getElementById('crit-c').innerHTML=h;
+}
+
+function drawGantt(gantt,n,rA){
+  const cv=document.getElementById('cv-g');cv.width=cv.parentElement.clientWidth||800;cv.height=Math.max(200,n*22+36);
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  const W=cv.width,H=cv.height,p={t:10,r:12,b:26,l:96};
+  const pw=W-p.l-p.r,ph=H-p.t-p.b,T=gantt[0]?gantt[0].length:1,rh=ph/n;
+  const cols=['#4a9eff','#22c97a','#f5952a','#9d7cf4','#22d3ee','#e84545','#f0d060','#34d399','#f472b6','#60a5fa','#fb923c','#a3e635','#38bdf8','#e879f9'];
+  gantt.forEach((gRow,i)=>{
+    const y=p.t+i*rh;
+    ctx.globalAlpha=1; // reset first: otherwise this label inherits the last alpha left by the previous row's cells
+    ctx.fillStyle='#c7d0e6';ctx.font='9px JetBrains Mono';ctx.fillText((rA[i].nm).slice(0,13),2,y+rh/2+4);
+    (gRow||[]).forEach((w,t)=>{
+      if(w===null||w===undefined)return;
+      const x=p.l+(t/T)*pw,bwp=pw/T;
+      // Alpha reflects remaining work (brighter = just started, dimmer = about to finish)
+      // but is floored at 0.55 so an active block never fades near-invisible while work
+      // is still genuinely in progress — only the floor/ceiling values changed, not the logic.
+      const wv=w>0?w:0;
+      ctx.globalAlpha=0.55+0.45*wv;
+      ctx.fillStyle=cols[i%cols.length];
+      ctx.fillRect(x,y+1,bwp-.5,rh-2);
+    });
+  });
+  ctx.globalAlpha=1;ctx.strokeStyle='#263050';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(p.l,p.t+ph);ctx.lineTo(p.l+pw,p.t+ph);ctx.stroke();
+  ctx.fillStyle='#5e6d8f';ctx.font='10px JetBrains Mono';ctx.fillText('0',p.l,p.t+ph+16);ctx.fillText(T+' steps',p.l+pw-40,p.t+ph+16);
+}
+
+function drawOverview(ES,sS,EC,sC,gS,gC,PS,PC,RS,RC,runs){
+  const pr=N===14?DS.ucav.paper:null;
+  let ho='';
+  ho+=ioRowOut('E[S]',ES.toFixed(1)+' d',pr?pr.ES+' d':null);
+  ho+=ioRowOut('σ_S',sS.toFixed(1)+' d',pr?pr.sS+' d':null);
+  ho+=ioRowOut('E[C]','$'+EC.toFixed(0)+'k',pr?'$'+pr.EC+'k':null);
+  ho+=ioRowOut('σ_C','$'+sC.toFixed(0)+'k',pr?'$'+pr.sC+'k':null);
+  ho+=ioRowOut('γ_S',gS.toFixed(2),pr?pr.gS:null);
+  ho+=ioRowOut('γ_C',gC.toFixed(2),pr?pr.gC:null);
+  ho+=ioRowOut('P_S',PS.toFixed(3),pr?pr.PS:null);
+  ho+=ioRowOut('P_C',PC.toFixed(3),pr?pr.PC:null);
+  ho+=ioRowOut('R_S',RS.toFixed(0),pr?pr.RS:null);
+  ho+=ioRowOut('R_C',RC.toFixed(0),pr?pr.RC:null);
+  ho+=ioRowOut('Run',runs+'',pr?pr.r+'':null);
+  document.getElementById('ov-outputs').innerHTML=ho;
+}
+
+function drawCompare(){
+  const done=architectures.filter(a=>a.results);
+  if(done.length<1){document.getElementById('compare-c').innerHTML='<p style="color:var(--muted)">Simulate at least 1 architecture.</p>';return;}
+  const metrics=['E[C] $k','σ_C $k','E[S] d','σ_S d','γ_C','γ_S','P_C','P_S','R_C','R_S'];
+  const keys=['EC','sC','ES','sS','gC','gS','PC','PS','RC','RS'];
+  const fmts=[0,0,1,1,2,2,3,3,0,0];
+  const pv=N===14?[DS.ucav.paper.EC,DS.ucav.paper.sC,DS.ucav.paper.ES,DS.ucav.paper.sS,DS.ucav.paper.gC,DS.ucav.paper.gS,DS.ucav.paper.PC,DS.ucav.paper.PS,DS.ucav.paper.RC,DS.ucav.paper.RS]:null;
+  let h=`<table class="rtt"><thead><tr><th class="left">Metrica</th>`;
+  if(pv)h+=`<th>Paper</th>`;done.forEach(a=>h+=`<th>${a.name}</th>`);h+=`</tr></thead><tbody>`;
+  keys.forEach((k,ki)=>{
+    const vals=done.map(a=>a.results[k]),mn=Math.min(...vals);
+    h+=`<tr><td class="label">${metrics[ki]}</td>`;
+    if(pv)h+=`<td style="color:var(--muted)">${pv[ki].toFixed(fmts[ki])}</td>`;
+    done.forEach(a=>{const v=a.results[k];h+=`<td class="${v===mn?'best':''}">${v.toFixed(fmts[ki])}</td>`;});
+    h+=`</tr>`;
+  });
+  h+=`</tbody></table><div class="note-box">The <strong style="color:var(--green)">green</strong> cell indicates the minimum value per row. For P_C, P_S, R_C, R_S, lower values = lower risk.</div>`;
+  document.getElementById('compare-c').innerHTML=h;
+}
+
+// ══ LOAD EXAMPLES ══
+function newCase(){
+  if(!confirm('Start a new blank case study?\n\nThis clears all current activities, the DSM, probability/impact matrices, and any saved architectures. The preloaded examples (UCAV 2002, MIT v2.1, Airport) are not affected and can still be loaded at any time.'))return;
+  acts=[];dsmBin=[];probM=[];impM=[];
+  initState(4);
+  document.getElementById('proj-name').value='New Project';
+  document.getElementById('tc').value=100;document.getElementById('ts').value=50;
+  architectures=[];currentArchIdx=0;curSimS=[];curSimC=[];curGantt=[];
+  document.getElementById('hdr-arch').textContent='No architecture yet';
+  document.getElementById('sim-arch-label').textContent='No architecture saved yet';
+  document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
+  clearMetrics();renderAll();
+  setStatus('New blank case — rename activities, set durations/costs, fill in the DSM and probability/impact matrices, save a baseline architecture, then RUN');
+}
+function loadEx(name){
+  const d=DS[name];if(!d)return;
+  N=d.n;acts=d.acts.map(a=>({...a}));probM=d.prob.map(r=>[...r]);impM=d.imp.map(r=>[...r]);
+  dsmBin=probM.map(r=>r.map(v=>v>0?1:0));
+  if(name==='ucav'){document.getElementById('tc').value=630;document.getElementById('ts').value=130;}
+  architectures=[];currentArchIdx=0;curSimS=[];curSimC=[];curGantt=[];
+  document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
+  clearMetrics();renderAll();
+  setStatus('Dataset '+name.toUpperCase()+' loaded — go to Architectures, save baseline, then RUN');
+}
+function clearMetrics(){
+  ['m-ec','m-sc','m-es','m-ss','m-gc','m-gs','m-pc','m-ps','m-rc','m-rs','m-r'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
+  document.getElementById('dot').className='dot';document.getElementById('pf').style.width='0%';
+}
+function addAct(){if(N>=20)return;initState(N+1);renderAll();}
+function rmAct(){if(N<=2)return;initState(N-1);renderAll();}
+
+// ══ TAB NAVIGATION ══
+function showMacro(name){
+  ['input','output'].forEach(t=>{
+    document.getElementById('mt-'+t).className='mtab'+(t==='output'?' out':'')+(t===name?' on':'');
+    document.getElementById('mp-'+t).className='macro-pane'+(t===name?' on':'');
+  });
+  if(name==='output')redrawCurrentCharts();
+}
+function showSTab(name){
+  ['acts','dsm','prob','imp','arch'].forEach(t=>{
+    document.getElementById('st-'+t).className='stab'+(t===name?' on':'');
+    document.getElementById('sp-'+t).className='subpane'+(t===name?' on':'');
+  });
+}
+function showOTab(name){
+  ['overview','sched','cost','joint','crit','gantt','compare'].forEach(t=>{
+    document.getElementById('ot-'+t).className='ostab'+(t===name?' on':'');
+    document.getElementById('op-'+t).className='opane'+(t===name?' on':'');
+  });
+  redrawChart(name);
+}
+function redrawChart(name){
+  const TS=+document.getElementById('ts').value||130,TC=+document.getElementById('tc').value||630;
+  if(name==='sched'&&curSimS.length)drawHist('cv-s',[...curSimS].sort((a,b)=>a-b),TS,'#4a9eff','Schedule (days)');
+  if(name==='cost'&&curSimC.length)drawHist('cv-c',[...curSimC].sort((a,b)=>a-b),TC,'#f5952a','Cost ($k)');
+  if(name==='joint'&&curSimS.length)drawJoint(curSimS,curSimC,TS,TC);
+  if(name==='gantt'&&curGantt.length){const a=architectures.length>0?architectures[currentArchIdx]:null;drawGantt(curGantt,a?a.acts_seq.length:N,a?a.acts_seq:acts);}
+  if(name==='compare')drawCompare();
+}
+function redrawCurrentCharts(){
+  const active=document.querySelector('.ostab.on');
+  if(active)redrawChart(active.id.replace('ot-',''));
+}
+function togOpt(w){
+  if(w==='lhs'){useLHS=!useLHS;const b=document.getElementById('lb');b.className='tog'+(useLHS?' on':'');b.textContent=useLHS?'ON':'OFF';}
+  else{useStab=!useStab;const b=document.getElementById('sb');b.className='tog'+(useStab?' on':'');b.textContent=useStab?'ON':'OFF';}
+}
+function setStatus(t){document.getElementById('stxt').textContent=t;}
+
+// ══ EXPORT / IMPORT ══
+function exportJSON(){
+  const data={version:5,projectName:document.getElementById('proj-name').value,n:N,activities:acts,dsmBinary:dsmBin,probMatrix:probM,impMatrix:impM,
+    architectures:architectures.map(a=>({name:a.name,V:a.V,acts_seq:a.acts_seq,prob_seq:a.prob_seq,imp_seq:a.imp_seq,results:a.results||null})),
+    currentArchIdx,simParams:{rmax:document.getElementById('rmax').value,batch:document.getElementById('batch').value,alpha:document.getElementById('alpha').value,rho:document.getElementById('rho').value,tc:document.getElementById('tc').value,ts:document.getElementById('ts').value,kc:document.getElementById('kc').value,ks:document.getElementById('ks').value,useLHS,useStab}};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(document.getElementById('proj-name').value||'progetto').replace(/\s+/g,'_')+'_dsm_v5.json';a.click();
+  setStatus('Project exported.');
+}
+function importJSON(){document.getElementById('file-import').click();}
+function handleImport(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);if(!data.n||!data.activities)throw new Error('Formato non valido');
+      document.getElementById('proj-name').value=data.projectName||'Imported Project';
+      N=data.n;acts=data.activities.map(a=>({...a}));dsmBin=data.dsmBinary||acts.map(()=>acts.map(()=>0));
+      probM=data.probMatrix.map(r=>[...r]);impM=data.impMatrix.map(r=>[...r]);
+      architectures=(data.architectures||[]).map(a=>({...a}));currentArchIdx=data.currentArchIdx||0;
+      if(data.simParams){const sp=data.simParams;['rmax','batch','alpha','rho','tc','ts','kc','ks'].forEach(k=>{const el=document.getElementById(k);if(el&&sp[k]!==undefined)el.value=sp[k];});useLHS=sp.useLHS!==undefined?sp.useLHS:true;useStab=sp.useStab!==undefined?sp.useStab:true;document.getElementById('lb').className='tog'+(useLHS?' on':'');document.getElementById('lb').textContent=useLHS?'ON':'OFF';document.getElementById('sb').className='tog'+(useStab?' on':'');document.getElementById('sb').textContent=useStab?'ON':'OFF';}
+      document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
+      curSimS=[];curSimC=[];curGantt=[];clearMetrics();renderAll();
+      setStatus('Imported: '+document.getElementById('proj-name').value);
+    }catch(err){setStatus('Import error: '+err.message);alert('Error: '+err.message);}
+  };reader.readAsText(file);e.target.value='';
+}
+
+// ══ BOOT ══
+initState(14);
+// Fix: manually set DS.ucav data
+N=DS.ucav.n;acts=DS.ucav.acts.map(a=>({...a}));probM=DS.ucav.prob.map(r=>[...r]);impM=DS.ucav.imp.map(r=>[...r]);
+dsmBin=probM.map(r=>r.map(v=>v>0?1:0));
+document.getElementById('tc').value=630;document.getElementById('ts').value=130;
+document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
+architectures=[{name:'Arch. 1 baseline',V:Array.from({length:N},(_,i)=>i+1),acts_seq:acts.map(a=>({...a})),prob_seq:probM.map(r=>[...r]),imp_seq:impM.map(r=>[...r]),results:null}];
+currentArchIdx=0;
+renderAll();
+setStatus('Ready — UCAV 2002 loaded · Arch. 1 baseline active · press RUN to simulate');
+</script>
+</body>
+</html>
