@@ -1,0 +1,75 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "dsm-fram-toolkit: A browser-based simulator suite for DSM–FRAM integration and functional resonance risk analysis"
+version: 1.0.0
+date-released: 2026-06-01
+license: MIT
+repository-code: "https://github.com/danielegrazzini/dsm-fram-toolkit"
+authors:
+  - family-names: Grazzini
+    given-names: Daniele
+    orcid: "https://orcid.org/0009-0001-4800-6191"
+    affiliation: "Independent Researcher, Rome, Italy"
+    email: danielegrazzini77@gmail.com
+abstract: >
+  dsm-fram-toolkit is a suite of three browser-based simulation tools that 
+  operationalise a quantitative integration between the Design Structure Matrix 
+  (DSM) methodology and the Functional Resonance Analysis Method (FRAM). 
+  The toolkit includes a full Browning-Eppinger (2002) stochastic process 
+  simulator (B-E Simulator), a FRAM-extended version that replaces scalar 
+  rework probabilities with six-dimensional coupling tensors (FEBS Simulator), 
+  and a network-level variability propagation and global sensitivity analysis 
+  tool based on the Saltelli (2002) Sobol estimator (FRAME-Q Simulator). 
+  All simulators run as self-contained HTML files with no installation required.
+keywords:
+  - Design Structure Matrix
+  - Functional Resonance Analysis Method
+  - sensitivity analysis
+  - sociotechnical systems
+  - process simulation
+  - safety engineering
+  - functional resonance
+  - Sobol indices
+  - Browning-Eppinger model
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Grazzini
+      given-names: Daniele
+  title: "dsm-fram-toolkit: A browser-based simulator suite for DSM–FRAM integration and functional resonance risk analysis"
+  journal: "Journal of Open Source Software"
+  year: 2026
+  doi: "10.21105/joss.XXXXX"
+references:
+  - type: article
+    authors:
+      - family-names: Browning
+        given-names: Tyson R.
+      - family-names: Eppinger
+        given-names: Steven D.
+    title: "Modeling impacts of process architecture on cost and schedule risk in product development"
+    journal: "IEEE Transactions on Engineering Management"
+    year: 2002
+    volume: 49
+    issue: 4
+    pages: "428-442"
+    doi: "10.1109/TEM.2002.803387"
+  - type: article
+    authors:
+      - family-names: Saltelli
+        given-names: Andrea
+    title: "Making best use of model evaluations to compute sensitivity indices"
+    journal: "Computer Physics Communications"
+    year: 2002
+    volume: 145
+    issue: 2
+    pages: "280-297"
+    doi: "10.1016/S0010-4655(02)00280-1"
+  - type: book
+    authors:
+      - family-names: Hollnagel
+        given-names: Erik
+    title: "FRAM: The Functional Resonance Analysis Method"
+    publisher: "Ashgate Publishing"
+    year: 2012
