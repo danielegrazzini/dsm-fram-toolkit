@@ -1,5 +1,49 @@
+<!--
+  FRAME-Q Simulator — FRAM Functional Resonance Analysis Method Extended and Quantified
+  Version S28 · June 2026
+
+  Copyright (c) 2026 Daniele Grazzini
+  Independent Researcher, Rome, Italy
+  danielegrazzini77@gmail.com
+
+  Algorithm design and theoretical framework:
+    Daniele Grazzini — FRAME-Q Framework (2025-2026)
+    Reference: "Functional Amplification in Design Networks: The FRAME-Q Framework
+    for DSM-Based Resonance Analysis", working paper, 2026.
+
+  The computational engine implements:
+    L1: Tensor M elicitation via FRAME-6 protocol (Eq. 1-2)
+    L2: Beta-distributed epistemic parameters sigma_i (Eq. 3-4)
+    L3: RMS-based variability propagation — V(Of_i), Phi_i, R_i, R_net (Eq. 5a-5c, 6-8)
+    L4: Global Sobol sensitivity analysis via Saltelli method (Eq. 9-11)
+
+  Case study dataset: UCAV preliminary design process
+    Source: Browning, T.R. & Eppinger, S.D. (2002). Modeling impacts of process
+    architecture on cost and schedule risk in product development.
+    IEEE Transactions on Engineering Management, 49(4), 428-442.
+
+  MIT License
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+-->
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -185,18 +229,18 @@ canvas{display:block;max-width:100%}
 <div class="hdr">
   <div>
     <div class="hdr-logo">FRAME-Q</div>
-    <div class="hdr-sub">FRAM Functional Resonance Simulator &middot; General Purpose</div>
+    <div class="hdr-sub">FRAM Functional Resonance Simulator &middot; D. Grazzini 2026</div>
   </div>
   <span class="badge" id="hdr-n">n = —</span>
   <span class="badge" id="hdr-k">k = —</span>
   <span class="badge" id="hdr-ne">Ne = —</span>
   <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-    <button class="btn btn-sm btn-outline" onclick="loadExample('ucav')">&#8615; Carica UCAV (B&amp;E 2002)</button>
-    <button class="btn btn-sm btn-outline" onclick="clearAll()">&#10005; Nuovo</button>
+    <button class="btn btn-sm btn-outline" onclick="loadExample('ucav')">&#8615; Load UCAV (B&amp;E 2002)</button>
+    <button class="btn btn-sm btn-outline" onclick="clearAll()">&#10005; New</button>
   </div>
   <span style="display:flex;align-items:center;gap:4px;margin-left:8px">
     <span class="dot idle" id="dot"></span>
-    <span id="sthdr" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Pronto</span>
+    <span id="sthdr" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">Ready</span>
   </span>
 </div>
 
@@ -204,22 +248,22 @@ canvas{display:block;max-width:100%}
 <div class="wizard-bar">
   <div class="wstep active" id="ws1" onclick="goStep(1)">
     <div class="wnum" id="wn1">1</div>
-    <div><div class="wlabel">Attivit&agrave;</div><div class="wstatus" id="wst1">—</div></div>
+    <div><div class="wlabel">Activities</div><div class="wstatus" id="wst1">—</div></div>
   </div>
   <div class="wsep">›</div>
   <div class="wstep locked" id="ws2" onclick="goStep(2)">
     <div class="wnum" id="wn2">2</div>
-    <div><div class="wlabel">Tensore M</div><div class="wstatus" id="wst2">—</div></div>
+    <div><div class="wlabel">Tensor M</div><div class="wstatus" id="wst2">—</div></div>
   </div>
   <div class="wsep">›</div>
   <div class="wstep locked" id="ws3" onclick="goStep(3)">
     <div class="wnum" id="wn3">3</div>
-    <div><div class="wlabel">Parametri &amp; Calibrazione</div><div class="wstatus" id="wst3">—</div></div>
+    <div><div class="wlabel">Parameters &amp; Calibration</div><div class="wstatus" id="wst3">—</div></div>
   </div>
   <div class="wsep">›</div>
   <div class="wstep locked" id="ws4" onclick="goStep(4)">
     <div class="wnum" id="wn4">4</div>
-    <div><div class="wlabel">Simulazione Sobol</div><div class="wstatus" id="wst4">—</div></div>
+    <div><div class="wlabel">Sobol Simulation</div><div class="wstatus" id="wst4">—</div></div>
   </div>
 </div>
 
@@ -228,23 +272,23 @@ canvas{display:block;max-width:100%}
 <!-- ══ STEP 1: ATTIVITÀ ══ -->
 <div class="step-pane on" id="sp1">
   <div class="content-area">
-    <div class="sec-hdr">Step 1 — Definizione Attivit&agrave;</div>
+    <div class="sec-hdr">Step 1 — Activity Definition</div>
     <div class="sec-note">
-      Inserisci le attivit&agrave; del processo. Per ogni attivit&agrave; specifica nome, durate (BCV/MLV/WCV) e costi.
-      &sigma;<sub>i</sub> e i parametri Beta vengono calcolati automaticamente.<br>
+      Enter the process activities. For each activity specify name and durations (BCV/MLV/WCV).
+      &sigma;<sub>i</sub> and Beta parameters are computed automatically.<br>
       <span style="color:var(--cyan)">BCV</span> = Best Case Value &nbsp;&middot;&nbsp;
       <span style="color:var(--cyan)">MLV</span> = Most Likely Value &nbsp;&middot;&nbsp;
       <span style="color:var(--cyan)">WCV</span> = Worst Case Value
     </div>
     <div class="acts-toolbar">
-      <button class="add-btn" onclick="addActivity()">+ Aggiungi attivit&agrave;</button>
+      <button class="add-btn" onclick="addActivity()">+ Add activity</button>
       <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)" id="n-label">0 attivit&agrave;</span>
     </div>
     <table class="tbl" id="acts-table">
       <thead>
         <tr>
           <th style="width:32px">#</th>
-          <th style="min-width:200px">Nome attivit&agrave;</th>
+          <th style="min-width:200px">Activity name</th>
           <th>Dur BCV</th><th>Dur MLV</th><th>Dur WCV</th>
           <th style="width:28px"></th>
         </tr>
@@ -253,21 +297,21 @@ canvas{display:block;max-width:100%}
     </table>
   </div>
   <div class="step-footer">
-    <button class="btn btn-primary" onclick="calcStep1()">&#9654; CALCOLA PARAMETRI BASE</button>
+    <button class="btn btn-primary" onclick="calcStep1()">&#9654; COMPUTE BASE PARAMETERS</button>
     <span id="s1-msg" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)"></span>
-    <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="goStep(2)" id="s1-next" disabled>Avanti ›</button>
+    <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="goStep(2)" id="s1-next" disabled>Next ›</button>
   </div>
 </div>
 
 <!-- ══ STEP 2: TENSORE M ══ -->
 <div class="step-pane" id="sp2">
   <div class="content-area">
-    <div class="sec-hdr">Step 2 — Tensore M (DSM FRAME-6)</div>
+    <div class="sec-hdr">Step 2 — Tensor M (DSM FRAME-6)</div>
     <div class="sec-note">
-      <b style="color:var(--text)">Fase A — Struttura DSM:</b> clicca sulle celle per attivare le dipendenze (riga i dipende da colonna j).<br>
-      <b style="color:var(--text)">Fase B — Aspetti FRAME-6:</b> seleziona una cella attiva e compila i 6 valori nel pannello a destra.
-      <span style="color:var(--green)">Verde</span> = configurata &nbsp;
-      <span style="color:var(--cyan)">Ciano</span> = attiva ma con valori default (0.5)
+      <b style="color:var(--text)">Phase A — DSM Structure:</b> click cells to activate dependencies (row i depends on column j).<br>
+      <b style="color:var(--text)">Phase B — FRAME-6 Aspects:</b> select an active cell and fill in the 6 values in the right panel.
+      <span style="color:var(--green)">Green</span> = configured &nbsp;
+      <span style="color:var(--cyan)">Cyan</span> = active but with default values (0.5)
     </div>
     <div class="dsm-wrap">
       <div class="dsm-grid-container">
@@ -275,33 +319,33 @@ canvas{display:block;max-width:100%}
       </div>
       <div class="f6-panel" id="f6-panel">
         <div class="f6-title">FRAME-6 Aspects</div>
-        <div class="f6-pair-lbl" id="f6-pair">Seleziona una cella attiva</div>
+        <div class="f6-pair-lbl" id="f6-pair">Select an active cell</div>
         <div class="f6-empty" id="f6-empty">
-          Clicca su una cella attiva (ciano o verde) per configurare i 6 aspetti FRAME-6.<br><br>
-          Ogni aspetto rappresenta il tipo di accoppiamento tra le due funzioni.
+          Click on an active cell (cyan or green) to configure the 6 FRAME-6 aspects.<br><br>
+          Each aspect represents the type of functional coupling between the two functions.
         </div>
         <div id="f6-fields" style="display:none">
           <div id="f6-sliders"></div>
           <div class="f6-actions">
             <button class="btn btn-sm btn-outline" onclick="resetF6()">Reset 0.5</button>
-            <button class="btn btn-sm btn-primary" onclick="applyF6()">Applica</button>
+            <button class="btn btn-sm btn-primary" onclick="applyF6()">Apply</button>
           </div>
         </div>
       </div>
     </div>
   </div>
   <div class="step-footer">
-    <button class="btn btn-outline btn-sm" onclick="goStep(1)">‹ Indietro</button>
-    <button class="btn btn-primary" onclick="calcStep2()">&#9654; CALCOLA ACCOPPIAMENTI</button>
+    <button class="btn btn-outline btn-sm" onclick="goStep(1)">‹ Back</button>
+    <button class="btn btn-primary" onclick="calcStep2()">&#9654; COMPUTE COUPLINGS</button>
     <span id="s2-msg" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)"></span>
-    <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="goStep(3)" id="s2-next" disabled>Avanti ›</button>
+    <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="goStep(3)" id="s2-next" disabled>Next ›</button>
   </div>
 </div>
 
 <!-- ══ STEP 3: CALIBRAZIONE ══ -->
 <div class="step-pane" id="sp3">
   <div class="content-area">
-    <div class="sec-hdr">Step 3 — Parametri Epistemici &amp; Calibrazione Nominale</div>
+    <div class="sec-hdr">Step 3 — Epistemic Parameters &amp; Nominal Calibration</div>
     <div class="formula-box">
       <span class="hl">&sigma;<sub>i</sub></span> = (WCV<sub>i</sub> - BCV<sub>i</sub>) / (6 &middot; MLV<sub>i</sub>)
       &nbsp;&nbsp;&nbsp;
@@ -309,14 +353,14 @@ canvas{display:block;max-width:100%}
       &nbsp;&nbsp;&nbsp;
       <span class="hl">V(Of<sub>i</sub>)</span> = &radic;[&Sigma;<sub>k</sub> (1/6) V<sub>ik</sub>&sup2;]
       &nbsp;&nbsp;&nbsp;
-      <span class="hl">R<sub>i</sub></span> = V(Of<sub>i</sub>) / &Phi;<sub>i</sub>
+      <span class="hl">R<sub>i</sub></span> = V(Of<sub>i</sub>) / &Phi;<sub>i</sub>&nbsp;&nbsp;&nbsp;<span style="color:var(--muted)">threshold: V(Of) = median &middot; R<sub>i</sub> = median(R<sub>i</sub>)</span>
     </div>
     <div class="calc-grid" id="cal-summary"></div>
     <div class="sec-hdr" style="margin-top:4px">Risultati nominali (&mu;) — Propagazione L3</div>
     <table class="res-tbl" id="cal-table">
       <thead><tr>
-        <th>#</th><th>Attivit&agrave;</th><th>&sigma; &mu;</th><th>&alpha;</th><th>&beta;</th>
-        <th>V(Of<sub>i</sub>)</th><th>&Phi;<sub>i</sub></th><th>R<sub>i</sub></th><th>w<sub>i</sub></th><th>Categoria</th>
+        <th>#</th><th>Activity</th><th>&sigma; &mu;</th><th>&alpha;</th><th>&beta;</th>
+        <th>V(Of<sub>i</sub>)</th><th>&Phi;<sub>i</sub></th><th>R<sub>i</sub></th><th>w<sub>i</sub></th><th>Category</th>
       </tr></thead>
       <tbody id="cal-body"></tbody>
     </table>
@@ -326,10 +370,10 @@ canvas{display:block;max-width:100%}
     </div>
   </div>
   <div class="step-footer">
-    <button class="btn btn-outline btn-sm" onclick="goStep(2)">‹ Indietro</button>
-    <button class="btn btn-primary" onclick="calcStep3()">&#9654; CALCOLA RISONANZA NOMINALE</button>
+    <button class="btn btn-outline btn-sm" onclick="goStep(2)">‹ Back</button>
+    <button class="btn btn-primary" onclick="calcStep3()">&#9654; COMPUTE NOMINAL RESONANCE</button>
     <span id="s3-msg" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)"></span>
-    <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="goStep(4)" id="s3-next" disabled>Avanti › Simulazione</button>
+    <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="goStep(4)" id="s3-next" disabled>Next › Simulation</button>
   </div>
 </div>
 
@@ -337,36 +381,38 @@ canvas{display:block;max-width:100%}
 <div class="step-pane" id="sp4">
   <div class="mstrip">
     <div class="met" id="met-rnet"><div class="met-lbl">E[R_net]</div><div class="met-val" id="m-rnet">&#8212;</div><div class="met-ref" id="m-rnet-ref">nominale —</div></div>
-    <div class="met"><div class="met-lbl">Var(Y)</div><div class="met-val" id="m-vary">&#8212;</div><div class="met-ref">varianza R_net</div></div>
-    <div class="met"><div class="met-lbl">Ne</div><div class="met-val" id="m-ne">&#8212;</div><div class="met-ref">campioni</div></div>
-    <div class="met"><div class="met-lbl">Valutazioni</div><div class="met-val" id="m-eval">&#8212;</div><div class="met-ref">Ne&middot;(2k+2)</div></div>
+    <div class="met"><div class="met-lbl">Var(Y)</div><div class="met-val" id="m-vary">&#8212;</div><div class="met-ref">variance R_net</div></div>
+    <div class="met"><div class="met-lbl">Ne</div><div class="met-val" id="m-ne">&#8212;</div><div class="met-ref">samples</div></div>
+    <div class="met"><div class="met-lbl">Evaluations</div><div class="met-val" id="m-eval">&#8212;</div><div class="met-ref">Ne&middot;(2k+2)</div></div>
     <div class="met"><div class="met-lbl">Top param</div><div class="met-val" id="m-top" style="font-size:12px">&#8212;</div><div class="met-ref">max Ti</div></div>
-    <div class="met"><div class="met-lbl">Tempo</div><div class="met-val" id="m-time">&#8212;</div><div class="met-ref">secondi</div></div>
+    <div class="met"><div class="met-lbl">Tempo</div><div class="met-val" id="m-time">&#8212;</div><div class="met-ref">seconds</div></div>
     <button class="exp-btn" id="exp-btn" onclick="exportJSON()" disabled>&#8595; JSON</button>
+    <button class="exp-btn" id="exp-toolkit-btn" onclick="exportToolkitJSON()" disabled style="background:var(--cyan);color:#0d0d0d;margin-left:6px">&#8595; Toolkit JSON</button>
+    <label style="display:inline-flex;align-items:center;margin-left:6px"><button class="exp-btn" onclick="importToolkitJSON()" style="background:var(--card2);border:1px solid var(--b2)">&#8593; Import Toolkit</button></label>
   </div>
   <div class="out-tabs">
     <div class="otab on" id="ot-ov" onclick="showOTab('ov')">Overview</div>
     <div class="otab" id="ot-sobol" onclick="showOTab('sobol')">Sobol Si / Ti</div>
-    <div class="otab" id="ot-dist" onclick="showOTab('dist')">Distribuzione R_net</div>
+    <div class="otab" id="ot-dist" onclick="showOTab('dist')">Distribution R_net</div>
   </div>
   <div class="content-area" style="padding-top:14px">
     <div class="opane on" id="op-ov">
       <div class="ov-grid" id="ov-grid">
         <div class="ov-card" style="grid-column:1/-1">
           <div style="font-size:11px;color:var(--muted);line-height:1.8">
-            Configura Ne e premi RUN per avviare la simulazione Sobol.
+            Configure Ne and press RUN to start the Sobol simulation.
           </div>
         </div>
       </div>
     </div>
-    <div class="opane" id="op-sobol"><div id="sobol-body" style="color:var(--muted);font-size:11px">Nessun risultato.</div></div>
+    <div class="opane" id="op-sobol"><div id="sobol-body" style="color:var(--muted);font-size:11px">No results.</div></div>
     <div class="opane" id="op-dist">
-      <div style="margin-bottom:8px;font-size:10px;color:var(--muted)">Distribuzione Y = R_net</div>
+      <div style="margin-bottom:8px;font-size:10px;color:var(--muted)">Distribution Y = R_net</div>
       <canvas id="dist-canvas" width="620" height="220"></canvas>
     </div>
   </div>
   <div class="step-footer">
-    <button class="btn btn-outline btn-sm" onclick="goStep(3)">‹ Indietro</button>
+    <button class="btn btn-outline btn-sm" onclick="goStep(3)">‹ Back</button>
     <div style="display:flex;align-items:center;gap:10px">
       <select id="ne-sel" style="background:var(--card2);border:1px solid var(--b2);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 8px;border-radius:3px;outline:none">
         <option value="16">Ne=16 ~3s</option>
@@ -375,19 +421,28 @@ canvas{display:block;max-width:100%}
         <option value="128">Ne=128 ~25s</option>
         <option value="256">Ne=256 ~50s</option>
         <option value="512" selected>Ne=512 ~2min</option>
+        <option value="1024">Ne=1024 ~4min</option>
+        <option value="2048">Ne=2048 ~8min</option>
+        <option value="4096">Ne=4096 ~16min</option>
       </select>
+      <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+        ν=<input id="nu-inp" type="number" value="10" min="2" max="50" step="1"
+          style="width:46px;background:var(--card2);border:1px solid var(--b2);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 5px;border-radius:3px;outline:none"
+          title="Beta distribution concentration parameter (default 10). Higher = narrower distributions.">
+        <span style="color:var(--muted);font-size:10px;cursor:help" title="Beta concentration ν: controls width of σ distributions. Low ν (5) = wide, High ν (20) = narrow.">β-conc</span>
+      </label>
       <select id="topn-sel" style="background:var(--card2);border:1px solid var(--b2);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 8px;border-radius:3px;outline:none">
         <option value="15">Top 15</option>
         <option value="20" selected>Top 20</option>
         <option value="30">Top 30</option>
         <option value="50">Top 50</option>
       </select>
-      <button class="btn btn-run" id="rb" onclick="startRun()">&#9654; RUN SIMULAZIONE</button>
+      <button class="btn btn-run" id="rb" onclick="startRun()">&#9654; RUN SIMULATION</button>
       <button class="btn btn-stop" id="sb" onclick="stopRun()">&#9632; STOP</button>
     </div>
     <div class="prog-wrap">
       <div class="prog"><div class="pf" id="pf"></div></div>
-      <div class="st-msg" id="stmsg">Pronto</div>
+      <div class="st-msg" id="stmsg">Ready</div>
     </div>
   </div>
 </div>
@@ -396,19 +451,20 @@ canvas{display:block;max-width:100%}
 
 <div class="statusbar">
   <span class="dot idle" id="dot2"></span>
-  <span id="stbar">FRAME-Q &middot; FRAM Functional Resonance Simulator &middot; Grazzini 2026</span>
+  <span id="stbar">FRAME-Q &middot; Grazzini 2026 &middot; MIT License &middot; danielegrazzini77@gmail.com</span>
 </div>
 
 <script>
 const FRAME6_LABELS = ['Input','Output','Precondition','Resource','Control','Time'];
-const NU = 10;
+const NU_DEFAULT = 10;
+const getNu = () => { const el = document.getElementById("nu-inp"); return el ? Math.max(2, Math.min(50, +el.value || NU_DEFAULT)) : NU_DEFAULT; };
 const THR_V_DEFAULT = null, THR_R_DEFAULT = null;
 const CAT_COLORS = {
-  'Risonatore critico':'var(--orange)',
-  'Risonatore latente':'var(--cyan)',
-  'Accumulatore':'var(--blue)',
-  'Attivita stabile':'var(--muted)',
-  'Sorgente (n/d)':'var(--b3)'
+  'Critical resonator':'var(--orange)',
+  'Latent resonator':'var(--cyan)',
+  'Accumulator':'var(--blue)',
+  'Stable':'var(--muted)',
+  'Source (n/a)':'var(--b3)'
 };
 
 // STATE
@@ -465,7 +521,7 @@ function renderActs(){
       <td><button class="del-btn" onclick="deleteAct(${i})">&#10005;</button></td>
     </tr>`;
   });
-  document.getElementById('n-label').textContent = acts.length + ' attività';
+  document.getElementById('n-label').textContent = acts.length + ' activities';
   document.getElementById('hdr-n').textContent = 'n = ' + acts.length;
 }
 
@@ -489,17 +545,17 @@ function deleteAct(i){
 
 function calcStep1(){
   const n = acts.length;
-  if(n < 3){ s1msg('Servono almeno 3 attività','warn'); return; }
+  if(n < 3){ s1msg('At least 3 activities required','warn'); return; }
   for(const a of acts){
-    if(a.bcv > a.mlv || a.mlv > a.wcv){ s1msg('BCV ≤ MLV ≤ WCV per tutte le attività','err'); return; }
-    if(a.mlv <= 0){ s1msg('MLV deve essere > 0','err'); return; }
+    if(a.bcv > a.mlv || a.mlv > a.wcv){ s1msg('BCV ≤ MLV ≤ WCV required for all activities','err'); return; }
+    if(a.mlv <= 0){ s1msg('MLV must be > 0','err'); return; }
   }
   const sigMu = acts.map(a=>(a.wcv-a.bcv)/(6*a.mlv));
   const sumD = acts.reduce((s,a)=>s+a.mlv,0);
   const wDur = acts.map(a=>a.mlv/sumD);
   computed.step1 = {n, sigMu, wDur, sumD};
-  s1msg(`✓ ${n} attività validate — σ calcolati`,'ok');
-  setWizDone(1); setWizStatus(1,n+' attività','ok');
+  s1msg(`✓ ${n} activities validated — σ computed`,'ok');
+  setWizDone(1); setWizStatus(1,n+' activities','ok');
   document.getElementById('s1-next').disabled = false;
   document.getElementById('ws2').classList.remove('locked');
   document.getElementById('ws3').classList.add('locked');
@@ -551,7 +607,7 @@ function updateF6Panel(){
   const panel=document.getElementById('f6-fields');
   const empty=document.getElementById('f6-empty');
   const pairLbl=document.getElementById('f6-pair');
-  if(!selectedPair||!mActive.has(selectedPair)){ panel.style.display='none'; empty.style.display='block'; pairLbl.textContent='Seleziona una cella attiva'; return; }
+  if(!selectedPair||!mActive.has(selectedPair)){ panel.style.display='none'; empty.style.display='block'; pairLbl.textContent='Select an active cell'; return; }
   const [i,j]=selectedPair.split(',').map(Number);
   pairLbl.textContent=`A${i} → A${j} — ${acts[i-1]?.nm||''} → ${acts[j-1]?.nm||''}`;
   const vals=mData[selectedPair]||[0.5,0.5,0.5,0.5,0.5,0.5];
@@ -574,7 +630,7 @@ function applyF6(){
   const cell=document.getElementById(`dc_${i}_${j}`);
   if(cell){ cell.className='dsm-cell configured'; }
   computed.step3=null; simRes=null;
-  document.getElementById('s2-msg').textContent='✓ Coppia configurata';
+  document.getElementById('s2-msg').textContent='✓ Pair configured';
   document.getElementById('s2-msg').style.color='var(--green)';
 }
 
@@ -586,7 +642,7 @@ function resetF6(){
 }
 
 function calcStep2(){
-  if(mActive.size===0){ s2msg('Nessuna dipendenza attiva','warn'); return; }
+  if(mActive.size===0){ s2msg('No active dependencies','warn'); return; }
   // Fill defaults for unconfigured pairs
   mActive.forEach(key=>{ if(!mData[key]) mData[key]=[0.5,0.5,0.5,0.5,0.5,0.5]; });
   const n=computed.step1.n;
@@ -602,18 +658,18 @@ function calcStep2(){
     const [i,j]=key.split(',').map(Number);
     mData[key].forEach((mu,k)=>{
       if(mu>0){
-        params.push({type:'M',i,j,k,i0:i-1,j0:j-1,alpha:mu*NU,beta:(1-mu)*NU,name:`M_${i}_${j}_${FRAME6_LABELS[k].slice(0,3)}`});
+        params.push({type:'M',i,j,k,i0:i-1,j0:j-1,alpha:mu*getNu(),beta:(1-mu)*getNu(),name:`M_${i}_${j}_${FRAME6_LABELS[k].slice(0,3)}`});
       }
     });
   });
   const {sigMu}=computed.step1;
   sigMu.forEach((mu,i)=>{
-    params.push({type:'s',i:i+1,i0:i,alpha:mu*NU,beta:(1-mu)*NU,name:`sigma_${i+1}`});
+    params.push({type:'s',i:i+1,i0:i,alpha:mu*getNu(),beta:(1-mu)*getNu(),name:`sigma_${i+1}`});
   });
   computed.step1.M=M; computed.step1.params=params;
   const k=params.length;
-  s2msg(`✓ ${mActive.size} coppie — k=${k} parametri`,'ok');
-  setWizDone(2); setWizStatus(2, mActive.size+' coppie','ok');
+  s2msg(`✓ ${mActive.size} pairs — k=${k} parameters`,'ok');
+  setWizDone(2); setWizStatus(2, mActive.size+' pairs','ok');
   document.getElementById('s2-next').disabled=false;
   document.getElementById('ws3').classList.remove('locked');
   document.getElementById('ws4').classList.add('locked');
@@ -623,7 +679,7 @@ function s2msg(t,c){ const el=document.getElementById('s2-msg'); el.textContent=
 
 // ── STEP 3: CALIBRATION ──
 function calcStep3(){
-  if(!computed.step1?.M){ s3msg('Completa prima lo Step 2','warn'); return; }
+  if(!computed.step1?.M){ s3msg('Complete Step 2 first','warn'); return; }
   const {n,sigMu,wDur,M}=computed.step1;
   const VOf=propagate(M,sigMu,n);
   const {Phi,Ri,Rnet,valid}=computeResonance(VOf,M,wDur,n);
@@ -644,10 +700,10 @@ function renderCalibration(){
   const {n,VOf,Phi,Ri,Rnet,cats,valid}=computed.step3;
   const {sigMu,wDur}=computed.step1;
   // Summary cards
-  const nRes=cats.filter(c=>c==='Risonatore critico').length;
-  const nLat=cats.filter(c=>c==='Risonatore latente').length;
+  const nRes=cats.filter(c=>c==='Critical resonator').length;
+  const nLat=cats.filter(c=>c==='Latent resonator').length;
   document.getElementById('cal-summary').innerHTML=`
-    <div class="calc-card"><div class="calc-label">R_net nominale</div><div class="calc-value cyan">${Rnet.toFixed(4)}</div><div class="calc-note">${Rnet>1?'rete amplifica':'rete smorza'}</div></div>
+    <div class="calc-card"><div class="calc-label">R_net nominale</div><div class="calc-value cyan">${Rnet.toFixed(4)}</div><div class="calc-note">${Rnet>1?'network amplifies':'network attenuates'}</div></div>
     <div class="calc-card"><div class="calc-label">Attivit&agrave; valide</div><div class="calc-value">${valid}</div><div class="calc-note">su ${n} totali</div></div>
     <div class="calc-card"><div class="calc-label">Risonatori critici</div><div class="calc-value orange">${nRes}</div><div class="calc-note">Q-I: V↑ R↑</div></div>
     <div class="calc-card"><div class="calc-label">Risonatori latenti</div><div class="calc-value" style="color:var(--cyan)">${nLat}</div><div class="calc-note">Q-II: V↓ R↑</div></div>
@@ -657,13 +713,13 @@ function renderCalibration(){
   for(let i=0;i<n;i++){
     const ri=isNaN(Ri[i])?'n/d':Ri[i].toFixed(4);
     const cat=cats[i]; const clr=CAT_COLORS[cat]||'var(--muted)';
-    const catCls=cat==='Risonatore critico'?'cat-crit':cat==='Risonatore latente'?'cat-lat':cat==='Accumulatore'?'cat-acc':cat==='Sorgente (n/d)'?'cat-src':'cat-stab';
+    const catCls=cat==='Critical resonator'?'cat-crit':cat==='Latent resonator'?'cat-lat':cat==='Accumulator'?'cat-acc':cat==='Source (n/a)'?'cat-src':'cat-stab';
     rows+=`<tr>
       <td style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">A${i+1}</td>
       <td>${acts[i].nm}</td>
       <td style="text-align:right;font-family:'JetBrains Mono',monospace">${sigMu[i].toFixed(4)}</td>
-      <td style="text-align:right;font-family:'JetBrains Mono',monospace">${(sigMu[i]*NU).toFixed(3)}</td>
-      <td style="text-align:right;font-family:'JetBrains Mono',monospace">${((1-sigMu[i])*NU).toFixed(3)}</td>
+      <td style="text-align:right;font-family:'JetBrains Mono',monospace">${(sigMu[i]*getNu()).toFixed(3)}</td>
+      <td style="text-align:right;font-family:'JetBrains Mono',monospace">${((1-sigMu[i])*getNu()).toFixed(3)}</td>
       <td style="text-align:right;font-family:'JetBrains Mono',monospace;color:var(--cyan)">${VOf[i].toFixed(4)}</td>
       <td style="text-align:right;font-family:'JetBrains Mono',monospace">${Phi[i].toFixed(4)}</td>
       <td style="text-align:right;font-family:'JetBrains Mono',monospace;color:${isNaN(Ri[i])?'var(--muted)':Ri[i]>=1?'var(--orange)':'var(--text)'}">${ri}</td>
@@ -676,7 +732,7 @@ function renderCalibration(){
     <div style="background:var(--card);border:1px solid var(--b2);border-radius:3px;padding:10px 16px;display:inline-block">
       <span style="font-family:'JetBrains Mono',monospace;color:var(--muted)">R_net =&nbsp;</span>
       <span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--cyan)">${Rnet.toFixed(6)}</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">&nbsp;&middot;&nbsp;${Rnet>1?'rete amplifica variabilità (R_net > 1)':'rete smorza variabilità (R_net ≤ 1)'}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">&nbsp;&middot;&nbsp;${Rnet>1?'network amplifies variability (R_net > 1)':'network attenuates variability (R_net ≤ 1)'}</span>
     </div>`;
 }
 
@@ -705,13 +761,13 @@ function categorize(Ri,VOf,valid,n){
   const rVals=Array.from({length:n},(_,i)=>isNaN(Ri[i])?null:Ri[i]).filter(v=>v!==null);
   const vVals=Array.from({length:n},(_,i)=>isNaN(Ri[i])?null:VOf[i]).filter(v=>v!==null);
   const med=arr=>{const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
-  const thrR=med(rVals), thrV=med(vVals);
+  const thrR=med(rVals), thrV=med(vVals); // S1: thrR=median(Ri); thrV=median(V(Ofi)) — paper uses Ri=1 and median(V) as nominal thresholds
   return Array.from({length:n},(_,i)=>{
-    if(isNaN(Ri[i])) return 'Sorgente (n/d)';
-    if(VOf[i]>=thrV&&Ri[i]>=thrR) return 'Risonatore critico';
-    if(VOf[i]< thrV&&Ri[i]>=thrR) return 'Risonatore latente';
-    if(VOf[i]< thrV&&Ri[i]< thrR) return 'Attivita stabile';
-    return 'Accumulatore';
+    if(isNaN(Ri[i])) return 'Source (n/a)';
+    if(VOf[i]>=thrV&&Ri[i]>=thrR) return 'Critical resonator';
+    if(VOf[i]< thrV&&Ri[i]>=thrR) return 'Latent resonator';
+    if(VOf[i]< thrV&&Ri[i]< thrR) return 'Stable';
+    return 'Accumulator';
   });
 }
 
@@ -748,11 +804,11 @@ function drawRmap(VOf,Ri,cats,n){
   // ── quadrant labels (faint, corners) ────────────────────────────────────────
   ctx.font='9px JetBrains Mono,monospace';
   ctx.textAlign='right';
-  ctx.fillStyle='rgba(245,149,42,0.35)'; ctx.fillText('Risonatori critici', W-pad.r-5, pad.t+14);
-  ctx.fillStyle='rgba(74,158,255,0.35)'; ctx.fillText('Accumulatori',       W-pad.r-5, my+14);
+  ctx.fillStyle='rgba(245,149,42,0.35)'; ctx.fillText('Critical resonators', W-pad.r-5, pad.t+14);
+  ctx.fillStyle='rgba(74,158,255,0.35)'; ctx.fillText('Accumulators',       W-pad.r-5, my+14);
   ctx.textAlign='left';
-  ctx.fillStyle='rgba(34,211,238,0.35)'; ctx.fillText('Risonatori latenti', pad.l+5, pad.t+14);
-  ctx.fillStyle='rgba(120,120,130,0.35)';ctx.fillText('Stabili',            pad.l+5, my+14);
+  ctx.fillStyle='rgba(34,211,238,0.35)'; ctx.fillText('Latent resonators', pad.l+5, pad.t+14);
+  ctx.fillStyle='rgba(120,120,130,0.35)';ctx.fillText('Stable',            pad.l+5, my+14);
 
   // ── axes ────────────────────────────────────────────────────────────────────
   ctx.strokeStyle='#1e2840';ctx.lineWidth=1;
@@ -781,8 +837,8 @@ function drawRmap(VOf,Ri,cats,n){
   ctx.save();ctx.translate(13,H/2);ctx.rotate(-Math.PI/2);ctx.fillText('Rᵢ',0,0);ctx.restore();
 
   // ── compute dot positions ───────────────────────────────────────────────────
-  const clrs={'Risonatore critico':'#f5952a','Risonatore latente':'#22d3ee',
-               'Accumulatore':'#4a9eff','Attivita stabile':'#7a8aaa','Sorgente (n/d)':'#333'};
+  const clrs={'Critical resonator':'#f5952a','Latent resonator':'#22d3ee',
+               'Accumulator':'#4a9eff','Stable':'#7a8aaa','Source (n/a)':'#333'};
   const DOT=7;
   const dots=[];
   for(let i=0;i<n;i++){
@@ -932,7 +988,7 @@ function setSt(m){document.getElementById('stmsg').textContent=m;document.getEle
 function setPf(p){document.getElementById('pf').style.width=p+'%';}
 
 async function startRun(){
-  if(!computed.step3){setSt('Completa prima la calibrazione (Step 3)');return;}
+  if(!computed.step3){setSt('Complete calibration (Step 3) first');return;}
   const params=computed.step1.params, k=params.length;
   const Ne=+document.getElementById('ne-sel').value;
   document.getElementById('rb').disabled=true;
@@ -940,7 +996,7 @@ async function startRun(){
   document.getElementById('hdr-ne').textContent='Ne='+Ne;
   document.getElementById('exp-btn').disabled=true;
   stopFlag=false;setDot('run');setPf(0);
-  setSt('Generazione campioni A, B...');await tick();
+  setSt('Generating samples A, B...');await tick();
   const t0=Date.now();
   const A=[],B=[];
   for(let r=0;r<Ne;r++){A.push(sampleRow());B.push(sampleRow());}
@@ -961,7 +1017,7 @@ async function startRun(){
       setPf(pct);setSt('Param '+(j+1)+'/'+k+' — '+pct+'% — ETA '+eta.toFixed(0)+'s');await tick();
     }
   }
-  setSt('Calcolo indici Sobol...');await tick();
+  setSt('Computing Sobol indices...');await tick();
   const varY=variance2(YA,YB);
   const Si=new Float64Array(k),Ti=new Float64Array(k);
   if(varY>1e-12){
@@ -974,14 +1030,16 @@ async function startRun(){
   const elapsed=(Date.now()-t0)/1000;
   simRes={Si,Ti,varY,YA:Array.from(YA),Ne,elapsed,k};
   showResults(Si,Ti,varY,Array.from(YA),Ne,elapsed,k);
-  setDot('ok');setSt('Completato — '+(Ne*(2+k)).toLocaleString()+' eval — '+elapsed.toFixed(1)+'s');
+  setDot('ok');setSt('Completed — '+(Ne*(2+k)).toLocaleString()+' eval — '+elapsed.toFixed(1)+'s');
+  setWizDone(4);
   setWizStatus(4,'Ne='+Ne+' ✓','ok');
   document.getElementById('rb').disabled=false;
   document.getElementById('sb').classList.remove('vis');
   document.getElementById('exp-btn').disabled=false;
+  document.getElementById('exp-toolkit-btn').disabled = false;
   setPf(100);
 }
-function stopped(){setSt('Interrotto');setDot('warn');document.getElementById('rb').disabled=false;document.getElementById('sb').classList.remove('vis');}
+function stopped(){setSt('Stopped');setDot('warn');document.getElementById('rb').disabled=false;document.getElementById('sb').classList.remove('vis');}
 function stopRun(){stopFlag=true;}
 
 function showResults(Si,Ti,varY,YA,Ne,elapsed,k){
@@ -1019,7 +1077,7 @@ function buildSobolTable(Si,Ti,order,Ne,k){
   const params=computed.step1.params;
   const topN=Math.min(+document.getElementById('topn-sel').value||20,k);
   const maxTi=Math.max(...order.slice(0,topN).map(i=>Math.max(0,Ti[i])),0.001);
-  const warn=Ne<64?`<div class="warn-box">&#9888; Ne=${Ne} — indici orientativi. Raccomandato Ne≥64.</div>`:'';
+  const warn=Ne<64?`<div class="warn-box">&#9888; Ne=${Ne} — indicative indices. Recommended Ne≥64.</div>`:'';
   let rows='';
   for(let r=0;r<topN;r++){
     const idx=order[r],p=params[idx];
@@ -1032,10 +1090,10 @@ function buildSobolTable(Si,Ti,order,Ne,k){
   }
   document.getElementById('sobol-body').innerHTML=warn+
     `<div style="display:flex;gap:14px;margin-bottom:10px;font-size:10px;color:var(--muted)">
-    <span><span style="display:inline-block;width:10px;height:6px;background:var(--blue);vertical-align:middle;margin-right:4px;border-radius:2px"></span>Ti totale</span>
-    <span><span style="display:inline-block;width:10px;height:6px;background:var(--cyan);opacity:.6;vertical-align:middle;margin-right:4px;border-radius:2px"></span>Si primo ordine</span>
+    <span><span style="display:inline-block;width:10px;height:6px;background:var(--blue);vertical-align:middle;margin-right:4px;border-radius:2px"></span>Total Ti</span>
+    <span><span style="display:inline-block;width:10px;height:6px;background:var(--cyan);opacity:.6;vertical-align:middle;margin-right:4px;border-radius:2px"></span>First-order Si</span>
     <span style="margin-left:auto"><span style="color:var(--blue)">&bull; M</span>&nbsp;<span style="color:var(--orange)">&bull; σ</span>&nbsp;<span style="color:var(--muted)">&bull; K</span></span></div>
-    <table class="tbl"><thead><tr><th>#</th><th>Parametro</th><th>Coppia</th><th>Aspetto</th><th>Si</th><th>Ti</th><th>Barre</th></tr></thead><tbody>${rows}</tbody></table>
+    <table class="tbl"><thead><tr><th>#</th><th>Parametro</th><th>Pair</th><th>Aspect</th><th>Si</th><th>Ti</th><th>Barre</th></tr></thead><tbody>${rows}</tbody></table>
     <button class="exp-btn" onclick="exportJSON()" style="margin-top:12px">&#8595; Esporta JSON</button>`;
 }
 
@@ -1166,8 +1224,56 @@ function loadExample(name){
     // Auto-calc step2
     calcStep2();
     goStep(1);
-    setSt('Dataset UCAV B&E 2002 caricato — premi Calcola o avanza agli step');
+    setSt('UCAV dataset (Browning & Eppinger, 2002) loaded — press Compute or advance to next step');
   }
+}
+
+function exportToolkitJSON(){
+  if(!computed.step1) return;
+  const out = {
+    _schema: "dsm-fram-toolkit-v1",
+    _description: "Shared format for B-E, FEBS and FRAME-Q simulators",
+    _source: "FRAME-Q",
+    timestamp: new Date().toISOString(),
+    activities: acts.map((a,i)=>({
+      id: i+1, name: a.nm, bcv: a.bcv, mlv: a.mlv, wcv: a.wcv
+    })),
+    m_pairs: Object.fromEntries(Array.from(mActive).map(key=>[key,[...(mData[key]||[0,0,0,0,0,0])]])),
+    sobol_results: (computed.step3 && simRes) ? {
+      Rnet_nominal: +computed.step3.Rnet.toFixed(6),
+      P_Rnet_gt1: simRes.YA ? +(simRes.YA.filter(v=>v>1).length/simRes.YA.length).toFixed(4) : null,
+      nu_used: getNu()
+    } : null
+  };
+  const blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'toolkit_frameq_' + Date.now() + '.json';
+  a.click();
+}
+
+function importToolkitJSON(){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if(data._schema !== 'dsm-fram-toolkit-v1') throw new Error('Not a toolkit JSON file. Expected _schema: dsm-fram-toolkit-v1');
+        acts = data.activities.map(a=>({nm:a.name, bcv:a.bcv||a.bs||2, mlv:a.mlv||a.ms||3, wcv:a.wcv||a.ws||5}));
+        mActive = new Set(); mData = {};
+        Object.entries(data.m_pairs||{}).forEach(([key,vals])=>{ mActive.add(key); mData[key]=[...vals]; });
+        computed = {step1:null, step3:null}; simRes = null;
+        renderActs(); calcStep1(); calcStep2(); goStep(1);
+        document.getElementById('exp-toolkit-btn').disabled = false;
+        setSt('Toolkit JSON imported: ' + data.activities.length + ' activities, ' + Object.keys(data.m_pairs||{}).length + ' active pairs' + (data._source ? ' [from ' + data._source + ']' : ''));
+      } catch(err){ setSt('Import error: ' + err.message); alert('Import error: ' + err.message); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
 }
 
 function clearAll(){
@@ -1175,17 +1281,17 @@ function clearAll(){
   selectedPair=null; stopFlag=false;
   renderActs();
   document.getElementById('acts-body').innerHTML='';
-  document.getElementById('n-label').textContent='0 attività';
+  document.getElementById('n-label').textContent='0 activities';
   document.getElementById('hdr-n').textContent='n = —';
   document.getElementById('hdr-k').textContent='k = —';
   document.getElementById('hdr-ne').textContent='Ne = —';
   // Reset messaggi di stato
-  setSt('Pronto');
+  setSt('Ready');
   setDot('idle');
   setPf(0);
   // Reset messaggi step
   const msgs=['s1-msg','s2-msg','s3-msg','stmsg'];
-  msgs.forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=id==='stmsg'?'Pronto':'';}});
+  msgs.forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=id==='stmsg'?'Ready':'';}});
   // Reset metrics strip Step 4
   ['m-rnet','m-vary','m-ne','m-eval','m-top','m-time'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.textContent='—';
@@ -1193,8 +1299,8 @@ function clearAll(){
   document.getElementById('met-rnet').className='met';
   document.getElementById('m-rnet-ref').textContent='nominale —';
   // Reset overview Step 4
-  document.getElementById('ov-grid').innerHTML='<div class="ov-card" style="grid-column:1/-1"><div style="font-size:11px;color:var(--muted);line-height:1.8">Configura Ne e premi RUN per avviare la simulazione Sobol.</div></div>';
-  document.getElementById('sobol-body').innerHTML='<span style="color:var(--muted);font-size:11px">Nessun risultato.</span>';
+  document.getElementById('ov-grid').innerHTML='<div class="ov-card" style="grid-column:1/-1"><div style="font-size:11px;color:var(--muted);line-height:1.8">Configure Ne and press RUN to start the Sobol simulation.</div></div>';
+  document.getElementById('sobol-body').innerHTML='<span style="color:var(--muted);font-size:11px">No results.</span>';
   // Reset pulsanti Step 4
   document.getElementById('rb').disabled=true;
   document.getElementById('sb').classList.remove('vis');
@@ -1245,7 +1351,7 @@ window.onload=()=>{
   addActivity(); addActivity(); addActivity();
   acts=[];
   document.getElementById('acts-body').innerHTML='';
-  document.getElementById('n-label').textContent='0 attività';
+  document.getElementById('n-label').textContent='0 activities';
 };
 </script>
 </body>

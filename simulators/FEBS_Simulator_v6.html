@@ -302,6 +302,8 @@ canvas{display:block;max-width:100%}
       <div class="export-row">
         <button class="btn sm" onclick="expCSV()">&#8595; CSV</button>
         <button class="btn sm" onclick="expJSON()">&#8595; JSON</button>
+        <button class="btn sm" onclick="expToolkitJSON()" style="background:#00c9a7;color:#0d0d0d">&#8595; Toolkit JSON</button>
+        <label style="display:inline-flex"><button class="btn sm" onclick="impToolkitJSON()" style="border:1px solid #00c9a7;background:transparent;color:#00c9a7">&#8593; Import Toolkit</button></label>
         <button class="btn sm" onclick="expMIT()">&#8595; MIT format</button>
         <button class="btn sm" onclick="fillLower()">&#9661; Lower triangle only</button>
         <button class="btn sm" onclick="dsmClear()">&#10005; Clear</button>
@@ -536,6 +538,12 @@ canvas{display:block;max-width:100%}
     <div class="opane on" id="op-irr">
       <div class="sh">FUNCTIONAL RESONANCE RISK INDEX</div>
       <div id="irr-cont"></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;padding:0 2px">
+        <button class="btn sm" onclick="expIRR()" style="background:#00c9a7;color:#0d0d0d">&#8595; Export IRR + Toolkit JSON</button>
+        <button class="btn sm" onclick="expJSON()">&#8595; DSM JSON</button>
+        <button class="btn sm" onclick="expCSV()">&#8595; DSM CSV</button>
+        <button class="btn sm" onclick="expMIT()">&#8595; MIT format</button>
+      </div>
     </div>
     <div class="opane" id="op-schedule">
       <div class="sh">SCHEDULE DISTRIBUTION</div>
@@ -976,6 +984,96 @@ function dsmClear(){
   tensorM=Array.from({length:N},()=>Array.from({length:N},()=>[0,0,0,0,0,0]));
   impactM=Array.from({length:N},()=>new Array(N).fill(0));
   renderDSM();
+}
+
+function expToolkitJSON(){
+  const pairs = {};
+  for(let i=1;i<=N;i++) for(let j=1;j<=N;j++){
+    if(i===j) continue;
+    if(!dsmB[i-1]||!dsmB[i-1][j-1]) continue;
+    const key = i+','+j;
+    // Read directly from tensorM (the live FRAME-6 data)
+    const mVals = (tensorM[i-1] && tensorM[i-1][j-1] && !tensorM[i-1][j-1].every(v=>v===0))
+      ? [...tensorM[i-1][j-1]]
+      : [0.5,0.5,0.5,0.5,0.5,0.5];
+    pairs[key] = mVals;
+  }
+  const out = {
+    _schema: "dsm-fram-toolkit-v1",
+    _description: "Shared format for B-E, FEBS and FRAME-Q simulators",
+    _source: "FEBS",
+    timestamp: new Date().toISOString(),
+    activities: fns.map((f,i)=>({
+      id: i+1, name: f.nm,
+      bcv: f.bcv||f.bv||1, mlv: f.mlv||f.mv||2, wcv: f.wcv||f.wv||3
+    })),
+    m_pairs: pairs
+  };
+  const blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'toolkit_febs_' + Date.now() + '.json';
+  a.click();
+}
+
+function impToolkitJSON(){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if(data._schema !== 'dsm-fram-toolkit-v1') throw new Error('Not a toolkit JSON file');
+        // Load activities into FEBS
+        N = data.activities.length;
+        fns = data.activities.map(a=>({
+          nm: a.name,
+          bcv: a.bcv||a.bs||1, mlv: a.mlv||a.ms||2, wcv: a.wcv||a.ws||3
+        }));
+        // Store m_pairs for reference
+        window.frmData = data.m_pairs || {};
+        // Rebuild binary DSM from m_pairs
+        dsmB = Array.from({length:N},()=>Array(N).fill(0));
+        Object.keys(window.frmData).forEach(key=>{
+          const [i,j] = key.split(',').map(Number);
+          if(i>=1&&i<=N&&j>=1&&j<=N) dsmB[i-1][j-1] = 1;
+        });
+        renderAll();
+        alert('Toolkit JSON imported: ' + N + ' activities from ' + (data._source||'unknown source'));
+      } catch(err){ alert('Import error: ' + err.message); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+function expIRR(){
+  if(!febs_IRR||!febs_IRR.length){alert('Run simulation first');return;}
+  const rows = febs_IRR.map((irr,i)=>({
+    id:'F'+(i+1),
+    name: fns[i]?.nm||'F'+(i+1),
+    IRR: +irr.toFixed(6),
+    norm: febs_norms ? +(febs_norms[i+','+i]||0).toFixed(4) : null
+  })).sort((a,b)=>b.IRR-a.IRR);
+  const out = {
+    _schema: "dsm-fram-toolkit-v1",
+    _source: "FEBS",
+    _type: "IRR_results",
+    timestamp: new Date().toISOString(),
+    activities: fns.map((f,i)=>({id:i+1, name:f.nm, bcv:f.bcv||f.bs||1, mlv:f.mlv||f.ms||2, wcv:f.wcv||f.ws||3})),
+    m_pairs: (()=>{const p={};for(let i=1;i<=N;i++)for(let j=1;j<=N;j++){if(i===j)continue;if(!dsmB[i-1]||!dsmB[i-1][j-1])continue;p[i+','+j]=[...tensorM[i-1][j-1]];}return p;})(),
+    irr_results: rows,
+    sim_stats: simS.length ? {
+      n_runs: simS.length,
+      E_S: +(simS.reduce((a,b)=>a+b,0)/simS.length).toFixed(4),
+      E_C: simC.length ? +(simC.reduce((a,b)=>a+b,0)/simC.length).toFixed(4) : null
+    } : null
+  };
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='febs_irr_results_'+Date.now()+'.json'; a.click();
 }
 
 function expCSV(){

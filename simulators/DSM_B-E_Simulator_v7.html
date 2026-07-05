@@ -1,49 +1,9 @@
-<!--
-  B-E DSM Simulator
-  A browser-based reimplementation of the Monte Carlo process-architecture
-  cost/schedule risk model described in:
-    T. R. Browning and S. D. Eppinger, "Modeling Impacts of Process
-    Architecture on Cost and Schedule Risk in Product Development,"
-    IEEE Transactions on Engineering Management, vol. 49, no. 4,
-    pp. 428-442, Nov. 2002.
-  and cross-validated against:
-    T. R. Browning, "Modeling and Analyzing Cost, Schedule, and
-    Performance in Complex System Product Development," Ph.D.
-    dissertation, Massachusetts Institute of Technology, 1998.
-
-  This is an independent, unofficial reimplementation created for
-  educational and research purposes. It is not affiliated with, and has
-  not been reviewed or endorsed by, the original authors.
-
-  Copyright (c) 2026 Daniele Grazzini, Independent Researcher
-
-  MIT License
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the
-  "Software"), to deal in the Software without restriction, including
-  without limitation the rights to use, copy, modify, merge, publish,
-  distribute, sublicense, and/or sell copies of the Software, and to
-  permit persons to whom the Software is furnished to do so, subject to
-  the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>B-E DSM Simulator</title>
+<title>B-E DSM Simulator v7</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 :root{
@@ -116,8 +76,6 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 .ex:hover{color:var(--text);border-color:var(--muted);}
 .ex.ucav{color:var(--orange);border-color:#2a1200;}
 .ex.mit{color:var(--green);border-color:#0a2010;}
-.ex.new{color:var(--text);border-color:var(--muted);font-weight:700;}
-.ex.new:hover{color:var(--red);border-color:var(--red);}
 
 table.at{border-collapse:collapse;width:100%;}
 table.at th{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:5px 4px;border-bottom:2px solid var(--b2);text-align:center;white-space:nowrap;}
@@ -255,7 +213,7 @@ table.rtt td.best{color:var(--green);font-weight:700;}
 <div class="hdr">
   <div class="hdr-brand">
     <div class="hdr-brand-name">B-E DSM SIMULATOR</div>
-    <div class="hdr-brand-sub">IEEE TEM 49(4) 2002 · by Daniele Grazzini</div>
+    <div class="hdr-brand-sub">IEEE TEM 49(4) 2002 · v7.1</div>
   </div>
   <div class="hdr-mid">
     <div class="hdr-proj"><input id="proj-name" value="My Project" spellcheck="false"></div>
@@ -265,6 +223,8 @@ table.rtt td.best{color:var(--green);font-weight:700;}
   <div class="hdr-right">
     <button class="hbtn save" onclick="exportJSON()">↓ Export JSON</button>
     <button class="hbtn" onclick="importJSON()">↑ Import JSON</button>
+    <button class="hbtn" onclick="exportToolkitJSON()" style="background:#00c9a7;color:#0d0d0d">↓ Toolkit JSON</button>
+    <button class="hbtn" onclick="importToolkitJSON()" style="border:1px solid #00c9a7;background:transparent;color:#00c9a7">↑ Import Toolkit</button>
     <input type="file" id="file-import" accept=".json" style="display:none" onchange="handleImport(event)">
   </div>
 </div>
@@ -284,27 +244,27 @@ table.rtt td.best{color:var(--green);font-weight:700;}
     <!-- SIDEBAR: sim params + RUN -->
     <div class="inp-sidebar">
       <div class="inp-sidebar-scroll">
-        <div class="slabel">Parameters</div>
+        <div class="slabel">Parametri</div>
 
         <div class="param-row"><span class="param-label">Max run r</span><input class="param-input" id="rmax" type="number" value="1100" min="50" max="5000"></div>
         <div class="param-row"><span class="param-label">Batch b</span><input class="param-input" id="batch" type="number" value="100"></div>
-        <div class="param-row"><span class="param-label">α stability</span><input class="param-input" id="alpha" type="number" value="0.01" step="0.001"></div>
+        <div class="param-row"><span class="param-label">α stabilità</span><input class="param-input" id="alpha" type="number" value="0.01" step="0.001"></div>
         <div class="param-row"><span class="param-label">ρ corr C-S</span><input class="param-input" id="rho" type="number" value="0.9" step="0.05"></div>
         <div class="param-row"><span class="param-label">Target T_C ($k)</span><input class="param-input" id="tc" type="number" value="630"></div>
         <div class="param-row"><span class="param-label">Target T_S (gg)</span><input class="param-input" id="ts" type="number" value="130"></div>
         <div class="param-row"><span class="param-label">κ_C</span><input class="param-input" id="kc" type="number" value="1" step="0.1"></div>
         <div class="param-row"><span class="param-label">κ_S</span><input class="param-input" id="ks" type="number" value="1" step="0.1"></div>
         <div class="param-row"><span class="param-label">LHS</span><button class="tog on" id="lb" onclick="togOpt('lhs')">ON</button></div>
-        <div class="param-row"><span class="param-label">Stability</span><button class="tog on" id="sb" onclick="togOpt('stab')">ON</button></div>
+        <div class="param-row"><span class="param-label">Stabilità</span><button class="tog on" id="sb" onclick="togOpt('stab')">ON</button></div>
 
         <div class="divider"></div>
-        <div class="slabel">Summary</div>
+        <div class="slabel">Riepilogo</div>
         <div id="sim-summary"></div>
       </div>
 
       <div class="inp-sidebar-foot">
         <div class="arch-label" id="sim-arch-label">—</div>
-        <button class="btn-run" id="rb" onclick="runSim()">▶  RUN SIMULATION</button>
+        <button class="btn-run" id="rb" onclick="runSim()">▶  RUN SIMULAZIONE</button>
         <div class="prog"><div class="pf" id="pf" style="width:0%"></div></div>
       </div>
     </div>
@@ -312,17 +272,17 @@ table.rtt td.best{color:var(--green);font-weight:700;}
     <!-- CONTENT AREA -->
     <div class="inp-content">
       <div class="subtabs">
-        <div class="stab on" id="st-acts" onclick="showSTab('acts')">Activities</div>
-        <div class="stab" id="st-dsm" onclick="showSTab('dsm')">Binary DSM</div>
-        <div class="stab" id="st-prob" onclick="showSTab('prob')">Probability</div>
-        <div class="stab" id="st-imp" onclick="showSTab('imp')">Impact</div>
-        <div class="stab" id="st-arch" onclick="showSTab('arch')">Architectures</div>
+        <div class="stab on" id="st-acts" onclick="showSTab('acts')">Attività</div>
+        <div class="stab" id="st-dsm" onclick="showSTab('dsm')">DSM Binaria</div>
+        <div class="stab" id="st-prob" onclick="showSTab('prob')">Probabilità</div>
+        <div class="stab" id="st-imp" onclick="showSTab('imp')">Impatto</div>
+        <div class="stab" id="st-arch" onclick="showSTab('arch')">Architetture</div>
       </div>
 
-      <!-- ACTIVITIES -->
+      <!-- ATTIVITÀ -->
       <div class="subpane on" id="sp-acts">
         <div class="acts-toolbar">
-          <div class="slabel" style="margin:0">Activities</div>
+          <div class="slabel" style="margin:0">Attività</div>
           <div class="n-ctrl">
             <button class="nb" onclick="rmAct()">−</button>
             <div class="nv" id="nv">14</div>
@@ -330,7 +290,6 @@ table.rtt td.best{color:var(--green);font-weight:700;}
             <span style="font-size:11px;color:var(--muted);margin-left:4px;">(2–20)</span>
           </div>
           <div class="ex-group">
-            <button class="ex new" onclick="newCase()">+ New Case</button>
             <button class="ex ucav" onclick="loadEx('ucav')">UCAV 2002</button>
             <button class="ex mit" onclick="loadEx('mit')">MIT v2.1</button>
             <button class="ex" onclick="loadEx('air')">Airport</button>
@@ -341,9 +300,9 @@ table.rtt td.best{color:var(--green);font-weight:700;}
             <thead>
               <tr>
                 <th></th>
-                <th class="left">Name</th>
-                <th colspan="3" style="color:var(--blue);font-size:10px;">Duration (days)</th>
-                <th colspan="3" style="color:var(--orange);font-size:10px;">Cost ($k)</th>
+                <th class="left">Nome</th>
+                <th colspan="3" style="color:var(--blue);font-size:10px;">Durata (giorni)</th>
+                <th colspan="3" style="color:var(--orange);font-size:10px;">Costo ($k)</th>
                 <th style="color:var(--purple);font-size:10px;">IC</th>
               </tr>
               <tr>
@@ -361,17 +320,17 @@ table.rtt td.best{color:var(--green);font-weight:700;}
       <!-- DSM BINARIA -->
       <div class="subpane" id="sp-dsm">
         <div class="mx-toolbar">
-          <div class="slabel" style="margin:0">Binary DSM</div>
-          <span class="mx-help">1 = dependency declared · governs prob and impact · TAB/arrows to navigate</span>
+          <div class="slabel" style="margin:0">DSM Binaria</div>
+          <span class="mx-help">1 = dipendenza dichiarata · governa prob e impatto · TAB/frecce per navigare</span>
         </div>
         <div class="mx-wrap" id="dsm-wrap"></div>
       </div>
 
-      <!-- PROBABILITY -->
+      <!-- PROBABILITÀ -->
       <div class="subpane" id="sp-prob">
         <div class="mx-toolbar">
-          <div class="slabel" style="margin:0">Probability DSM<sub>ij1</sub></div>
-          <span class="mx-help">P(rework from j→i) · [0, 1] · grey cells = no DSM dependency</span>
+          <div class="slabel" style="margin:0">Probabilità DSM<sub>ij1</sub></div>
+          <span class="mx-help">P(rework da j→i) · [0, 1] · celle grigie = nessuna dipendenza DSM</span>
         </div>
         <div class="mx-wrap" id="prob-wrap"></div>
       </div>
@@ -380,29 +339,29 @@ table.rtt td.best{color:var(--green);font-weight:700;}
       <div class="subpane" id="sp-imp">
         <div class="mx-toolbar">
           <div class="slabel" style="margin:0">Impatto DSM<sub>ij2</sub></div>
-          <span class="mx-help">Fraction to redo · [0, 1] · grey cells = no DSM dependency</span>
+          <span class="mx-help">Frazione da rifare · [0, 1] · celle grigie = nessuna dipendenza DSM</span>
         </div>
         <div class="mx-wrap" id="imp-wrap"></div>
       </div>
 
       <!-- ARCHITETTURE -->
       <div class="subpane" id="sp-arch">
-        <div class="slabel">Saved Architectures</div>
+        <div class="slabel">Architetture Salvate</div>
         <div class="arch-list" id="arch-list"></div>
 
         <div class="new-arch-box">
-          <div class="slabel" style="margin-bottom:12px;">+ New Architecture (Partitioning)</div>
+          <div class="slabel" style="margin-bottom:12px;">+ Nuova Architettura (Partitioning)</div>
           <div class="na-row">
-            <span class="na-lbl">Name</span>
-            <input class="na-inp" id="na-name" placeholder="E.g.: Arch. 2 — Act13 moved earlier">
+            <span class="na-lbl">Nome</span>
+            <input class="na-inp" id="na-name" placeholder="Es: Arch. 2 — Act13 anticipata">
           </div>
           <div class="na-row">
-            <span class="na-lbl">Vector V</span>
-            <input class="na-inp" id="na-vec" placeholder="E.g.: 1,2,3,13,4,5,6,7,8,9,10,11,12,14">
+            <span class="na-lbl">Vettore V</span>
+            <input class="na-inp" id="na-vec" placeholder="Es: 1,2,3,13,4,5,6,7,8,9,10,11,12,14">
           </div>
           <div class="na-btns">
-            <button class="na-add" onclick="addArch()">Save Architecture</button>
-            <button class="na-secondary" onclick="saveBaselineArch()">Save Baseline (current order)</button>
+            <button class="na-add" onclick="addArch()">Salva Architettura</button>
+            <button class="na-secondary" onclick="saveBaselineArch()">Salva Baseline (ordine corrente)</button>
           </div>
           <div class="na-err" id="na-err"></div>
         </div>
@@ -419,8 +378,8 @@ table.rtt td.best{color:var(--green);font-weight:700;}
       <div class="metrics-strip">
         <div class="met"><div class="met-label">E[C] $k</div><div class="met-value" id="m-ec">—</div><div class="met-ref">paper 637</div></div>
         <div class="met"><div class="met-label">σ_C $k</div><div class="met-value" id="m-sc">—</div><div class="met-ref">paper 63</div></div>
-        <div class="met"><div class="met-label">E[S] days</div><div class="met-value" id="m-es">—</div><div class="met-ref">paper 138</div></div>
-        <div class="met"><div class="met-label">σ_S days</div><div class="met-value" id="m-ss">—</div><div class="met-ref">paper 14</div></div>
+        <div class="met"><div class="met-label">E[S] giorni</div><div class="met-value" id="m-es">—</div><div class="met-ref">paper 138</div></div>
+        <div class="met"><div class="met-label">σ_S giorni</div><div class="met-value" id="m-ss">—</div><div class="met-ref">paper 14</div></div>
         <div class="met"><div class="met-label">γ_C skew</div><div class="met-value" id="m-gc">—</div><div class="met-ref">paper 0.58</div></div>
         <div class="met"><div class="met-label">γ_S skew</div><div class="met-value" id="m-gs">—</div><div class="met-ref">paper 0.55</div></div>
         <div class="met"><div class="met-label">P_C</div><div class="met-value" id="m-pc">—</div><div class="met-ref">paper 0.51</div></div>
@@ -438,7 +397,7 @@ table.rtt td.best{color:var(--green);font-weight:700;}
         <div class="ostab" id="ot-joint" onclick="showOTab('joint')">Joint C-S</div>
         <div class="ostab" id="ot-crit" onclick="showOTab('crit')">Criticality</div>
         <div class="ostab" id="ot-gantt" onclick="showOTab('gantt')">Single Run</div>
-        <div class="ostab" id="ot-compare" onclick="showOTab('compare')">Compare Arch.</div>
+        <div class="ostab" id="ot-compare" onclick="showOTab('compare')">Confronto Arch.</div>
       </div>
 
       <!-- OUTPUT CONTENT -->
@@ -447,44 +406,44 @@ table.rtt td.best{color:var(--green);font-weight:700;}
         <div class="opane on" id="op-overview">
           <div class="ov-grid">
             <div class="ov-card">
-              <div class="ov-title">Current Input</div>
-              <div id="ov-inputs"><p style="color:var(--muted);font-size:12px;">Load an example or configure activities in the INPUT tab.</p></div>
+              <div class="ov-title">Input Corrente</div>
+              <div id="ov-inputs"><p style="color:var(--muted);font-size:12px;">Carica un esempio o configura le attività nel tab INPUT.</p></div>
             </div>
             <div class="ov-card">
               <div class="ov-title">Output vs Paper</div>
-              <div id="ov-outputs"><p style="color:var(--muted);font-size:12px;">Run the simulation (INPUT tab → RUN) to see results.</p></div>
+              <div id="ov-outputs"><p style="color:var(--muted);font-size:12px;">Esegui la simulazione (tab INPUT → RUN) per vedere i risultati.</p></div>
             </div>
           </div>
         </div>
 
         <div class="opane" id="op-sched">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Schedule distribution — histogram + CDF (paper Fig. 8 bottom)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Schedule distribution — istogramma + CDF (paper Fig. 8 bottom)</div>
           <canvas id="cv-s"></canvas>
         </div>
 
         <div class="opane" id="op-cost">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Cost distribution — histogram + CDF (paper Fig. 8 top)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Cost distribution — istogramma + CDF (paper Fig. 8 top)</div>
           <canvas id="cv-c"></canvas>
         </div>
 
         <div class="opane" id="op-joint">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Joint Cost-Schedule scatter (paper Fig. 9) — colored by overrun quadrant</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Joint Cost-Schedule scatter (paper Fig. 9) — colorato per quadrante overrun</div>
           <canvas id="cv-j"></canvas>
         </div>
 
         <div class="opane" id="op-crit">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Interface Criticality — analytical (paper eq.10, Fig. 7)</div>
-          <div id="crit-c"><p style="color:var(--muted);">Run the simulation to calculate.</p></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Interface Criticality — analitica (paper eq.10, Fig. 7)</div>
+          <div id="crit-c"><p style="color:var(--muted);">Esegui la simulazione per calcolare.</p></div>
         </div>
 
         <div class="opane" id="op-gantt">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Work vector W — single sample run (paper Fig. 5)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Work vector W — singolo run campione (paper Fig. 5)</div>
           <canvas id="cv-g"></canvas>
         </div>
 
         <div class="opane" id="op-compare">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Architecture comparison — Table V style from the paper</div>
-          <div id="compare-c"><p style="color:var(--muted);">Simulate multiple architectures to compare them here.</p></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Confronto architetture — stile Table V del paper</div>
+          <div id="compare-c"><p style="color:var(--muted);">Simula più architetture per confrontarle qui.</p></div>
         </div>
 
       </div><!-- out-content -->
@@ -496,8 +455,7 @@ table.rtt td.best{color:var(--green);font-weight:700;}
 <!-- STATUS BAR -->
 <div class="statusbar">
   <div class="dot" id="dot"></div>
-  <span id="stxt">Ready — load UCAV 2002 (Activities tab) and press RUN</span>
-  <span style="margin-left:auto;color:var(--dim);">© 2026 Daniele Grazzini, Independent Researcher · MIT License</span>
+  <span id="stxt">Pronto — carica UCAV 2002 (tab Attività) e premi RUN</span>
 </div>
 
 <script>
@@ -560,38 +518,15 @@ function erf(x){const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152
 function corrU(us,uc,rho){return phi(rho*phiInv(us)+Math.sqrt(1-rho*rho)*phiInv(uc));}
 function lhs(n,k){const c=[];for(let j=0;j<k;j++){const col=Array.from({length:n},(_,i)=>(i+Math.random())/n);for(let i=col.length-1;i>0;i--){const j2=Math.floor(Math.random()*(i+1));[col[i],col[j2]]=[col[j2],col[i]];}c.push(col);}return Array.from({length:n},(_,i)=>c.map(col=>col[i]));}
 function skew(v,m,s){return s?v.reduce((a,x)=>a+(x-m)**3,0)/(v.length*s**3):0;}
-// Stability criterion Eq. (8)-(9) from the paper: compares the CUMULATIVE
-// mean/variance computed over all r runs against that computed over the
-// first r-b runs (i.e., before the last batch), not two isolated consecutive batches.
-function stable(S,b,a){
-  const r=S.length;if(r<2*b)return false;
-  const rb=r-b;
-  const prev=S.slice(0,rb); // first r-b runs (state "one batch ago")
-  const mr=S.reduce((s,x)=>s+x,0)/r;           // E[X_r]  (cumulative over all r runs)
-  const mp=prev.reduce((s,x)=>s+x,0)/rb;       // E[X_{r-b}] (cumulative over the first r-b runs)
-  if(!mp||Math.abs(mr-mp)/Math.abs(mp)>=a)return false;
-  const vr=S.reduce((s,x)=>s+(x-mr)**2,0)/r;   // Var[X_r]
-  const vp=prev.reduce((s,x)=>s+(x-mp)**2,0)/rb;// Var[X_{r-b}]
-  return !vp||Math.abs(vr-vp)/vp<a;
-}
+function stable(S,b,a){const r=S.length;if(r<2*b)return false;const rc=S.slice(-b),pv=S.slice(-2*b,-b);const mr=rc.reduce((a,x)=>a+x,0)/b,mp=pv.reduce((a,x)=>a+x,0)/b;if(!mp||Math.abs(mr-mp)/mp>=a)return false;const vr=rc.reduce((a,x)=>a+(x-mr)**2,0)/b,vp=pv.reduce((a,x)=>a+(x-mp)**2,0)/b;return !vp||Math.abs(vr-vp)/vp<a;}
 
 function bandingWith(W,WN,pm,n){
-  // Per Browning & Eppinger (2002), Table IV, work policy point 3:
-  // "only adjacent activities in V may work concurrently" (footnote 8:
-  // "adjacent when ignoring completed activities"). The scan must STOP
-  // permanently as soon as an unfinished, dependency-blocked activity is
-  // found — it must NOT skip past it to test further downstream activities,
-  // or non-contiguous activities could become simultaneously active.
   for(let i=0;i<n;i++)WN[i]=false;
   let f=-1;
   for(let i=0;i<n;i++){if(W[i]>0){WN[i]=true;f=i;break;}}
   if(f<0)return;
   for(let j=f+1;j<n;j++){
-    if(W[j]<=0)continue; // finished activity: ignored, chain continues past it
-    let dep=false;
-    for(let k=f;k<j;k++){if(pm[j][k]>0&&W[k]>0){dep=true;break;}}
-    if(dep)break; // blocked: active set is now finalized, stop scanning further
-    WN[j]=true;
+    if(W[j]>0){let ok=true;for(let k=f;k<j;k++){if(pm[j][k]>0&&W[k]>0){ok=false;break;}}if(ok)WN[j]=true;}
   }
 }
 
@@ -617,13 +552,7 @@ function singleRunWith(u_s,u_c,rho,rec,n,actsA,pm,im){
       for(let j=0;j<ci;j++){
         if(pm[j][ci]>0&&Math.random()<=pm[j][ci]){
           W[j]+=im[j][ci]*actsA[j].ic;if(W[j]>1)W[j]=0.9;
-          // Per Browning's PhD dissertation (MIT 1998, Ch.6 §3.3 and §3.5):
-          // "Rework in an upstream activity can also cause second-order rework in
-          // INTERIM activities (activities between the upstream, reworked activity
-          // and the downstream activity that caused the rework)". The scope is therefore
-          // limited to the interim activities (j, ci) and does NOT extend
-          // beyond activity ci that triggered the iteration.
-          for(let k=j+1;k<ci;k++){
+          for(let k=j+1;k<n;k++){
             if(pm[k][j]>0&&Math.random()<=pm[k][j]){
               if(W[k]===1)W[k]=2;W[k]+=im[k][j]*actsA[k].ic;if(W[k]>=2)W[k]=1;if(W[k]>1)W[k]=0.9;
             }
@@ -748,17 +677,17 @@ function updateSummary(){
   const sumEC=acts.reduce((a,x)=>a+(x.bc+x.mc+x.wc)/3,0);
   const nz=probM.flat().filter(v=>v>0).length;
   const nd=dsmBin.flat().filter(v=>v>0).length;
-  const rows=[['n activities',N],['DSM dependencies',nd],['Σ E[S_i]',sumES.toFixed(1)+' d'],['Σ E[C_i]','$'+sumEC.toFixed(0)+'k'],['Entry prob>0',nz]];
+  const rows=[['n attività',N],['Dipendenze DSM',nd],['Σ E[S_i]',sumES.toFixed(1)+' d'],['Σ E[C_i]','$'+sumEC.toFixed(0)+'k'],['Entry prob>0',nz]];
   document.getElementById('sim-summary').innerHTML=rows.map(([k,v])=>`<div class="summary-row"><span class="sk">${k}</span><span class="sv">${v}</span></div>`).join('');
   document.getElementById('ov-inputs').innerHTML=
-    ioRow('n activities',N)+ioRow('Sampling',useLHS?'LHS':'Random')+
+    ioRow('n attività',N)+ioRow('Campionamento',useLHS?'LHS':'Random')+
     ioRow('ρ C-S',document.getElementById('rho').value)+
-    ioRow('DSM dependencies',nd)+ioRow('Prob entries>0',nz)+
+    ioRow('Dipendenze DSM',nd)+ioRow('Entry prob>0',nz)+
     `<div style="margin-top:6px;padding-top:5px;border-top:1px solid var(--b1);">`+
     ioRow('Σ E[S_i]',sumES.toFixed(1)+' d')+ioRow('Σ E[C_i]','$'+sumEC.toFixed(0)+'k')+`</div>`;
   if(architectures.length>0){
     const a=architectures[currentArchIdx];
-    document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;
+    document.getElementById('sim-arch-label').textContent='Arch. corrente: '+a.name;
     document.getElementById('hdr-arch').textContent=a.name;
   }
 }
@@ -770,41 +699,41 @@ function ioRowOut(k,v,ref){const rs=ref?`<span style="color:var(--muted);font-si
 function saveBaselineArch(){
   const name=document.getElementById('na-name').value.trim()||('Arch. '+(architectures.length+1)+' baseline');
   architectures.push({name,V:Array.from({length:N},(_,i)=>i+1),acts_seq:acts.map(a=>({...a})),prob_seq:probM.map(r=>[...r]),imp_seq:impM.map(r=>[...r]),results:null});
-  currentArchIdx=architectures.length-1;renderArchList();setStatus('Saved: '+name);
+  currentArchIdx=architectures.length-1;renderArchList();setStatus('Salvata: '+name);
   document.getElementById('na-name').value='';
 }
 function addArch(){
   const name=document.getElementById('na-name').value.trim();
   const vecStr=document.getElementById('na-vec').value.trim();
   const errEl=document.getElementById('na-err');errEl.textContent='';
-  if(!name){errEl.textContent='Enter a name.';return;}
-  if(!vecStr){errEl.textContent='Enter vector V.';return;}
+  if(!name){errEl.textContent='Inserisci un nome.';return;}
+  if(!vecStr){errEl.textContent='Inserisci il vettore V.';return;}
   const V=vecStr.split(',').map(s=>parseInt(s.trim()));
-  if(V.length!==N||V.some(isNaN)){errEl.textContent=`V must have ${N} integers.`;return;}
+  if(V.length!==N||V.some(isNaN)){errEl.textContent=`V deve avere ${N} interi.`;return;}
   const sorted=[...V].sort((a,b)=>a-b);
-  for(let i=0;i<N;i++){if(sorted[i]!==i+1){errEl.textContent='V must contain 1…'+N+' with no duplicates.';return;}}
+  for(let i=0;i<N;i++){if(sorted[i]!==i+1){errEl.textContent='V deve contenere 1…'+N+' senza duplicati.';return;}}
   architectures.push({name,V,acts_seq:V.map(v=>({...acts[v-1]})),prob_seq:V.map(vi=>V.map(vj=>probM[vi-1][vj-1])),imp_seq:V.map(vi=>V.map(vj=>impM[vi-1][vj-1])),results:null});
-  currentArchIdx=architectures.length-1;renderArchList();setStatus('Added: '+name);
+  currentArchIdx=architectures.length-1;renderArchList();setStatus('Aggiunta: '+name);
   document.getElementById('na-name').value='';document.getElementById('na-vec').value='';
 }
 function renderArchList(){
   const el=document.getElementById('arch-list');
-  if(!architectures.length){el.innerHTML='<p style="color:var(--muted);font-size:12px;">No architectures yet. Save the baseline to start.</p>';return;}
+  if(!architectures.length){el.innerHTML='<p style="color:var(--muted);font-size:12px;">Nessuna architettura. Salva la baseline per iniziare.</p>';return;}
   el.innerHTML=architectures.map((a,idx)=>`
     <div class="arch-item${idx===currentArchIdx?' active':''}">
       <div class="arch-item-info">
         <div class="arch-item-name">${a.name}</div>
         <div class="arch-item-v">V = [${a.V.join(',')}]</div>
       </div>
-      <span class="arch-item-status ${a.results?'done':'none'}">${a.results?'✓ simulated':'—'}</span>
-      <button class="arch-btn sim" onclick="selectAndSim(${idx})">▶ Simulate</button>
-      <button class="arch-btn" onclick="selectArch(${idx})">Select</button>
+      <span class="arch-item-status ${a.results?'done':'none'}">${a.results?'✓ simulato':'—'}</span>
+      <button class="arch-btn sim" onclick="selectAndSim(${idx})">▶ Simula</button>
+      <button class="arch-btn" onclick="selectArch(${idx})">Seleziona</button>
       <button class="arch-btn del" onclick="delArch(${idx})">✕</button>
     </div>`).join('');
 }
-function selectArch(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];if(a.results)showStoredResults(a);document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;}
+function selectArch(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];if(a.results)showStoredResults(a);document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Arch. corrente: '+a.name;}
 function delArch(idx){architectures.splice(idx,1);if(currentArchIdx>=architectures.length)currentArchIdx=Math.max(0,architectures.length-1);renderArchList();}
-function selectAndSim(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;runSim();}
+function selectAndSim(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Arch. corrente: '+a.name;runSim();}
 
 // ══ SIMULATION ══
 async function runSim(){
@@ -815,25 +744,16 @@ async function runSim(){
   const CHUNK=40;
   let runActs,runProb,runImp,archName;
   if(architectures.length>0){const a=architectures[currentArchIdx];runActs=a.acts_seq;runProb=a.prob_seq;runImp=a.imp_seq;archName=a.name;}
-  else{runActs=acts;runProb=probM;runImp=impM;archName='(baseline not saved)';}
+  else{runActs=acts;runProb=probM;runImp=impM;archName='(baseline non salvata)';}
   const n=runActs.length;
   curSimS=[];curSimC=[];curGantt=[];
   document.getElementById('rb').disabled=true;document.getElementById('dot').className='dot run';
-  setStatus('Simulation running...');
-  // True LHS: stratification must be generated ONCE over all rMax planned
-  // rows (not re-stratified at every 40-run chunk), otherwise the uniform
-  // coverage property of the Latin Hypercube over the whole sample is lost.
-  // If early stopping for stability kicks in first, only the first r rows of
-  // this matrix will be used (a prefix of a larger LHS: slightly less uniform
-  // coverage than an LHS dedicated to r rows, but still correct and still
-  // preferable to re-stratifying from scratch every time).
-  const usAll=useLHS?lhs(rMax,n):null;
-  const ucAll=useLHS?lhs(rMax,n):null;
+  setStatus('Simulazione in corso...');
   let r=0,stab=false;
   while(r<rMax&&!stab){
     const chunk=Math.min(CHUNK,rMax-r);
-    const us=useLHS?usAll.slice(r,r+chunk):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));
-    const uc=useLHS?ucAll.slice(r,r+chunk):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));
+    const us=useLHS?lhs(chunk,n):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));
+    const uc=useLHS?lhs(chunk,n):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));
     for(let i=0;i<chunk;i++){const res=singleRunWith(us[i],uc[i],rho,r+i===0,n,runActs,runProb,runImp);curSimS.push(res.S);curSimC.push(res.C);if(r+i===0)curGantt=res.gantt||[];}
     r+=chunk;if(useStab&&r>=2*b&&stable(curSimS,b,alpha))stab=true;
     document.getElementById('pf').style.width=`${Math.round(r/rMax*100)}%`;
@@ -841,7 +761,7 @@ async function runSim(){
     await new Promise(res=>setTimeout(res,0));
   }
   document.getElementById('rb').disabled=false;document.getElementById('dot').className='dot ok';
-  setStatus(`Completed ${curSimS.length} runs${stab?' (stability)':''} — ${archName}`);
+  setStatus(`Completato ${curSimS.length} run${stab?' (stabilità)':''} — ${archName}`);
   document.getElementById('pf').style.width='100%';
   const res=computeMetrics(curSimS,curSimC);
   if(architectures.length>0){architectures[currentArchIdx].results={...res,runs:curSimS.length,stab};architectures[currentArchIdx].simS=[...curSimS];architectures[currentArchIdx].simC=[...curSimC];renderArchList();}
@@ -867,7 +787,7 @@ function showStoredResults(arch){
   if(!arch.results)return;const r=arch.results;
   setMetrics(r.EC,r.sC,r.ES,r.sS,r.gC,r.gS,r.PC,r.PS,r.RC,r.RS,r.runs);
   document.getElementById('m-arch-tag').textContent=arch.name;
-  if(arch.simS){drawHist('cv-s',[...arch.simS].sort((a,b)=>a-b),r.TS||130,'#4a9eff','Schedule (days)');drawHist('cv-c',[...arch.simC].sort((a,b)=>a-b),r.TC||630,'#f5952a','Cost ($k)');drawJoint(arch.simS,arch.simC,r.TS||130,r.TC||630);}
+  if(arch.simS){drawHist('cv-s',[...arch.simS].sort((a,b)=>a-b),r.TS||130,'#4a9eff','Schedule (giorni)');drawHist('cv-c',[...arch.simC].sort((a,b)=>a-b),r.TC||630,'#f5952a','Costo ($k)');drawJoint(arch.simS,arch.simC,r.TS||130,r.TC||630);}
 }
 
 function showResultsData(res,S_arr,C_arr,gantt,archName,runs,n,rA,rP,rI){
@@ -875,8 +795,8 @@ function showResultsData(res,S_arr,C_arr,gantt,archName,runs,n,rA,rP,rI){
   setMetrics(EC,sC,ES,sS,gC,gS,PC,PS,RC,RS,runs);
   document.getElementById('m-arch-tag').textContent=archName;
   const S=[...S_arr].sort((a,b)=>a-b),C=[...C_arr].sort((a,b)=>a-b);
-  drawHist('cv-s',S,TS,'#4a9eff','Schedule (days)');
-  drawHist('cv-c',C,TC,'#f5952a','Cost ($k)');
+  drawHist('cv-s',S,TS,'#4a9eff','Schedule (giorni)');
+  drawHist('cv-c',C,TC,'#f5952a','Costo ($k)');
   drawJoint(S_arr,C_arr,TS,TC);
   drawCrit(rA,rP,rI,n);
   if(gantt&&gantt.length)drawGantt(gantt,n,rA);
@@ -903,7 +823,7 @@ function drawHist(id,S,tgt,col,xlabel){
   ctx.strokeStyle='#1b2236';ctx.lineWidth=1;
   for(let i=0;i<=5;i++){const y=p.t+(1-i/5)*ph;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+pw,y);ctx.stroke();}
   cts.forEach((c,i)=>{
-    const x=p.l+(i/bins)*pw,bwp=pw/bins-.5,a=.35+.55*(c/maxC);
+    const x=p.l+(i/bins)*pw,bwp=pw/bins-.5,a=.15+.7*(c/maxC);
     ctx.fillStyle=`${col}${Math.round(a*255).toString(16).padStart(2,'0')}`;
     ctx.fillRect(x,p.t+ph-(c/maxC)*ph,bwp,(c/maxC)*ph);
   });
@@ -948,10 +868,10 @@ function drawJoint(S,C,TS,TC){
   ctx.strokeStyle='#263050';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(p.l,p.t);ctx.lineTo(p.l,p.t+ph);ctx.lineTo(p.l+pw,p.t+ph);ctx.stroke();
   ctx.fillStyle='#5e6d8f';ctx.font='11px JetBrains Mono';
-  ctx.fillText('Schedule (days)',p.l+pw/2-55,H-6);
-  ctx.save();ctx.translate(14,p.t+ph/2+30);ctx.rotate(-Math.PI/2);ctx.fillText('Cost ($k)',0,0);ctx.restore();
+  ctx.fillText('Schedule (giorni)',p.l+pw/2-55,H-6);
+  ctx.save();ctx.translate(14,p.t+ph/2+30);ctx.rotate(-Math.PI/2);ctx.fillText('Costo ($k)',0,0);ctx.restore();
   ctx.fillText(Sm.toFixed(0),p.l,p.t+ph+16);ctx.fillText(Sx.toFixed(0),p.l+pw-28,p.t+ph+16);
-  [['Both over','rgba(232,69,69,.9)'],['Schedule over','rgba(245,149,42,.9)'],['Cost over','rgba(157,124,244,.9)'],['On target','rgba(74,158,255,.7)']].forEach(([l,c],i)=>{
+  [['Entrambi over','rgba(232,69,69,.9)'],['Schedule over','rgba(245,149,42,.9)'],['Costo over','rgba(157,124,244,.9)'],['In target','rgba(74,158,255,.7)']].forEach(([l,c],i)=>{
     ctx.fillStyle=c;ctx.beginPath();ctx.arc(p.l+7,p.t+12+i*16,4,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#7a8aaa';ctx.fillText(l,p.l+14,p.t+16+i*16);
   });
@@ -964,17 +884,17 @@ function drawCrit(rA,pm,im,n){
     if(p>0&&imp>0){const icj=rA[j].ic,msj=rA[j].ms;pairs.push({i,j,p,im:imp,icj,msj,crit:p*imp*icj*msj,lbl:`${rA[i].nm} ← ${rA[j].nm}`});}
   }
   pairs.sort((a,b)=>b.crit-a.crit);
-  if(!pairs.length){document.getElementById('crit-c').innerHTML='<p style="color:var(--muted)">No non-zero entries.</p>';return;}
+  if(!pairs.length){document.getElementById('crit-c').innerHTML='<p style="color:var(--muted)">Nessuna entry non zero.</p>';return;}
   const mx=pairs[0].crit;
   const byA=new Array(n).fill(0);pairs.forEach(p=>byA[p.i]+=p.crit);
   const ar=[...rA.map((a,i)=>({nm:a.nm,v:byA[i]}))].sort((a,b)=>b.v-a.v);const ma=ar[0].v||1;
-  let h=`<table class="crt"><thead><tr><th>Interface</th><th>Prob</th><th>Impact</th><th>IC_j</th><th>ActS_j</th><th>Criticality</th><th style="min-width:100px"></th></tr></thead><tbody>`;
+  let h=`<table class="crt"><thead><tr><th>Interfaccia</th><th>Prob</th><th>Impact</th><th>IC_j</th><th>ActS_j</th><th>Criticità</th><th style="min-width:100px"></th></tr></thead><tbody>`;
   pairs.slice(0,20).forEach((p,idx)=>{
     const col=idx===0?'var(--orange)':'var(--blue)';const bw=Math.round((p.crit/mx)*100);
     h+=`<tr><td style="color:${col};font-weight:${idx===0?700:400}">${p.lbl}</td><td>${p.p.toFixed(2)}</td><td>${p.im.toFixed(2)}</td><td>${p.icj.toFixed(2)}</td><td>${p.msj}</td><td style="color:${col}">${p.crit.toFixed(3)}</td><td><div class="cbar" style="width:${bw}px;background:${col}"></div></td></tr>`;
   });
-  h+=`</tbody></table><div style="margin-top:16px;"><div style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Activity rank — Σ incoming criticality</div>
-  <table class="crt"><thead><tr><th>Rank</th><th>Activity</th><th>Σ Criticality</th><th style="min-width:140px"></th></tr></thead><tbody>`;
+  h+=`</tbody></table><div style="margin-top:16px;"><div style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Rank attività — Σ criticità incoming</div>
+  <table class="crt"><thead><tr><th>Rank</th><th>Attività</th><th>Σ Criticità</th><th style="min-width:140px"></th></tr></thead><tbody>`;
   ar.forEach((a,idx)=>{const col=idx===0?'var(--orange)':'var(--green)';const bw=Math.round((a.v/ma)*140);h+=`<tr><td style="color:${col}">${idx+1}</td><td style="color:${col};font-weight:${idx===0?700:400}">${a.nm}</td><td style="color:${col}">${a.v.toFixed(3)}</td><td><div class="cbar" style="width:${bw}px;background:${col}"></div></td></tr>`;});
   h+=`</tbody></table></div>`;document.getElementById('crit-c').innerHTML=h;
 }
@@ -986,24 +906,15 @@ function drawGantt(gantt,n,rA){
   const pw=W-p.l-p.r,ph=H-p.t-p.b,T=gantt[0]?gantt[0].length:1,rh=ph/n;
   const cols=['#4a9eff','#22c97a','#f5952a','#9d7cf4','#22d3ee','#e84545','#f0d060','#34d399','#f472b6','#60a5fa','#fb923c','#a3e635','#38bdf8','#e879f9'];
   gantt.forEach((gRow,i)=>{
-    const y=p.t+i*rh;
-    ctx.globalAlpha=1; // reset first: otherwise this label inherits the last alpha left by the previous row's cells
-    ctx.fillStyle='#c7d0e6';ctx.font='9px JetBrains Mono';ctx.fillText((rA[i].nm).slice(0,13),2,y+rh/2+4);
+    const y=p.t+i*rh;ctx.fillStyle='#7a8aaa';ctx.font='9px JetBrains Mono';ctx.fillText((rA[i].nm).slice(0,13),2,y+rh/2+4);
     (gRow||[]).forEach((w,t)=>{
       if(w===null||w===undefined)return;
-      const x=p.l+(t/T)*pw,bwp=pw/T;
-      // Alpha reflects remaining work (brighter = just started, dimmer = about to finish)
-      // but is floored at 0.55 so an active block never fades near-invisible while work
-      // is still genuinely in progress — only the floor/ceiling values changed, not the logic.
-      const wv=w>0?w:0;
-      ctx.globalAlpha=0.55+0.45*wv;
-      ctx.fillStyle=cols[i%cols.length];
-      ctx.fillRect(x,y+1,bwp-.5,rh-2);
+      const x=p.l+(t/T)*pw,bwp=pw/T;ctx.globalAlpha=w>0?.12+.82*w:.03;ctx.fillStyle=cols[i%cols.length];ctx.fillRect(x,y+1,bwp-.5,rh-2);
     });
   });
   ctx.globalAlpha=1;ctx.strokeStyle='#263050';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(p.l,p.t+ph);ctx.lineTo(p.l+pw,p.t+ph);ctx.stroke();
-  ctx.fillStyle='#5e6d8f';ctx.font='10px JetBrains Mono';ctx.fillText('0',p.l,p.t+ph+16);ctx.fillText(T+' steps',p.l+pw-40,p.t+ph+16);
+  ctx.fillStyle='#5e6d8f';ctx.font='10px JetBrains Mono';ctx.fillText('0',p.l,p.t+ph+16);ctx.fillText(T+' step',p.l+pw-40,p.t+ph+16);
 }
 
 function drawOverview(ES,sS,EC,sC,gS,gC,PS,PC,RS,RC,runs){
@@ -1025,7 +936,7 @@ function drawOverview(ES,sS,EC,sC,gS,gC,PS,PC,RS,RC,runs){
 
 function drawCompare(){
   const done=architectures.filter(a=>a.results);
-  if(done.length<1){document.getElementById('compare-c').innerHTML='<p style="color:var(--muted)">Simulate at least 1 architecture.</p>';return;}
+  if(done.length<1){document.getElementById('compare-c').innerHTML='<p style="color:var(--muted)">Simula almeno 1 architettura.</p>';return;}
   const metrics=['E[C] $k','σ_C $k','E[S] d','σ_S d','γ_C','γ_S','P_C','P_S','R_C','R_S'];
   const keys=['EC','sC','ES','sS','gC','gS','PC','PS','RC','RS'];
   const fmts=[0,0,1,1,2,2,3,3,0,0];
@@ -1039,24 +950,11 @@ function drawCompare(){
     done.forEach(a=>{const v=a.results[k];h+=`<td class="${v===mn?'best':''}">${v.toFixed(fmts[ki])}</td>`;});
     h+=`</tr>`;
   });
-  h+=`</tbody></table><div class="note-box">The <strong style="color:var(--green)">green</strong> cell indicates the minimum value per row. For P_C, P_S, R_C, R_S, lower values = lower risk.</div>`;
+  h+=`</tbody></table><div class="note-box">Il <strong style="color:var(--green)">verde</strong> indica il valore minimo per riga. Per P_C, P_S, R_C, R_S valori minori = minor rischio.</div>`;
   document.getElementById('compare-c').innerHTML=h;
 }
 
 // ══ LOAD EXAMPLES ══
-function newCase(){
-  if(!confirm('Start a new blank case study?\n\nThis clears all current activities, the DSM, probability/impact matrices, and any saved architectures. The preloaded examples (UCAV 2002, MIT v2.1, Airport) are not affected and can still be loaded at any time.'))return;
-  acts=[];dsmBin=[];probM=[];impM=[];
-  initState(4);
-  document.getElementById('proj-name').value='New Project';
-  document.getElementById('tc').value=100;document.getElementById('ts').value=50;
-  architectures=[];currentArchIdx=0;curSimS=[];curSimC=[];curGantt=[];
-  document.getElementById('hdr-arch').textContent='No architecture yet';
-  document.getElementById('sim-arch-label').textContent='No architecture saved yet';
-  document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
-  clearMetrics();renderAll();
-  setStatus('New blank case — rename activities, set durations/costs, fill in the DSM and probability/impact matrices, save a baseline architecture, then RUN');
-}
 function loadEx(name){
   const d=DS[name];if(!d)return;
   N=d.n;acts=d.acts.map(a=>({...a}));probM=d.prob.map(r=>[...r]);impM=d.imp.map(r=>[...r]);
@@ -1065,7 +963,7 @@ function loadEx(name){
   architectures=[];currentArchIdx=0;curSimS=[];curSimC=[];curGantt=[];
   document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
   clearMetrics();renderAll();
-  setStatus('Dataset '+name.toUpperCase()+' loaded — go to Architectures, save baseline, then RUN');
+  setStatus('Dataset '+name.toUpperCase()+' caricato — vai ad Architetture, salva baseline, poi RUN');
 }
 function clearMetrics(){
   ['m-ec','m-sc','m-es','m-ss','m-gc','m-gs','m-pc','m-ps','m-rc','m-rs','m-r'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
@@ -1097,8 +995,8 @@ function showOTab(name){
 }
 function redrawChart(name){
   const TS=+document.getElementById('ts').value||130,TC=+document.getElementById('tc').value||630;
-  if(name==='sched'&&curSimS.length)drawHist('cv-s',[...curSimS].sort((a,b)=>a-b),TS,'#4a9eff','Schedule (days)');
-  if(name==='cost'&&curSimC.length)drawHist('cv-c',[...curSimC].sort((a,b)=>a-b),TC,'#f5952a','Cost ($k)');
+  if(name==='sched'&&curSimS.length)drawHist('cv-s',[...curSimS].sort((a,b)=>a-b),TS,'#4a9eff','Schedule (giorni)');
+  if(name==='cost'&&curSimC.length)drawHist('cv-c',[...curSimC].sort((a,b)=>a-b),TC,'#f5952a','Costo ($k)');
   if(name==='joint'&&curSimS.length)drawJoint(curSimS,curSimC,TS,TC);
   if(name==='gantt'&&curGantt.length){const a=architectures.length>0?architectures[currentArchIdx]:null;drawGantt(curGantt,a?a.acts_seq.length:N,a?a.acts_seq:acts);}
   if(name==='compare')drawCompare();
@@ -1114,14 +1012,105 @@ function togOpt(w){
 function setStatus(t){document.getElementById('stxt').textContent=t;}
 
 // ══ EXPORT / IMPORT ══
+function exportToolkitJSON(){
+  const pairs = {};
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++){
+    if(i===j) continue;
+    if(dsmBin[i]&&dsmBin[i][j]){
+      const p = probM[i]&&probM[i][j] ? probM[i][j] : 0;
+      const imp = impM[i]&&impM[i][j] ? impM[i][j] : 0;
+      if(p>0||imp>0){
+        // Convert scalar p to 6D tensor (uniform distribution across aspects)
+        pairs[(i+1)+','+(j+1)] = [p,p,p,p,p,p];
+      }
+    }
+  }
+  const out = {
+    _schema: "dsm-fram-toolkit-v1",
+    _description: "Shared format for B-E, FEBS and FRAME-Q simulators",
+    _source: "B-E",
+    _note: "m_pairs generated from scalar rework probabilities — use FRAME-6 elicitation to refine",
+    timestamp: new Date().toISOString(),
+    activities: acts.map((a,i)=>({
+      id: i+1,
+      name: a.nm,
+      bcv: a.bs||a.bcv||1,
+      mlv: a.ms||a.mlv||2,
+      wcv: a.ws||a.wcv||3,
+      bc_cost: a.bc||null,
+      mc_cost: a.mc||null,
+      wc_cost: a.wc||null
+    })),
+    m_pairs: pairs,
+    be_matrices: {
+      prob: probM.map(r=>[...r]),
+      impact: impM.map(r=>[...r]),
+      binary_dsm: dsmBin.map(r=>[...r])
+    }
+  };
+  const blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (document.getElementById('proj-name').value||'progetto').replace(/\s+/g,'_')+'_toolkit.json';
+  a.click();
+  setStatus('Toolkit JSON esportato.');
+}
+
+function importToolkitJSON(){
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept='.json';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if(data._schema !== 'dsm-fram-toolkit-v1') throw new Error('Not a toolkit JSON file');
+        N = data.activities.length;
+        acts = data.activities.map(a=>({
+          nm: a.name,
+          bs: a.bcv||a.bs||1, ms: a.mlv||a.ms||2, ws: a.wcv||a.ws||3,
+          bc: a.bc_cost||a.bcv||1, mc: a.mc_cost||a.mlv||2, wc: a.wc_cost||a.wcv||3,
+          ic: 0.5
+        }));
+        dsmBin = data.activities.map(()=>data.activities.map(()=>0));
+        probM = data.activities.map(()=>data.activities.map(()=>0));
+        impM = data.activities.map(()=>data.activities.map(()=>0));
+        // Load from be_matrices if available
+        if(data.be_matrices){
+          dsmBin = data.be_matrices.binary_dsm.map(r=>[...r]);
+          probM = data.be_matrices.prob.map(r=>[...r]);
+          impM = data.be_matrices.impact.map(r=>[...r]);
+        } else {
+          // Reconstruct from m_pairs using first component as scalar
+          Object.entries(data.m_pairs||{}).forEach(([key,vals])=>{
+            const [i,j]=key.split(',').map(Number);
+            dsmBin[i-1][j-1]=1;
+            probM[i-1][j-1]=vals[0]||0.5;
+            impM[i-1][j-1]=vals[0]||0.5;
+          });
+        }
+        document.getElementById('proj-name').value = 'From Toolkit (' + (data._source||'?') + ')';
+        document.getElementById('nv').textContent=N;
+        document.getElementById('hdr-n').textContent='n = '+N;
+        architectures=[]; currentArchIdx=0;
+        curSimS=[]; curSimC=[]; curGantt=[]; clearMetrics(); renderAll();
+        setStatus('Toolkit JSON importato: '+N+' attivit\u00e0 da ' + (data._source||'source sconosciuta'));
+      } catch(err){ setStatus('Errore import toolkit: '+err.message); alert('Errore: '+err.message); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
 function exportJSON(){
-  const data={version:5,projectName:document.getElementById('proj-name').value,n:N,activities:acts,dsmBinary:dsmBin,probMatrix:probM,impMatrix:impM,
+  const data={version:7,projectName:document.getElementById('proj-name').value,n:N,activities:acts,dsmBinary:dsmBin,probMatrix:probM,impMatrix:impM,
     architectures:architectures.map(a=>({name:a.name,V:a.V,acts_seq:a.acts_seq,prob_seq:a.prob_seq,imp_seq:a.imp_seq,results:a.results||null})),
     currentArchIdx,simParams:{rmax:document.getElementById('rmax').value,batch:document.getElementById('batch').value,alpha:document.getElementById('alpha').value,rho:document.getElementById('rho').value,tc:document.getElementById('tc').value,ts:document.getElementById('ts').value,kc:document.getElementById('kc').value,ks:document.getElementById('ks').value,useLHS,useStab}};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=(document.getElementById('proj-name').value||'progetto').replace(/\s+/g,'_')+'_dsm_v5.json';a.click();
-  setStatus('Project exported.');
+  a.download=(document.getElementById('proj-name').value||'progetto').replace(/\s+/g,'_')+'_dsm_v7.json';a.click();
+  setStatus('Progetto esportato.');
 }
 function importJSON(){document.getElementById('file-import').click();}
 function handleImport(e){
@@ -1130,15 +1119,15 @@ function handleImport(e){
   reader.onload=ev=>{
     try{
       const data=JSON.parse(ev.target.result);if(!data.n||!data.activities)throw new Error('Formato non valido');
-      document.getElementById('proj-name').value=data.projectName||'Imported Project';
+      document.getElementById('proj-name').value=data.projectName||'Progetto Importato';
       N=data.n;acts=data.activities.map(a=>({...a}));dsmBin=data.dsmBinary||acts.map(()=>acts.map(()=>0));
       probM=data.probMatrix.map(r=>[...r]);impM=data.impMatrix.map(r=>[...r]);
       architectures=(data.architectures||[]).map(a=>({...a}));currentArchIdx=data.currentArchIdx||0;
       if(data.simParams){const sp=data.simParams;['rmax','batch','alpha','rho','tc','ts','kc','ks'].forEach(k=>{const el=document.getElementById(k);if(el&&sp[k]!==undefined)el.value=sp[k];});useLHS=sp.useLHS!==undefined?sp.useLHS:true;useStab=sp.useStab!==undefined?sp.useStab:true;document.getElementById('lb').className='tog'+(useLHS?' on':'');document.getElementById('lb').textContent=useLHS?'ON':'OFF';document.getElementById('sb').className='tog'+(useStab?' on':'');document.getElementById('sb').textContent=useStab?'ON':'OFF';}
       document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
       curSimS=[];curSimC=[];curGantt=[];clearMetrics();renderAll();
-      setStatus('Imported: '+document.getElementById('proj-name').value);
-    }catch(err){setStatus('Import error: '+err.message);alert('Error: '+err.message);}
+      setStatus('Importato: '+document.getElementById('proj-name').value);
+    }catch(err){setStatus('Errore import: '+err.message);alert('Errore: '+err.message);}
   };reader.readAsText(file);e.target.value='';
 }
 
@@ -1152,7 +1141,7 @@ document.getElementById('nv').textContent=N;document.getElementById('hdr-n').tex
 architectures=[{name:'Arch. 1 baseline',V:Array.from({length:N},(_,i)=>i+1),acts_seq:acts.map(a=>({...a})),prob_seq:probM.map(r=>[...r]),imp_seq:impM.map(r=>[...r]),results:null}];
 currentArchIdx=0;
 renderAll();
-setStatus('Ready — UCAV 2002 loaded · Arch. 1 baseline active · press RUN to simulate');
+setStatus('Pronto — UCAV 2002 caricato · Arch. 1 baseline attiva · premi RUN per simulare');
 </script>
 </body>
 </html>
