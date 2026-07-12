@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -286,8 +286,8 @@ canvas{display:block;max-width:100%}
     <div style="flex:1;padding:16px;overflow:auto;display:flex;flex-direction:column;gap:0">
       <div class="sh">BINARY DSM <span style="font-weight:400;color:var(--muted);font-size:8px">— row i depends on column j</span></div>
       <div class="snote">Click to activate dependencies.
-        <span style="color:var(--green)">&#9632;</span> feed-forward (sotto diagonale) &nbsp;
-        <span style="color:var(--orange)">&#9632;</span> feedback (sopra diagonale)
+        <span style="color:var(--green)">&#9632;</span> feed-forward (below diagonal) &nbsp;
+        <span style="color:var(--orange)">&#9632;</span> feedback (above diagonal)
       </div>
 
       <!-- stats bar -->
@@ -391,10 +391,10 @@ canvas{display:block;max-width:100%}
   <div class="scroll">
     <div class="sh">FEBS PARAMETERS</div>
     <div class="formula">
-      <b>&#952;</b> = F<sup>&#8722;1</sup>(p) soglia adattiva &nbsp;&#183;&nbsp;
-      <b>S<sub>ij</sub></b> = &#8214;C&#8214;<sup>&#946;</sup> se &#8214;C&#8214; &#8805; &#952;, 0 altrimenti &nbsp;&#183;&nbsp;
+      <b>&#952;</b> = F<sup>&#8722;1</sup>(p) adaptive threshold &nbsp;&#183;&nbsp;
+      <b>S<sub>ij</sub></b> = &#8214;C&#8214;<sup>&#946;</sup> if &#8214;C&#8214; &#8805; &#952;, 0 otherwise &nbsp;&#183;&nbsp;
       <b>P<sub>ij</sub></b> = p<sub>base</sub> &#183; (S<sub>ij</sub>/S<sub>max</sub>) &nbsp;&#183;&nbsp;
-      <b>IRR<sub>i</sub></b> = &#931;<sub>j&#8712;N(i)</sub> S<sub>ij</sub> &#183; imp<sub>ij</sub> &#183; IC<sub>i</sub> &#183; ActS<sub>i</sub> &#183; (1 + freq<sub>i</sub>/r)
+      <b>IRR<sub>i</sub></b> = &#931;<sub>j&#8712;N(i)</sub> S<sub>ij</sub> &#183; imp<sub>ij</sub> &#183; IC<sub>i</sub> &#183; MLV<sub>i</sub> &#183; (1 + freq<sub>i</sub>/r)
     </div>
     <div class="par-grid">
       <div class="par-card">
@@ -414,8 +414,8 @@ canvas{display:block;max-width:100%}
       </div>
       <div class="par-card">
         <div class="par-lbl">&#961; — S/C CORRELATION</div>
-        <input class="par-inp" type="number" id="rho" value="0.7" min="0" max="0.99" step="0.01">
-        <div class="par-note">Normal copula schedule-cost</div>
+        <input class="par-inp" type="number" id="rho" value="0.9" min="0" max="0.99" step="0.01">
+        <div class="par-note">Normal copula schedule-cost (B-E 2002 default 0.9)</div>
       </div>
       <div class="par-card">
         <div class="par-lbl">RUNS MONTE CARLO</div>
@@ -425,24 +425,24 @@ canvas{display:block;max-width:100%}
       <div class="par-card">
         <div class="par-lbl">SCHEDULE TARGET (days)</div>
         <input class="par-inp" type="number" id="ts" value="0" min="0">
-        <div class="par-note">P(S &#8804; ts) — 0 = disabled</div>
+        <div class="par-note">P(S &gt; T&#8347;) and R_S — 0 = disabled</div>
       </div>
       <div class="par-card">
         <div class="par-lbl">COST TARGET ($k)</div>
         <input class="par-inp" type="number" id="tc" value="0" min="0">
-        <div class="par-note">P(C &#8804; tc) — 0 = disabled</div>
+        <div class="par-note">P(C &gt; T&#8342;) and R_C — 0 = disabled</div>
       </div>
     </div>
 
     <div class="sh" style="margin-top:20px">FRAME-6 ASPECT WEIGHTS w<sub>k</sub></div>
-    <div class="snote">Weighted norm &#8214;C&#8214;<sub>w</sub> = &#8730;(&#931; w<sub>k</sub>&#183;c&#178;<sub>k</sub>). Default = 1/6 uniform.</div>
+    <div class="snote">Weighted norm &#8214;C&#8214;<sub>w</sub> = &#8730;(&#931; w<sub>k</sub>&#183;c&#178;<sub>k</sub>). Default = 1/6 &#8776; 0.1667 uniform.</div>
     <div class="weights-row">
-      <div class="w-item"><span class="w-lbl" style="color:var(--inp)">I</span><input class="w-inp" id="wI" value="0.167" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--out)">O</span><input class="w-inp" id="wO" value="0.167" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--pre)">P</span><input class="w-inp" id="wP" value="0.167" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--res)">R</span><input class="w-inp" id="wR" value="0.167" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--ctl)">C</span><input class="w-inp" id="wC" value="0.167" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--tim)">T</span><input class="w-inp" id="wT" value="0.167" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--inp)">I</span><input class="w-inp" id="wI" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--out)">O</span><input class="w-inp" id="wO" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--pre)">P</span><input class="w-inp" id="wP" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--res)">R</span><input class="w-inp" id="wR" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--ctl)">C</span><input class="w-inp" id="wC" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--tim)">T</span><input class="w-inp" id="wT" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
     </div>
   </div>
   <div class="foot">
@@ -494,7 +494,7 @@ canvas{display:block;max-width:100%}
       &gt;0.20 = frequent (dynamic IRR may rerank functions)
       <br><br>
       <b style="color:var(--text)">Formula effect:</b>
-      &nbsp; IRR<sub>i</sub> = [Σ S<sub>ij</sub> · IMPACT<sub>ij</sub> · IC<sub>i</sub> · E[ActS<sub>i</sub>]] · <b>(1 + freq<sub>i</sub>/r)</b>
+      &nbsp; IRR<sub>i</sub> = [Σ S<sub>ij</sub> · IMPACT<sub>ij</sub> · IC<sub>i</sub> · MLV<sub>i</sub>] · <b>(1 + freq<sub>i</sub>/r)</b>
       &nbsp;— when freq<sub>i</sub>/r = 0, IRR reduces to its structural approximation (paper Tables 5 & 6).
     </div>
   </div>
@@ -511,12 +511,17 @@ canvas{display:block;max-width:100%}
   <div class="mstrip">
     <div class="met"><div class="ml">E[S] days</div><div class="mv" id="r-es">—</div></div>
     <div class="met"><div class="ml">&#963;_S</div><div class="mv" id="r-ss">—</div></div>
+    <div class="met"><div class="ml">&#947;_S skew</div><div class="mv" id="r-gs">—</div></div>
     <div class="met hi"><div class="ml">E[C] $k</div><div class="mv" id="r-ec">—</div></div>
     <div class="met"><div class="ml">&#963;_C</div><div class="mv" id="r-sc">—</div></div>
+    <div class="met"><div class="ml">&#947;_C skew</div><div class="mv" id="r-gc">—</div></div>
     <div class="met"><div class="ml">Runs</div><div class="mv" id="r-n">—</div></div>
     <div class="met"><div class="ml">&#952;</div><div class="mv" id="r-theta">—</div></div>
     <div class="met"><div class="ml">Active pairs</div><div class="mv" id="r-act">—</div></div>
-    <div class="met"><div class="ml">P(S&#8804;ts)</div><div class="mv" id="r-ps">—</div></div>
+    <div class="met"><div class="ml">P(S&gt;T&#8347;)</div><div class="mv" id="r-ps">—</div></div>
+    <div class="met"><div class="ml">P(C&gt;T&#8342;)</div><div class="mv" id="r-pc">—</div></div>
+    <div class="met"><div class="ml">R_S</div><div class="mv" id="r-rs">—</div></div>
+    <div class="met"><div class="ml">R_C</div><div class="mv" id="r-rc">—</div></div>
     <div class="met"><div class="ml">IRR &gt; 0</div><div class="mv" id="r-irr">—</div></div>
   </div>
 
@@ -769,6 +774,10 @@ function febsInit(p_pct,beta,pbase){
 }
 
 function banding(W,WN,P_mat){
+  // Sequencing (work policy) follows the BINARY DSM structure, as in B-E 2002.
+  // The adaptive threshold theta gates rework probabilities only: a dormant
+  // coupling (S_ij = 0) suppresses variability propagation but does NOT remove
+  // the logical precedence constraint declared in the DSM (cf. paper Sec. 4.2).
   for(let ii=0;ii<N;ii++)WN[ii]=false;
   let f=-1;
   for(let ii=0;ii<N;ii++){if(W[ii]>0){WN[ii]=true;f=ii;break;}}
@@ -776,7 +785,7 @@ function banding(W,WN,P_mat){
   for(let j=f+1;j<N;j++){
     if(W[j]>0){
       let ok=true;
-      for(let k=f;k<j;k++){if((P_mat[j][k]||0)>0&&W[k]>0){ok=false;break;}}
+      for(let k=f;k<j;k++){if((dsmB[j]&&dsmB[j][k])&&W[k]>0){ok=false;break;}}
       if(ok)WN[j]=true;else break;
     }
   }
@@ -813,12 +822,15 @@ function singleRun(P_mat,u_s,u_c,rho,rec){
           freq_run[j]++;
           W[j]+=impactM[j][ci]*fns[j].ic;
           if(W[j]>1)W[j]=0.9;
+          // Second-order propagation [B-E + FEBS, paper Step D2]: only
+          // activities with partial or completed work based on j's output
+          // (W_k < 1) can receive second-order rework; freq is incremented
+          // for every rework event affecting k.
           for(let k=j+1;k<N;k++){
             const p2=P_mat[k][j]||0;
-            if(p2>0&&Math.random()<=p2){
-              if(W[k]===1)W[k]=2;
+            if(p2>0&&W[k]<1&&Math.random()<=p2){
+              freq_run[k]++;
               W[k]+=impactM[k][j]*fns[k].ic;
-              if(W[k]>=2)W[k]=1;
               if(W[k]>1)W[k]=0.9;
             }
           }
@@ -891,7 +903,7 @@ function renderFnList(){
       <span class="fn-idx">F${idx+1}</span>
       <input class="fn-nm-inp" placeholder="Function name" value="${f.nm}"
         onchange="fns[${idx}].nm=this.value;renderDSM()" oninput="fns[${idx}].nm=this.value;renderDSM()">
-      <button class="fn-del" onclick="delFn(${idx})" title="Elimina">&#10005;</button>
+      <button class="fn-del" onclick="delFn(${idx})" title="Delete">&#10005;</button>
     </div>`;
   });
   el.innerHTML=h;
@@ -925,7 +937,7 @@ function renderDSM(){
       const cls=!val?'off':isFB?'fb':'on';
       const sym=val?'&#9632;':'&#9633;';
       h+=`<div class="dc2 ${cls}" onclick="toggleDSM(${ii},${j})"
-            title="F${ii+1}←F${j+1}: ${fns[ii]?.nm||''} dipende da ${fns[j]?.nm||''}">${sym}</div>`;
+            title="F${ii+1}←F${j+1}: ${fns[ii]?.nm||''} depends on ${fns[j]?.nm||''}">${sym}</div>`;
     }
   }
   h+='</div>';
@@ -964,7 +976,7 @@ function updateDSMStats(){
       for(let ii=0;ii<N;ii++) for(let j=ii+1;j<N;j++)
         if(dsmB[ii]&&dsmB[ii][j]&&dsmB[j]&&dsmB[j][ii]) pairs.push(`F${ii+1}↔F${j+1}`);
       fw.style.display='block';
-      fw.innerHTML='⚠ '+fb+' link feedback: '+pairs.slice(0,8).join(', ')+(pairs.length>8?'…':'')+'<br><span style="color:var(--muted)">I loop di feedback generano rework B-E — atteso in FEBS.</span>';
+      fw.innerHTML='⚠ '+fb+' feedback links: '+pairs.slice(0,8).join(', ')+(pairs.length>8?'…':'')+'<br><span style="color:var(--muted)">Feedback loops generate B-E rework — expected in FEBS.</span>';
     } else fw.style.display='none';
   }
 }
@@ -987,7 +999,7 @@ function dsmClear(){
 }
 
 function expToolkitJSON(){
-  const pairs = {};
+  const pairs = {}, impPairs = {};
   for(let i=1;i<=N;i++) for(let j=1;j<=N;j++){
     if(i===j) continue;
     if(!dsmB[i-1]||!dsmB[i-1][j-1]) continue;
@@ -997,6 +1009,7 @@ function expToolkitJSON(){
       ? [...tensorM[i-1][j-1]]
       : [0.5,0.5,0.5,0.5,0.5,0.5];
     pairs[key] = mVals;
+    impPairs[key] = (impactM[i-1] && impactM[i-1][j-1]) || 0;
   }
   const out = {
     _schema: "dsm-fram-toolkit-v1",
@@ -1004,10 +1017,14 @@ function expToolkitJSON(){
     _source: "FEBS",
     timestamp: new Date().toISOString(),
     activities: fns.map((f,i)=>({
-      id: i+1, name: f.nm,
-      bcv: f.bcv||f.bv||1, mlv: f.mlv||f.mv||2, wcv: f.wcv||f.wv||3
+      id: i+1, name: f.nm, desc: f.desc||'',
+      bcv: f.bs, mlv: f.ms, wcv: f.ws,
+      cost_bcv: f.bc, cost_mlv: f.mc, cost_wcv: f.wc,
+      ic: f.ic
     })),
-    m_pairs: pairs
+    m_pairs: pairs,
+    impact_pairs: impPairs,
+    binary_dsm: dsmB.map(r=>[...r])
   };
   const blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
   const a = document.createElement('a');
@@ -1026,22 +1043,49 @@ function impToolkitJSON(){
       try {
         const data = JSON.parse(ev.target.result);
         if(data._schema !== 'dsm-fram-toolkit-v1') throw new Error('Not a toolkit JSON file');
-        // Load activities into FEBS
+        if(!Array.isArray(data.activities)||data.activities.length<2) throw new Error('At least 2 activities required');
+        // Load activities using the engine field names (bs/ms/ws, bc/mc/wc, ic).
+        // Older exports may only carry duration triples: costs default to durations.
         N = data.activities.length;
-        fns = data.activities.map(a=>({
-          nm: a.name,
-          bcv: a.bcv||a.bs||1, mlv: a.mlv||a.ms||2, wcv: a.wcv||a.ws||3
-        }));
-        // Store m_pairs for reference
-        window.frmData = data.m_pairs || {};
-        // Rebuild binary DSM from m_pairs
-        dsmB = Array.from({length:N},()=>Array(N).fill(0));
-        Object.keys(window.frmData).forEach(key=>{
-          const [i,j] = key.split(',').map(Number);
-          if(i>=1&&i<=N&&j>=1&&j<=N) dsmB[i-1][j-1] = 1;
+        fns = data.activities.map((a,idx)=>{
+          const bs=+(a.bcv??a.bs??1), ms=+(a.mlv??a.ms??2), ws=+(a.wcv??a.ws??3);
+          return {
+            nm: a.name||('F'+(idx+1)), desc: a.desc||'',
+            bs, ms, ws,
+            bc:+(a.cost_bcv??a.bc??bs), mc:+(a.cost_mlv??a.mc??ms), wc:+(a.cost_wcv??a.wc??ws),
+            ic:+(a.ic??0.8)
+          };
         });
-        renderAll();
-        alert('Toolkit JSON imported: ' + N + ' activities from ' + (data._source||'unknown source'));
+        const mp = data.m_pairs || {};
+        const ip = data.impact_pairs || {};
+        // Rebuild binary DSM (from binary_dsm if present, else from m_pairs)
+        dsmB = Array.from({length:N},()=>Array(N).fill(0));
+        if(Array.isArray(data.binary_dsm)){
+          for(let r=0;r<N;r++) for(let c=0;c<N;c++)
+            dsmB[r][c] = (data.binary_dsm[r]&&data.binary_dsm[r][c])?1:0;
+        } else {
+          Object.keys(mp).forEach(key=>{
+            const [a,b] = key.split(',').map(Number);
+            if(a>=1&&a<=N&&b>=1&&b<=N&&a!==b) dsmB[a-1][b-1] = 1;
+          });
+        }
+        // Rebuild tensor M and impact matrix, sized to the new N
+        tensorM = Array.from({length:N},()=>Array.from({length:N},()=>[0,0,0,0,0,0]));
+        impactM = Array.from({length:N},()=>new Array(N).fill(0));
+        for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+          if(r===c||!dsmB[r][c]) continue;
+          const key=(r+1)+','+(c+1);
+          const v = mp[key];
+          tensorM[r][c] = (Array.isArray(v)&&v.length===6) ? v.map(Number) : [0.5,0.5,0.5,0.5,0.5,0.5];
+          impactM[r][c] = (key in ip) ? +ip[key] : 0.5;
+        }
+        // Clear stale results and re-render
+        simS=[];simC=[];ganttD=[];febs_IRR=[];febs_norms={};febs_S={};febs_P={};febs_freq=[];
+        sensResults=[];_lastFebs=null;
+        renderFnList();
+        renderDSM();
+        nav(1);
+        msg(1,'\u2713 Toolkit JSON imported: '+N+' activities from '+(data._source||'unknown source')+' \u2014 validate to proceed','ok');
       } catch(err){ alert('Import error: ' + err.message); }
     };
     reader.readAsText(file);
@@ -1051,18 +1095,23 @@ function impToolkitJSON(){
 
 function expIRR(){
   if(!febs_IRR||!febs_IRR.length){alert('Run simulation first');return;}
-  const rows = febs_IRR.map((irr,i)=>({
-    id:'F'+(i+1),
-    name: fns[i]?.nm||'F'+(i+1),
-    IRR: +irr.toFixed(6),
-    norm: febs_norms ? +(febs_norms[i+','+i]||0).toFixed(4) : null
-  })).sort((a,b)=>b.IRR-a.IRR);
+  const rows = febs_IRR.map((irr,idx)=>{
+    // max incoming coupling norm for function idx (keys are 'i,j' with i = receiver)
+    let mx=0;
+    if(febs_norms) for(let j=0;j<N;j++){const v=febs_norms[idx+','+j];if(v&&v>mx)mx=v;}
+    return {
+      id:'F'+(idx+1),
+      name: fns[idx]?.nm||'F'+(idx+1),
+      IRR: +irr.toFixed(6),
+      max_incoming_norm: +mx.toFixed(4)
+    };
+  }).sort((a,b)=>b.IRR-a.IRR);
   const out = {
     _schema: "dsm-fram-toolkit-v1",
     _source: "FEBS",
     _type: "IRR_results",
     timestamp: new Date().toISOString(),
-    activities: fns.map((f,i)=>({id:i+1, name:f.nm, bcv:f.bcv||f.bs||1, mlv:f.mlv||f.ms||2, wcv:f.wcv||f.ws||3})),
+    activities: fns.map((f,i)=>({id:i+1, name:f.nm, desc:f.desc||'', bcv:f.bs, mlv:f.ms, wcv:f.ws, cost_bcv:f.bc, cost_mlv:f.mc, cost_wcv:f.wc, ic:f.ic})),
     m_pairs: (()=>{const p={};for(let i=1;i<=N;i++)for(let j=1;j<=N;j++){if(i===j)continue;if(!dsmB[i-1]||!dsmB[i-1][j-1])continue;p[i+','+j]=[...tensorM[i-1][j-1]];}return p;})(),
     irr_results: rows,
     sim_stats: simS.length ? {
@@ -1385,22 +1434,34 @@ async function runSim(p_ov,beta_ov,pbase_ov,rMax_ov){
 
 function showResults(febs){
   const S=[...simS].sort((a,b)=>a-b),C=[...simC].sort((a,b)=>a-b),n=S.length;
-  const ES=S.reduce((a,b)=>a+b,0)/n;
-  const sS=Math.sqrt(S.map(x=>(x-ES)**2).reduce((a,b)=>a+b,0)/n);
-  const EC=C.reduce((a,b)=>a+b,0)/n;
-  const sC=Math.sqrt(C.map(x=>(x-EC)**2).reduce((a,b)=>a+b,0)/n);
+  const mom=(a)=>{ // mean, sd, skewness (normalised 3rd moment)
+    const m=a.reduce((x,y)=>x+y,0)/n;
+    const v=a.reduce((s,x)=>s+(x-m)**2,0)/n, sd=Math.sqrt(v);
+    const g=sd>0?a.reduce((s,x)=>s+(x-m)**3,0)/n/(sd**3):0;
+    return{m,sd,g};
+  };
+  const mS=mom(S),mC=mom(C);
+  const ES=mS.m,sS=mS.sd,EC=mC.m,sC=mC.sd;
   const ts=+i('ts').value,tc=+i('tc').value;
-  const ps=ts>0?S.filter(s=>s<=ts).length/n:null;
-  ['r-es','r-ss','r-ec','r-sc','r-n','r-theta','r-act','r-ps','r-irr'].forEach((id,k)=>{
+  // Exceedance probability P(X > T) and quadratic weighted risk
+  // R = E[(X-T)^2 * 1{X>T}]  (kappa = 1), as defined in the I/O guide
+  const exceed=(a,T)=>T>0?a.filter(x=>x>T).length/n:null;
+  const qRisk=(a,T)=>T>0?a.reduce((s,x)=>s+(x>T?(x-T)**2:0),0)/n:null;
+  const ps=exceed(S,ts),pc=exceed(C,tc),rs=qRisk(S,ts),rc=qRisk(C,tc);
+  ['r-es','r-ss','r-gs','r-ec','r-sc','r-gc','r-n','r-theta','r-act','r-ps','r-pc','r-rs','r-rc','r-irr'].forEach((id,k)=>{
     const el=i(id);if(!el)return;
-    el.textContent=[ES.toFixed(1),sS.toFixed(1),EC.toFixed(0),sC.toFixed(0),n,
-      febs.theta.toFixed(3),febs.activePairs,ps!==null?(100*ps).toFixed(1)+'%':'—',
+    el.textContent=[ES.toFixed(1),sS.toFixed(1),mS.g.toFixed(2),EC.toFixed(0),sC.toFixed(0),mC.g.toFixed(2),n,
+      febs.theta.toFixed(3),febs.activePairs,
+      ps!==null?(100*ps).toFixed(1)+'%':'—',
+      pc!==null?(100*pc).toFixed(1)+'%':'—',
+      rs!==null?rs.toFixed(1):'—',
+      rc!==null?rc.toFixed(1):'—',
       febs_IRR.filter(x=>x>0).length+'/'+N][k];
   });
   renderPipeline(febs);
   drawIRR();
   drawHist(S,'cv-s','Schedule (days)','#3b82f6',fns.reduce((a,f)=>a+f.ms,0));
-  drawHist(C,'cv-c','Costo ($k)','#f59e0b',fns.reduce((a,f)=>a+f.mc,0));
+  drawHist(C,'cv-c','Cost ($k)','#f59e0b',fns.reduce((a,f)=>a+f.mc,0));
   setDone(6,'E[S]='+ES.toFixed(1)+' IRR#1='+(fns[febs_IRR.map((v,ii)=>({v,i:ii})).sort((a,b)=>b.v-a.v)[0].i]?.nm||'F1').slice(0,6));
 }
 
@@ -1448,13 +1509,13 @@ function drawHist(data,cvId,label,color,mlv){
   ctx.setLineDash([]);
   if(mlv>0){
     const mlvX=PAD.l+(mlv-mn)/bw*bpx;
-    ctx.strokeStyle='var(--muted)';ctx.lineWidth=1;
+    ctx.strokeStyle='#64748b';ctx.lineWidth=1;
     ctx.beginPath();ctx.setLineDash([2,4]);ctx.moveTo(mlvX,PAD.t);ctx.lineTo(mlvX,PAD.t+gH);ctx.stroke();
     ctx.setLineDash([]);
   }
   ctx.fillStyle=color;ctx.font="bold 11px 'Space Mono'";
   ctx.fillText('E='+es.toFixed(1),esX+4,PAD.t+16);
-  ctx.fillStyle='var(--muted)';ctx.font="10px 'Space Mono'";
+  ctx.fillStyle='#64748b';ctx.font="10px 'Space Mono'";
   ctx.fillText(mn.toFixed(0),PAD.l,PAD.t+gH+20);
   ctx.fillText(mx.toFixed(0),PAD.l+gW-20,PAD.t+gH+20);
   ctx.fillText(label,PAD.l+gW/2-30,PAD.t+gH+20);
@@ -1464,9 +1525,9 @@ async function runSens(){
   const pVals=[50,75,90],bVals=[1.2,1.5,2.0];
   sensResults=[];
   const el=i('sens-cont');
-  if(el)el.innerHTML='<div style="color:var(--muted);font-size:11px">Calcolo 9 scenari...</div>';
+  if(el)el.innerHTML='<div style="color:var(--muted);font-size:11px">Computing 9 scenarios...</div>';
 
-  // Salva lo stato della run principale PRIMA di eseguire la sensitivity
+  // Save the main-run state BEFORE running the sensitivity analysis
   const _save = {
     simS:[...simS], simC:[...simC], ganttD:[...ganttD],
     febs_IRR:[...febs_IRR],
@@ -1482,21 +1543,21 @@ async function runSens(){
     if(res) sensResults.push({p,b,...res});
   }
 
-  // Ripristina lo stato della run principale
+  // Restore the main-run state
   simS=_save.simS; simC=_save.simC; ganttD=_save.ganttD;
   febs_IRR=_save.febs_IRR;
   febs_norms=_save.febs_norms; febs_S=_save.febs_S;
   febs_P=_save.febs_P; febs_freq=_save.febs_freq;
   _lastFebs=_save.lastFebs;
 
-  // Ridisegna IRR con i dati originali (non della sensitivity)
+  // Redraw IRR with the original data (not the sensitivity data)
   drawIRR();
 
   renderSens();
   sw('sens');
 }
 
-// Runner locale per sensitivity: non tocca le variabili globali UI
+// Local sensitivity runner: does not touch the global UI variables
 async function runSimLocal(p_pct, beta, pbase, rMax){
   const rho=+i('rho').value;
   const febs=febsInit(p_pct, beta, pbase);
@@ -1525,8 +1586,6 @@ async function runSimLocal(p_pct, beta, pbase, rMax){
 function renderSens(){
   const el=i('sens-cont');if(!el)return;
   if(!sensResults.length){el.innerHTML='Run sensitivity analysis first.';return;}
-  const topFn=name=>febs_IRR&&febs_IRR.length?
-    (fns[febs_IRR.map((v,ii)=>({v,i:ii})).sort((a,b)=>b.v-a.v)[0]?.i]?.nm||'—'):'—';
   let h=`<table style="border-collapse:collapse;font-family:'Space Mono',monospace;font-size:10px;width:100%">
     <thead><tr style="color:var(--muted)">
       <th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--b2)">p</th>
@@ -1535,9 +1594,9 @@ function renderSens(){
       <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">σS</th>
       <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">E[C]</th>
       <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">θ</th>
-      <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">Attive</th>
+      <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">Active</th>
       <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--b2)">IRR max</th>
-      <th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--b2)">Nodo #1</th>
+      <th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--b2)">Top node</th>
     </tr></thead><tbody>`;
   sensResults.forEach(r=>{
     const S=[...r.simS].sort((a,b)=>a-b),C=[...r.simC].sort((a,b)=>a-b),n=S.length;
@@ -1605,12 +1664,12 @@ function sw(t){
 // ═══════════════════════════════════════════════════════════════════════
 
 function loadAirport(){
-  // — prima pulisci tutto come un reset —
+  // — clear everything first, like a reset —
   simS=[];simC=[];ganttD=[];febs_IRR=[];febs_norms={};febs_S={};febs_P={};febs_freq=[];
   sensResults=[];_lastFebs=null;
 
-  // — azzera metriche e contenuti risultati —
-  ['r-es','r-ss','r-ec','r-sc','r-n','r-theta','r-act','r-ps','r-irr'].forEach(id=>{
+  // — clear metrics and results content —
+  ['r-es','r-ss','r-gs','r-ec','r-sc','r-gc','r-n','r-theta','r-act','r-ps','r-pc','r-rs','r-rc','r-irr'].forEach(id=>{
     const el=i(id);if(el)el.textContent='—';
   });
   const empty='<p style="color:var(--muted);font-size:11px">Run the simulation first.</p>';
@@ -1621,14 +1680,14 @@ function loadAirport(){
   });
   [2,3,4,5].forEach(k=>msg(k,'',''));
 
-  // — carica dati Airport —
+  // — load Airport dataset —
   fns=AIRPORT.fns.map(f=>({...f}));
   N=AIRPORT.n;
   dsmB=AIRPORT.dsm.map(r=>[...r]);
   tensorM=AIRPORT.tensor.map(r=>r.map(c=>[...c]));
   impactM=AIRPORT.impact.map(r=>[...r]);
 
-  // — wizard bar: tutti step done e unlocked —
+  // — wizard bar: all steps done and unlocked —
   [1,2,3,4,5,6].forEach(k=>{
     const ws=i('ws'+k);
     if(ws){ws.classList.remove('active','locked');ws.classList.add('done');}
@@ -1638,7 +1697,7 @@ function loadAirport(){
   i('ws5').classList.remove('locked');
   ['n1','n2','n3','n4','rb','sb'].forEach(id=>{const el=i(id);if(el)el.disabled=false;});
 
-  // — render e nav —
+  // — render and nav —
   renderFnList();renderDSM();
   nav(1);
   i('dot').className='dot';
@@ -1648,7 +1707,7 @@ function loadAirport(){
 }
 
 function resetAll(){
-  // — dati —
+  // — data —
   fns=[{nm:'F1',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
        {nm:'F2',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8},
        {nm:'F3',desc:'',bs:3,ms:5,ws:8,bc:3,mc:5,wc:8,ic:0.8}];
@@ -1659,7 +1718,7 @@ function resetAll(){
   simS=[];simC=[];ganttD=[];febs_IRR=[];febs_norms={};febs_S={};febs_P={};febs_freq=[];
   sensResults=[];_lastFebs=null;
 
-  // — wizard bar: tutti i step tornano allo stato iniziale —
+  // — wizard bar: all steps back to initial state —
   [1,2,3,4,5,6].forEach(k=>{
     const ws=i('ws'+k);
     if(ws){
@@ -1671,18 +1730,18 @@ function resetAll(){
     if(wst){wst.textContent='—';wst.className='wst';}
   });
 
-  // — bottoni next / run —
+  // — next / run buttons —
   ['n1','n2','n3','n4','rb','sb'].forEach(id=>{const el=i(id);if(el)el.disabled=true;});
 
-  // — messaggi step —
+  // — step messages —
   [1,2,3,4,5].forEach(k=>msg(k,'',''));
 
-  // — metriche striscia risultati —
-  ['r-es','r-ss','r-ec','r-sc','r-n','r-theta','r-act','r-ps','r-irr'].forEach(id=>{
+  // — results strip metrics —
+  ['r-es','r-ss','r-gs','r-ec','r-sc','r-gc','r-n','r-theta','r-act','r-ps','r-pc','r-rs','r-rc','r-irr'].forEach(id=>{
     const el=i(id);if(el)el.textContent='—';
   });
 
-  // — contenuti tab risultati —
+  // — results tab content —
   const empty='<p style="color:var(--muted);font-size:11px">Run the simulation first.</p>';
   ['irr-cont','sens-cont','pipe-cont'].forEach(id=>{const el=i(id);if(el)el.innerHTML=empty;});
 
@@ -1692,7 +1751,7 @@ function resetAll(){
     if(cv){const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);}
   });
 
-  // — progress bar e dot —
+  // — progress bar and dot —
   i('pf').style.width='0%';
   i('dot').className='dot';
   setS('');
@@ -1808,10 +1867,10 @@ function renderPipeline(febs) {
       <thead>
         <tr style="border-bottom:1px solid var(--b2)">
           <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:center">#</th>
-          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px" colspan="3">Coppia</th>
-          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px">Nomi</th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px" colspan="3">Pair</th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px">Names</th>
           <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:right">‖C‖<sub>w</sub></th>
-          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;min-width:100px">Barra</th>
+          <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;min-width:100px">Bar</th>
           <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:center">S<sub>ij</sub></th>
           <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:right">P<sub>ij</sub></th>
           <th style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:5px 8px;text-align:right">Imp.</th>
