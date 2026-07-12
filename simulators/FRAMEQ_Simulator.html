@@ -269,7 +269,7 @@ canvas{display:block;max-width:100%}
 
 <div class="body-wrap">
 
-<!-- ══ STEP 1: ATTIVITÀ ══ -->
+<!-- ══ STEP 1: ACTIVITIES ══ -->
 <div class="step-pane on" id="sp1">
   <div class="content-area">
     <div class="sec-hdr">Step 1 — Activity Definition</div>
@@ -282,7 +282,7 @@ canvas{display:block;max-width:100%}
     </div>
     <div class="acts-toolbar">
       <button class="add-btn" onclick="addActivity()">+ Add activity</button>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)" id="n-label">0 attivit&agrave;</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)" id="n-label">0 activities</span>
     </div>
     <table class="tbl" id="acts-table">
       <thead>
@@ -380,12 +380,12 @@ canvas{display:block;max-width:100%}
 <!-- ══ STEP 4: SIMULAZIONE ══ -->
 <div class="step-pane" id="sp4">
   <div class="mstrip">
-    <div class="met" id="met-rnet"><div class="met-lbl">E[R_net]</div><div class="met-val" id="m-rnet">&#8212;</div><div class="met-ref" id="m-rnet-ref">nominale —</div></div>
+    <div class="met" id="met-rnet"><div class="met-lbl">E[R_net]</div><div class="met-val" id="m-rnet">&#8212;</div><div class="met-ref" id="m-rnet-ref">nominal —</div></div>
     <div class="met"><div class="met-lbl">Var(Y)</div><div class="met-val" id="m-vary">&#8212;</div><div class="met-ref">variance R_net</div></div>
     <div class="met"><div class="met-lbl">Ne</div><div class="met-val" id="m-ne">&#8212;</div><div class="met-ref">samples</div></div>
     <div class="met"><div class="met-lbl">Evaluations</div><div class="met-val" id="m-eval">&#8212;</div><div class="met-ref">Ne&middot;(2k+2)</div></div>
     <div class="met"><div class="met-lbl">Top param</div><div class="met-val" id="m-top" style="font-size:12px">&#8212;</div><div class="met-ref">max Ti</div></div>
-    <div class="met"><div class="met-lbl">Tempo</div><div class="met-val" id="m-time">&#8212;</div><div class="met-ref">seconds</div></div>
+    <div class="met"><div class="met-lbl">Time</div><div class="met-val" id="m-time">&#8212;</div><div class="met-ref">seconds</div></div>
     <button class="exp-btn" id="exp-btn" onclick="exportJSON()" disabled>&#8595; JSON</button>
     <button class="exp-btn" id="exp-toolkit-btn" onclick="exportToolkitJSON()" disabled style="background:var(--cyan);color:#0d0d0d;margin-left:6px">&#8595; Toolkit JSON</button>
     <label style="display:inline-flex;align-items:center;margin-left:6px"><button class="exp-btn" onclick="importToolkitJSON()" style="background:var(--card2);border:1px solid var(--b2)">&#8593; Import Toolkit</button></label>
@@ -551,6 +551,8 @@ function calcStep1(){
     if(a.mlv <= 0){ s1msg('MLV must be > 0','err'); return; }
   }
   const sigMu = acts.map(a=>(a.wcv-a.bcv)/(6*a.mlv));
+  const bad = sigMu.findIndex(s=>s>=1);
+  if(bad>=0){ s1msg(`\u03c3(A${bad+1}) = ${sigMu[bad].toFixed(2)} \u2265 1 \u2014 duration spread too wide: require (WCV\u2212BCV) < 6\u00b7MLV`,'err'); return; }
   const sumD = acts.reduce((s,a)=>s+a.mlv,0);
   const wDur = acts.map(a=>a.mlv/sumD);
   computed.step1 = {n, sigMu, wDur, sumD};
@@ -579,7 +581,7 @@ function renderDSM(){
       const active=mActive.has(key);
       const cfg=active&&mData[key];
       const cls=!active?'off':cfg?'configured':'on';
-      const tip=active?`A${i}→A${j}`:'';
+      const tip=active?`A${i}←A${j} (A${i} depends on A${j})`:'';
       html+=`<div class="dsm-cell ${cls}" id="dc_${i}_${j}" onclick="toggleCell(${i},${j})" oncontextmenu="selectCell(${i},${j});return false;" title="${tip}"></div>`;
     }
   }
@@ -609,7 +611,7 @@ function updateF6Panel(){
   const pairLbl=document.getElementById('f6-pair');
   if(!selectedPair||!mActive.has(selectedPair)){ panel.style.display='none'; empty.style.display='block'; pairLbl.textContent='Select an active cell'; return; }
   const [i,j]=selectedPair.split(',').map(Number);
-  pairLbl.textContent=`A${i} → A${j} — ${acts[i-1]?.nm||''} → ${acts[j-1]?.nm||''}`;
+  pairLbl.textContent=`A${i} ← A${j} — ${acts[i-1]?.nm||''} depends on ${acts[j-1]?.nm||''}`;
   const vals=mData[selectedPair]||[0.5,0.5,0.5,0.5,0.5,0.5];
   let html='';
   FRAME6_LABELS.forEach((lbl,k)=>{
@@ -669,6 +671,7 @@ function calcStep2(){
   computed.step1.M=M; computed.step1.params=params;
   const k=params.length;
   s2msg(`✓ ${mActive.size} pairs — k=${k} parameters`,'ok');
+  document.getElementById('exp-toolkit-btn').disabled=false;
   setWizDone(2); setWizStatus(2, mActive.size+' pairs','ok');
   document.getElementById('s2-next').disabled=false;
   document.getElementById('ws3').classList.remove('locked');
@@ -692,7 +695,7 @@ function calcStep3(){
   document.getElementById('s3-next').disabled=false;
   document.getElementById('ws4').classList.remove('locked');
   document.getElementById('rb').disabled=false;
-  document.getElementById('m-rnet-ref').textContent='nominale '+Rnet.toFixed(4);
+  document.getElementById('m-rnet-ref').textContent='nominal '+Rnet.toFixed(4);
 }
 function s3msg(t,c){ const el=document.getElementById('s3-msg'); el.textContent=t; el.style.color=c==='ok'?'var(--green)':c==='warn'?'var(--orange)':'var(--red)'; }
 
@@ -703,15 +706,15 @@ function renderCalibration(){
   const nRes=cats.filter(c=>c==='Critical resonator').length;
   const nLat=cats.filter(c=>c==='Latent resonator').length;
   document.getElementById('cal-summary').innerHTML=`
-    <div class="calc-card"><div class="calc-label">R_net nominale</div><div class="calc-value cyan">${Rnet.toFixed(4)}</div><div class="calc-note">${Rnet>1?'network amplifies':'network attenuates'}</div></div>
-    <div class="calc-card"><div class="calc-label">Attivit&agrave; valide</div><div class="calc-value">${valid}</div><div class="calc-note">su ${n} totali</div></div>
-    <div class="calc-card"><div class="calc-label">Risonatori critici</div><div class="calc-value orange">${nRes}</div><div class="calc-note">Q-I: V↑ R↑</div></div>
-    <div class="calc-card"><div class="calc-label">Risonatori latenti</div><div class="calc-value" style="color:var(--cyan)">${nLat}</div><div class="calc-note">Q-II: V↓ R↑</div></div>
+    <div class="calc-card"><div class="calc-label">Nominal R_net</div><div class="calc-value cyan">${Rnet.toFixed(4)}</div><div class="calc-note">${Rnet>1?'network amplifies':'network attenuates'}</div></div>
+    <div class="calc-card"><div class="calc-label">Valid activities</div><div class="calc-value">${valid}</div><div class="calc-note">of ${n} total</div></div>
+    <div class="calc-card"><div class="calc-label">Critical resonators</div><div class="calc-value orange">${nRes}</div><div class="calc-note">Q-I: V↑ R↑</div></div>
+    <div class="calc-card"><div class="calc-label">Latent resonators</div><div class="calc-value" style="color:var(--cyan)">${nLat}</div><div class="calc-note">Q-II: V↓ R↑</div></div>
   `;
   // Table
   let rows='';
   for(let i=0;i<n;i++){
-    const ri=isNaN(Ri[i])?'n/d':Ri[i].toFixed(4);
+    const ri=isNaN(Ri[i])?'n/a':Ri[i].toFixed(4);
     const cat=cats[i]; const clr=CAT_COLORS[cat]||'var(--muted)';
     const catCls=cat==='Critical resonator'?'cat-crit':cat==='Latent resonator'?'cat-lat':cat==='Accumulator'?'cat-acc':cat==='Source (n/a)'?'cat-src':'cat-stab';
     rows+=`<tr>
@@ -757,16 +760,16 @@ function computeResonance(VOf,M,wDur,n){
 }
 
 function categorize(Ri,VOf,valid,n){
-  const validV=Array.from({length:n},(_,i)=>!isNaN(Ri[i]));
-  const rVals=Array.from({length:n},(_,i)=>isNaN(Ri[i])?null:Ri[i]).filter(v=>v!==null);
+  // Thresholds as defined in the paper and User Guide (Sec. 4.4):
+  // horizontal divider R_i = 1 (amplification threshold), vertical divider = median of V(Of_i)
   const vVals=Array.from({length:n},(_,i)=>isNaN(Ri[i])?null:VOf[i]).filter(v=>v!==null);
   const med=arr=>{const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
-  const thrR=med(rVals), thrV=med(vVals); // S1: thrR=median(Ri); thrV=median(V(Ofi)) — paper uses Ri=1 and median(V) as nominal thresholds
+  const thrR=1, thrV=med(vVals);
   return Array.from({length:n},(_,i)=>{
     if(isNaN(Ri[i])) return 'Source (n/a)';
-    if(VOf[i]>=thrV&&Ri[i]>=thrR) return 'Critical resonator';
-    if(VOf[i]< thrV&&Ri[i]>=thrR) return 'Latent resonator';
-    if(VOf[i]< thrV&&Ri[i]< thrR) return 'Stable';
+    if(VOf[i]>=thrV&&Ri[i]>thrR) return 'Critical resonator';
+    if(VOf[i]< thrV&&Ri[i]>thrR) return 'Latent resonator';
+    if(VOf[i]< thrV) return 'Stable';
     return 'Accumulator';
   });
 }
@@ -781,9 +784,10 @@ function drawRmap(VOf,Ri,cats,n){
   const validRi=Array.from({length:n},(_,i)=>isNaN(Ri[i])?null:Ri[i]).filter(v=>v!==null);
   const validV=Array.from({length:n},(_,i)=>isNaN(Ri[i])?null:VOf[i]).filter(v=>v!==null);
   if(validRi.length===0) return;
-  const maxV=Math.max(...validV)*1.25||1, maxR=Math.max(...validRi)*1.25||1;
+  const maxV=Math.max(...validV)*1.25||1;
+  const maxR=Math.max(Math.max(...validRi)*1.25||1, 1.15); // keep the R=1 divider visible
   const med=arr=>{const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
-  const thrV=med(validV), thrR=med(validRi);
+  const thrV=med(validV), thrR=1; // R=1 amplification threshold (paper / guide Sec. 4.6)
   const pad={l:56,r:24,t:28,b:50};
   const tx=x=>pad.l+(x/maxV)*(W-pad.l-pad.r);
   const ty=y=>H-pad.b-(y/maxR)*(H-pad.t-pad.b);
@@ -949,7 +953,7 @@ function gammaSample(a){
   if(a<1)return gammaSample(1+a)*Math.pow(Math.random(),1/a);
   const d=a-1/3,c=1/Math.sqrt(9*d);
   for(let i=0;i<2000;i++){
-    let x=0;for(let j=0;j<6;j++)x+=Math.random();x=(x-3)*Math.SQRT2;
+    const x=Math.sqrt(-2*Math.log(1-Math.random()))*Math.cos(2*Math.PI*Math.random()); // Box-Muller N(0,1)
     let v=1+c*x;if(v<=0)continue;v=v*v*v;
     const u=Math.random();
     if(u<1-0.0331*x*x*x*x)return d*v;
@@ -1045,6 +1049,12 @@ function stopRun(){stopFlag=true;}
 function showResults(Si,Ti,varY,YA,Ne,elapsed,k){
   const params=computed.step1.params;
   const mY=YA.reduce((a,b)=>a+b,0)/YA.length;
+  const sdY=Math.sqrt(YA.reduce((s,v)=>s+(v-mY)**2,0)/YA.length);
+  const skewY=sdY>0?YA.reduce((s,v)=>s+(v-mY)**3,0)/YA.length/sdY**3:0;
+  const kurtY=sdY>0?YA.reduce((s,v)=>s+(v-mY)**4,0)/YA.length/sdY**4-3:0;
+  const srt=[...YA].sort((a,b)=>a-b);
+  const medY=srt.length%2?srt[(srt.length-1)/2]:(srt[srt.length/2-1]+srt[srt.length/2])/2;
+  const pGt1=YA.filter(v=>v>1).length/YA.length;
   const order=Array.from({length:k},(_,i)=>i).sort((a,b)=>Ti[b]-Ti[a]);
   const Rnom=computed.step3.Rnet;
 
@@ -1058,13 +1068,17 @@ function showResults(Si,Ti,varY,YA,Ne,elapsed,k){
 
   const dev=(100*(mY-Rnom)/Math.max(Rnom,0.01)).toFixed(2);
   document.getElementById('ov-grid').innerHTML=
-    `<div class="ov-card"><div class="ov-title">Statistiche Y = R_net</div>
+    `<div class="ov-card"><div class="ov-title">Statistics Y = R_net</div>
     <div class="io-row"><span class="io-k">E[R_net]</span><span class="io-v">${mY.toFixed(6)}</span></div>
-    <div class="io-row"><span class="io-k">R_net nominale</span><span class="io-v">${Rnom.toFixed(6)}</span></div>
-    <div class="io-row"><span class="io-k">Scarto %</span><span class="io-hi">${dev}%</span></div>
+    <div class="io-row"><span class="io-k">Median[R_net]</span><span class="io-v">${medY.toFixed(6)}</span></div>
+    <div class="io-row"><span class="io-k">Nominal R_net</span><span class="io-v">${Rnom.toFixed(6)}</span></div>
+    <div class="io-row"><span class="io-k">Deviation %</span><span class="io-hi">${dev}%</span></div>
     <div class="io-row"><span class="io-k">Var(R_net)</span><span class="io-v">${varY.toFixed(6)}</span></div>
-    <div class="io-row"><span class="io-k">Ne / Valutazioni</span><span class="io-v">${Ne} / ${(Ne*(2+k)).toLocaleString()}</span></div>
-    <div class="io-row"><span class="io-k">Tempo</span><span class="io-v">${elapsed.toFixed(1)}s</span></div></div>
+    <div class="io-row"><span class="io-k">Skewness γ₁</span><span class="io-v">${skewY.toFixed(3)}</span></div>
+    <div class="io-row"><span class="io-k">Excess kurtosis γ₂</span><span class="io-v">${kurtY.toFixed(3)}</span></div>
+    <div class="io-row"><span class="io-k">P(R_net &gt; 1)</span><span class="io-v">${(100*pGt1).toFixed(1)}%</span></div>
+    <div class="io-row"><span class="io-k">Ne / Evaluations</span><span class="io-v">${Ne} / ${(Ne*(2+k)).toLocaleString()}</span></div>
+    <div class="io-row"><span class="io-k">Time</span><span class="io-v">${elapsed.toFixed(1)}s</span></div></div>
     <div class="ov-card" style="grid-column:1/-1"><div class="ov-title">Top-5 per Ti</div>
     ${order.slice(0,5).map((idx,r)=>`<div class="io-row"><span class="io-k">${r+1}. ${params[idx].name}</span><span><span style="color:var(--cyan)">Si=${Math.max(0,Si[idx]).toFixed(4)}</span>&nbsp;&nbsp;<span style="color:var(--blue)">Ti=${Math.max(0,Ti[idx]).toFixed(4)}</span></span></div>`).join('')}</div>`;
 
@@ -1077,13 +1091,16 @@ function buildSobolTable(Si,Ti,order,Ne,k){
   const params=computed.step1.params;
   const topN=Math.min(+document.getElementById('topn-sel').value||20,k);
   const maxTi=Math.max(...order.slice(0,topN).map(i=>Math.max(0,Ti[i])),0.001);
-  const warn=Ne<64?`<div class="warn-box">&#9888; Ne=${Ne} — indicative indices. Recommended Ne≥64.</div>`:'';
+  let warn=Ne<64?`<div class="warn-box">&#9888; Ne=${Ne} — indicative indices. Recommended Ne≥64.</div>`:'';
+  // Heavy-tailed R_net makes the first-order Si estimator noisy: flag inconsistent estimates
+  const inconsistent=order.slice(0,topN).some(i=>Si[i]>1.001||Si[i]>Ti[i]+0.1);
+  if(inconsistent) warn+=`<div class="warn-box">&#9888; Some Si estimates exceed their theoretical bounds (Si≤Ti≤1) — the R_net distribution is heavy-tailed and first-order indices are noisy at this Ne. Rank parameters by Ti; increase Ne (≥2048) for more stable Si.</div>`;
   let rows='';
   for(let r=0;r<topN;r++){
     const idx=order[r],p=params[idx];
     const ti=Math.max(0,Ti[idx]),si=Math.max(0,Si[idx]);
     const cls=p.type==='M'?'cM':(p.type==='s'?'cs':'cK');
-    const pair=p.type==='M'?`(A${p.i}→A${p.j})`:'';
+    const pair=p.type==='M'?`(A${p.i}←A${p.j})`:'';
     const asp=p.type==='M'?FRAME6_LABELS[p.k]:'';
     const wT=Math.round(ti/maxTi*100),wS=Math.round(si/maxTi*100);
     rows+=`<tr><td style="color:var(--muted);font-family:'JetBrains Mono',monospace">${r+1}</td><td class="${cls}" style="font-family:'JetBrains Mono',monospace;font-size:11px">${p.name}</td><td style="color:var(--muted);font-size:10px;font-family:'JetBrains Mono',monospace">${pair}</td><td style="color:var(--muted);font-size:10px">${asp}</td><td style="text-align:right;font-family:'JetBrains Mono',monospace">${si.toFixed(4)}</td><td style="text-align:right;font-family:'JetBrains Mono',monospace">${ti.toFixed(4)}</td><td style="width:100px"><div class="bbar"><div class="bTi" style="width:${wT}%"></div><div class="bSi" style="width:${wS}%"></div></div></td></tr>`;
@@ -1093,8 +1110,8 @@ function buildSobolTable(Si,Ti,order,Ne,k){
     <span><span style="display:inline-block;width:10px;height:6px;background:var(--blue);vertical-align:middle;margin-right:4px;border-radius:2px"></span>Total Ti</span>
     <span><span style="display:inline-block;width:10px;height:6px;background:var(--cyan);opacity:.6;vertical-align:middle;margin-right:4px;border-radius:2px"></span>First-order Si</span>
     <span style="margin-left:auto"><span style="color:var(--blue)">&bull; M</span>&nbsp;<span style="color:var(--orange)">&bull; σ</span>&nbsp;<span style="color:var(--muted)">&bull; K</span></span></div>
-    <table class="tbl"><thead><tr><th>#</th><th>Parametro</th><th>Pair</th><th>Aspect</th><th>Si</th><th>Ti</th><th>Barre</th></tr></thead><tbody>${rows}</tbody></table>
-    <button class="exp-btn" onclick="exportJSON()" style="margin-top:12px">&#8595; Esporta JSON</button>`;
+    <table class="tbl"><thead><tr><th>#</th><th>Parameter</th><th>Pair</th><th>Aspect</th><th>Si</th><th>Ti</th><th>Bars</th></tr></thead><tbody>${rows}</tbody></table>
+    <button class="exp-btn" onclick="exportJSON()" style="margin-top:12px">&#8595; Export JSON</button>`;
 }
 
 function drawDist(YA,Rnom){
@@ -1236,9 +1253,14 @@ function exportToolkitJSON(){
     _source: "FRAME-Q",
     timestamp: new Date().toISOString(),
     activities: acts.map((a,i)=>({
-      id: i+1, name: a.nm, bcv: a.bcv, mlv: a.mlv, wcv: a.wcv
+      id: i+1, name: a.nm, desc: '', bcv: a.bcv, mlv: a.mlv, wcv: a.wcv
     })),
     m_pairs: Object.fromEntries(Array.from(mActive).map(key=>[key,[...(mData[key]||[0,0,0,0,0,0])]])),
+    binary_dsm: (()=>{ const n=acts.length;
+      const d=Array.from({length:n},()=>new Array(n).fill(0));
+      mActive.forEach(key=>{ const [a,b]=key.split(',').map(Number);
+        if(a>=1&&a<=n&&b>=1&&b<=n&&a!==b) d[a-1][b-1]=1; });
+      return d; })(),
     sobol_results: (computed.step3 && simRes) ? {
       Rnet_nominal: +computed.step3.Rnet.toFixed(6),
       P_Rnet_gt1: simRes.YA ? +(simRes.YA.filter(v=>v>1).length/simRes.YA.length).toFixed(4) : null,
@@ -1285,11 +1307,11 @@ function clearAll(){
   document.getElementById('hdr-n').textContent='n = —';
   document.getElementById('hdr-k').textContent='k = —';
   document.getElementById('hdr-ne').textContent='Ne = —';
-  // Reset messaggi di stato
+  // Reset status messages
   setSt('Ready');
   setDot('idle');
   setPf(0);
-  // Reset messaggi step
+  // Reset step messages
   const msgs=['s1-msg','s2-msg','s3-msg','stmsg'];
   msgs.forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=id==='stmsg'?'Ready':'';}});
   // Reset metrics strip Step 4
@@ -1297,26 +1319,27 @@ function clearAll(){
     const el=document.getElementById(id);if(el)el.textContent='—';
   });
   document.getElementById('met-rnet').className='met';
-  document.getElementById('m-rnet-ref').textContent='nominale —';
+  document.getElementById('m-rnet-ref').textContent='nominal —';
   // Reset overview Step 4
   document.getElementById('ov-grid').innerHTML='<div class="ov-card" style="grid-column:1/-1"><div style="font-size:11px;color:var(--muted);line-height:1.8">Configure Ne and press RUN to start the Sobol simulation.</div></div>';
   document.getElementById('sobol-body').innerHTML='<span style="color:var(--muted);font-size:11px">No results.</span>';
-  // Reset pulsanti Step 4
+  // Reset Step 4 buttons
   document.getElementById('rb').disabled=true;
   document.getElementById('sb').classList.remove('vis');
   document.getElementById('exp-btn').disabled=true;
-  // Reset pulsanti avanti
+  document.getElementById('exp-toolkit-btn').disabled=true;
+  // Reset next buttons
   document.getElementById('s1-next').disabled=true;
   document.getElementById('s2-next').disabled=true;
   document.getElementById('s3-next').disabled=true;
-  // Reset cal-summary e cal-body
+  // Reset cal-summary and cal-body
   document.getElementById('cal-summary').innerHTML='';
   document.getElementById('cal-body').innerHTML='';
   document.getElementById('cal-rnet-box').innerHTML='';
-  // Reset canvas mappa risonanza (Step 3)
+  // Reset resonance map canvas (Step 3)
   const rmap=document.getElementById('rmap-canvas');
   if(rmap){const ctx=rmap.getContext('2d');ctx.clearRect(0,0,rmap.width,rmap.height);}
-  // Reset canvas distribuzione R_net (Step 4)
+  // Reset R_net distribution canvas (Step 4)
   const dist=document.getElementById('dist-canvas');
   if(dist){const ctx=dist.getContext('2d');ctx.clearRect(0,0,dist.width,dist.height);}
   [1,2,3,4].forEach(i=>{
@@ -1339,7 +1362,14 @@ function exportJSON(){
     meta:{n:computed.step1.n,Ne,k,Y:'R_net',sampler:'Beta-Marsaglia-Tsang',timestamp:new Date().toISOString(),elapsed_s:+elapsed.toFixed(1)},
     activities:acts.map((a,i)=>({id:'A'+(i+1),...a})),
     resonance_nominal:{Rnet:+computed.step3.Rnet.toFixed(6),VOf:Array.from(computed.step3.VOf).map(v=>+v.toFixed(6)),Ri:Array.from(computed.step3.Ri).map(v=>isNaN(v)?null:+v.toFixed(6)),categories:computed.step3.cats},
-    stats:{mean_Rnet:+mY.toFixed(6),var_Rnet:+varY.toFixed(8)},
+    stats:(()=>{ const sd=Math.sqrt(varY);
+      const sk=sd>0?YA.reduce((s,v)=>s+(v-mY)**3,0)/YA.length/sd**3:0;
+      const ku=sd>0?YA.reduce((s,v)=>s+(v-mY)**4,0)/YA.length/sd**4-3:0;
+      const st=[...YA].sort((a,b)=>a-b);
+      const md=st.length%2?st[(st.length-1)/2]:(st[st.length/2-1]+st[st.length/2])/2;
+      return {mean_Rnet:+mY.toFixed(6),median_Rnet:+md.toFixed(6),var_Rnet:+varY.toFixed(8),
+        sd_Rnet:+sd.toFixed(6),skewness_Rnet:+sk.toFixed(4),excess_kurtosis_Rnet:+ku.toFixed(4),
+        P_Rnet_gt1:+(YA.filter(v=>v>1).length/YA.length).toFixed(4),nu_used:getNu()}; })(),
     indices:params.map((p,i)=>({name:p.name,type:p.type,Si:+Math.max(0,Si[i]).toFixed(6),Ti:+Math.max(0,Ti[i]).toFixed(6)})).sort((a,b)=>b.Ti-a.Ti)
   };
   const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
