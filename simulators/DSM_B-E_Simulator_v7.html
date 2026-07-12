@@ -244,18 +244,18 @@ table.rtt td.best{color:var(--green);font-weight:700;}
     <!-- SIDEBAR: sim params + RUN -->
     <div class="inp-sidebar">
       <div class="inp-sidebar-scroll">
-        <div class="slabel">Parametri</div>
+        <div class="slabel">Parameters</div>
 
         <div class="param-row"><span class="param-label">Max run r</span><input class="param-input" id="rmax" type="number" value="1100" min="50" max="5000"></div>
         <div class="param-row"><span class="param-label">Batch b</span><input class="param-input" id="batch" type="number" value="100"></div>
-        <div class="param-row"><span class="param-label">α stabilità</span><input class="param-input" id="alpha" type="number" value="0.01" step="0.001"></div>
+        <div class="param-row"><span class="param-label">Stability α</span><input class="param-input" id="alpha" type="number" value="0.01" step="0.001"></div>
         <div class="param-row"><span class="param-label">ρ corr C-S</span><input class="param-input" id="rho" type="number" value="0.9" step="0.05"></div>
         <div class="param-row"><span class="param-label">Target T_C ($k)</span><input class="param-input" id="tc" type="number" value="630"></div>
         <div class="param-row"><span class="param-label">Target T_S (gg)</span><input class="param-input" id="ts" type="number" value="130"></div>
         <div class="param-row"><span class="param-label">κ_C</span><input class="param-input" id="kc" type="number" value="1" step="0.1"></div>
         <div class="param-row"><span class="param-label">κ_S</span><input class="param-input" id="ks" type="number" value="1" step="0.1"></div>
         <div class="param-row"><span class="param-label">LHS</span><button class="tog on" id="lb" onclick="togOpt('lhs')">ON</button></div>
-        <div class="param-row"><span class="param-label">Stabilità</span><button class="tog on" id="sb" onclick="togOpt('stab')">ON</button></div>
+        <div class="param-row"><span class="param-label">Stability</span><button class="tog on" id="sb" onclick="togOpt('stab')">ON</button></div>
 
         <div class="divider"></div>
         <div class="slabel">Riepilogo</div>
@@ -272,17 +272,17 @@ table.rtt td.best{color:var(--green);font-weight:700;}
     <!-- CONTENT AREA -->
     <div class="inp-content">
       <div class="subtabs">
-        <div class="stab on" id="st-acts" onclick="showSTab('acts')">Attività</div>
-        <div class="stab" id="st-dsm" onclick="showSTab('dsm')">DSM Binaria</div>
-        <div class="stab" id="st-prob" onclick="showSTab('prob')">Probabilità</div>
-        <div class="stab" id="st-imp" onclick="showSTab('imp')">Impatto</div>
-        <div class="stab" id="st-arch" onclick="showSTab('arch')">Architetture</div>
+        <div class="stab on" id="st-acts" onclick="showSTab('acts')">Activities</div>
+        <div class="stab" id="st-dsm" onclick="showSTab('dsm')">Binary DSM</div>
+        <div class="stab" id="st-prob" onclick="showSTab('prob')">Probability</div>
+        <div class="stab" id="st-imp" onclick="showSTab('imp')">Impact</div>
+        <div class="stab" id="st-arch" onclick="showSTab('arch')">Architectures</div>
       </div>
 
-      <!-- ATTIVITÀ -->
+      <!-- ACTIVITIES -->
       <div class="subpane on" id="sp-acts">
         <div class="acts-toolbar">
-          <div class="slabel" style="margin:0">Attività</div>
+          <div class="slabel" style="margin:0">Activities</div>
           <div class="n-ctrl">
             <button class="nb" onclick="rmAct()">−</button>
             <div class="nv" id="nv">14</div>
@@ -301,8 +301,8 @@ table.rtt td.best{color:var(--green);font-weight:700;}
               <tr>
                 <th></th>
                 <th class="left">Nome</th>
-                <th colspan="3" style="color:var(--blue);font-size:10px;">Durata (giorni)</th>
-                <th colspan="3" style="color:var(--orange);font-size:10px;">Costo ($k)</th>
+                <th colspan="3" style="color:var(--blue);font-size:10px;">Duration (days)</th>
+                <th colspan="3" style="color:var(--orange);font-size:10px;">Cost ($k)</th>
                 <th style="color:var(--purple);font-size:10px;">IC</th>
               </tr>
               <tr>
@@ -326,11 +326,11 @@ table.rtt td.best{color:var(--green);font-weight:700;}
         <div class="mx-wrap" id="dsm-wrap"></div>
       </div>
 
-      <!-- PROBABILITÀ -->
+      <!-- PROBABILITY -->
       <div class="subpane" id="sp-prob">
         <div class="mx-toolbar">
-          <div class="slabel" style="margin:0">Probabilità DSM<sub>ij1</sub></div>
-          <span class="mx-help">P(rework da j→i) · [0, 1] · celle grigie = nessuna dipendenza DSM</span>
+          <div class="slabel" style="margin:0">Probability DSM<sub>ij1</sub></div>
+          <span class="mx-help">P(rework from j→i) · [0, 1] · grey cells = no DSM dependency</span>
         </div>
         <div class="mx-wrap" id="prob-wrap"></div>
       </div>
@@ -338,30 +338,30 @@ table.rtt td.best{color:var(--green);font-weight:700;}
       <!-- IMPATTO -->
       <div class="subpane" id="sp-imp">
         <div class="mx-toolbar">
-          <div class="slabel" style="margin:0">Impatto DSM<sub>ij2</sub></div>
-          <span class="mx-help">Frazione da rifare · [0, 1] · celle grigie = nessuna dipendenza DSM</span>
+          <div class="slabel" style="margin:0">Impact DSM<sub>ij2</sub></div>
+          <span class="mx-help">Fraction to redo · [0, 1] · grey cells = no DSM dependency</span>
         </div>
         <div class="mx-wrap" id="imp-wrap"></div>
       </div>
 
-      <!-- ARCHITETTURE -->
+      <!-- ARCHITECTURES -->
       <div class="subpane" id="sp-arch">
-        <div class="slabel">Architetture Salvate</div>
+        <div class="slabel">Saved Architectures</div>
         <div class="arch-list" id="arch-list"></div>
 
         <div class="new-arch-box">
-          <div class="slabel" style="margin-bottom:12px;">+ Nuova Architettura (Partitioning)</div>
+          <div class="slabel" style="margin-bottom:12px;">+ New Architecture (Partitioning)</div>
           <div class="na-row">
-            <span class="na-lbl">Nome</span>
-            <input class="na-inp" id="na-name" placeholder="Es: Arch. 2 — Act13 anticipata">
+            <span class="na-lbl">Name</span>
+            <input class="na-inp" id="na-name" placeholder="E.g.: Arch. 2 — Act13 moved up">
           </div>
           <div class="na-row">
-            <span class="na-lbl">Vettore V</span>
-            <input class="na-inp" id="na-vec" placeholder="Es: 1,2,3,13,4,5,6,7,8,9,10,11,12,14">
+            <span class="na-lbl">Vector V</span>
+            <input class="na-inp" id="na-vec" placeholder="E.g.: 1,2,3,13,4,5,6,7,8,9,10,11,12,14">
           </div>
           <div class="na-btns">
-            <button class="na-add" onclick="addArch()">Salva Architettura</button>
-            <button class="na-secondary" onclick="saveBaselineArch()">Salva Baseline (ordine corrente)</button>
+            <button class="na-add" onclick="addArch()">Save Architecture</button>
+            <button class="na-secondary" onclick="saveBaselineArch()">Save Baseline (current order)</button>
           </div>
           <div class="na-err" id="na-err"></div>
         </div>
@@ -378,8 +378,8 @@ table.rtt td.best{color:var(--green);font-weight:700;}
       <div class="metrics-strip">
         <div class="met"><div class="met-label">E[C] $k</div><div class="met-value" id="m-ec">—</div><div class="met-ref">paper 637</div></div>
         <div class="met"><div class="met-label">σ_C $k</div><div class="met-value" id="m-sc">—</div><div class="met-ref">paper 63</div></div>
-        <div class="met"><div class="met-label">E[S] giorni</div><div class="met-value" id="m-es">—</div><div class="met-ref">paper 138</div></div>
-        <div class="met"><div class="met-label">σ_S giorni</div><div class="met-value" id="m-ss">—</div><div class="met-ref">paper 14</div></div>
+        <div class="met"><div class="met-label">E[S] days</div><div class="met-value" id="m-es">—</div><div class="met-ref">paper 138</div></div>
+        <div class="met"><div class="met-label">σ_S days</div><div class="met-value" id="m-ss">—</div><div class="met-ref">paper 14</div></div>
         <div class="met"><div class="met-label">γ_C skew</div><div class="met-value" id="m-gc">—</div><div class="met-ref">paper 0.58</div></div>
         <div class="met"><div class="met-label">γ_S skew</div><div class="met-value" id="m-gs">—</div><div class="met-ref">paper 0.55</div></div>
         <div class="met"><div class="met-label">P_C</div><div class="met-value" id="m-pc">—</div><div class="met-ref">paper 0.51</div></div>
@@ -397,7 +397,7 @@ table.rtt td.best{color:var(--green);font-weight:700;}
         <div class="ostab" id="ot-joint" onclick="showOTab('joint')">Joint C-S</div>
         <div class="ostab" id="ot-crit" onclick="showOTab('crit')">Criticality</div>
         <div class="ostab" id="ot-gantt" onclick="showOTab('gantt')">Single Run</div>
-        <div class="ostab" id="ot-compare" onclick="showOTab('compare')">Confronto Arch.</div>
+        <div class="ostab" id="ot-compare" onclick="showOTab('compare')">Arch. Compare</div>
       </div>
 
       <!-- OUTPUT CONTENT -->
@@ -406,44 +406,44 @@ table.rtt td.best{color:var(--green);font-weight:700;}
         <div class="opane on" id="op-overview">
           <div class="ov-grid">
             <div class="ov-card">
-              <div class="ov-title">Input Corrente</div>
-              <div id="ov-inputs"><p style="color:var(--muted);font-size:12px;">Carica un esempio o configura le attività nel tab INPUT.</p></div>
+              <div class="ov-title">Current Input</div>
+              <div id="ov-inputs"><p style="color:var(--muted);font-size:12px;">Load an example or configure the activities in the INPUT tab.</p></div>
             </div>
             <div class="ov-card">
               <div class="ov-title">Output vs Paper</div>
-              <div id="ov-outputs"><p style="color:var(--muted);font-size:12px;">Esegui la simulazione (tab INPUT → RUN) per vedere i risultati.</p></div>
+              <div id="ov-outputs"><p style="color:var(--muted);font-size:12px;">Run the simulation (INPUT tab → RUN) to see the results.</p></div>
             </div>
           </div>
         </div>
 
         <div class="opane" id="op-sched">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Schedule distribution — istogramma + CDF (paper Fig. 8 bottom)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Schedule distribution — histogram + CDF (paper Fig. 8 bottom)</div>
           <canvas id="cv-s"></canvas>
         </div>
 
         <div class="opane" id="op-cost">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Cost distribution — istogramma + CDF (paper Fig. 8 top)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Cost distribution — histogram + CDF (paper Fig. 8 top)</div>
           <canvas id="cv-c"></canvas>
         </div>
 
         <div class="opane" id="op-joint">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Joint Cost-Schedule scatter (paper Fig. 9) — colorato per quadrante overrun</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Joint Cost-Schedule scatter (paper Fig. 9) — coloured by overrun quadrant</div>
           <canvas id="cv-j"></canvas>
         </div>
 
         <div class="opane" id="op-crit">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Interface Criticality — analitica (paper eq.10, Fig. 7)</div>
-          <div id="crit-c"><p style="color:var(--muted);">Esegui la simulazione per calcolare.</p></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Interface Criticality — analytical (paper eq. 10, Fig. 7)</div>
+          <div id="crit-c"><p style="color:var(--muted);">Run the simulation to compute.</p></div>
         </div>
 
         <div class="opane" id="op-gantt">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Work vector W — singolo run campione (paper Fig. 5)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Work vector W — single sample run (paper Fig. 5)</div>
           <canvas id="cv-g"></canvas>
         </div>
 
         <div class="opane" id="op-compare">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Confronto architetture — stile Table V del paper</div>
-          <div id="compare-c"><p style="color:var(--muted);">Simula più architetture per confrontarle qui.</p></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Architecture comparison — paper Table V style</div>
+          <div id="compare-c"><p style="color:var(--muted);">Simulate more architectures to compare them here.</p></div>
         </div>
 
       </div><!-- out-content -->
@@ -455,7 +455,7 @@ table.rtt td.best{color:var(--green);font-weight:700;}
 <!-- STATUS BAR -->
 <div class="statusbar">
   <div class="dot" id="dot"></div>
-  <span id="stxt">Pronto — carica UCAV 2002 (tab Attività) e premi RUN</span>
+  <span id="stxt">Ready — load UCAV 2002 (Activities tab) and press RUN</span>
 </div>
 
 <script>
@@ -510,7 +510,7 @@ prob:[[0,0,0,0,0],[0.4,0,0,0,0],[0.2,0.3,0,0,0],[0,0.35,0.4,0,0],[0.15,0.2,0.25,
 imp:[[0,0,0,0,0],[0.3,0,0,0,0],[0.2,0.4,0,0,0],[0,0.3,0.5,0,0],[0.2,0.3,0.4,0.3,0]],
 }};
 
-// ══ MATH CORE (identical to v4) ══
+// ══ MATH CORE — contiguous banding + limited-radius second-order rework (Guide Sec. 3.3-3.4) ══
 function triICDF(u,a,b,c){const F=(b-a)/(c-a);return u<=F?a+Math.sqrt(u*(b-a)*(c-a)):c-Math.sqrt((1-u)*(c-a)*(c-b));}
 function phiInv(p){p=Math.max(1e-10,Math.min(1-1e-10,p));const a=[2.515517,0.802853,0.010328],b=[1.432788,0.189269,0.001308];const t=p<0.5?Math.sqrt(-2*Math.log(p)):Math.sqrt(-2*Math.log(1-p));const z=t-(a[0]+a[1]*t+a[2]*t*t)/(1+b[0]*t+b[1]*t*t+b[2]*t*t*t);return p<0.5?-z:z;}
 function phi(z){return 0.5*(1+erf(z/Math.SQRT2));}
@@ -526,7 +526,7 @@ function bandingWith(W,WN,pm,n){
   for(let i=0;i<n;i++){if(W[i]>0){WN[i]=true;f=i;break;}}
   if(f<0)return;
   for(let j=f+1;j<n;j++){
-    if(W[j]>0){let ok=true;for(let k=f;k<j;k++){if(pm[j][k]>0&&W[k]>0){ok=false;break;}}if(ok)WN[j]=true;}
+    if(W[j]>0){let ok=true;for(let k=f;k<j;k++){if(pm[j][k]>0&&W[k]>0){ok=false;break;}}if(ok)WN[j]=true;else break;}
   }
 }
 
@@ -552,7 +552,10 @@ function singleRunWith(u_s,u_c,rho,rec,n,actsA,pm,im){
       for(let j=0;j<ci;j++){
         if(pm[j][ci]>0&&Math.random()<=pm[j][ci]){
           W[j]+=im[j][ci]*actsA[j].ic;if(W[j]>1)W[j]=0.9;
-          for(let k=j+1;k<n;k++){
+          // Second-order rework: limited radius — only intermediate activities
+          // strictly between the reworked activity j and the triggering activity ci
+          // (Browning 1998, Ch. 6; Guide Sec. 3.4). It does not propagate beyond ci.
+          for(let k=j+1;k<ci;k++){
             if(pm[k][j]>0&&Math.random()<=pm[k][j]){
               if(W[k]===1)W[k]=2;W[k]+=im[k][j]*actsA[k].ic;if(W[k]>=2)W[k]=1;if(W[k]>1)W[k]=0.9;
             }
@@ -677,17 +680,17 @@ function updateSummary(){
   const sumEC=acts.reduce((a,x)=>a+(x.bc+x.mc+x.wc)/3,0);
   const nz=probM.flat().filter(v=>v>0).length;
   const nd=dsmBin.flat().filter(v=>v>0).length;
-  const rows=[['n attività',N],['Dipendenze DSM',nd],['Σ E[S_i]',sumES.toFixed(1)+' d'],['Σ E[C_i]','$'+sumEC.toFixed(0)+'k'],['Entry prob>0',nz]];
+  const rows=[['n activities',N],['DSM dependencies',nd],['Σ E[S_i]',sumES.toFixed(1)+' d'],['Σ E[C_i]','$'+sumEC.toFixed(0)+'k'],['Entry prob>0',nz]];
   document.getElementById('sim-summary').innerHTML=rows.map(([k,v])=>`<div class="summary-row"><span class="sk">${k}</span><span class="sv">${v}</span></div>`).join('');
   document.getElementById('ov-inputs').innerHTML=
-    ioRow('n attività',N)+ioRow('Campionamento',useLHS?'LHS':'Random')+
+    ioRow('n activities',N)+ioRow('Sampling',useLHS?'LHS':'Random')+
     ioRow('ρ C-S',document.getElementById('rho').value)+
     ioRow('Dipendenze DSM',nd)+ioRow('Entry prob>0',nz)+
     `<div style="margin-top:6px;padding-top:5px;border-top:1px solid var(--b1);">`+
     ioRow('Σ E[S_i]',sumES.toFixed(1)+' d')+ioRow('Σ E[C_i]','$'+sumEC.toFixed(0)+'k')+`</div>`;
   if(architectures.length>0){
     const a=architectures[currentArchIdx];
-    document.getElementById('sim-arch-label').textContent='Arch. corrente: '+a.name;
+    document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;
     document.getElementById('hdr-arch').textContent=a.name;
   }
 }
@@ -699,7 +702,7 @@ function ioRowOut(k,v,ref){const rs=ref?`<span style="color:var(--muted);font-si
 function saveBaselineArch(){
   const name=document.getElementById('na-name').value.trim()||('Arch. '+(architectures.length+1)+' baseline');
   architectures.push({name,V:Array.from({length:N},(_,i)=>i+1),acts_seq:acts.map(a=>({...a})),prob_seq:probM.map(r=>[...r]),imp_seq:impM.map(r=>[...r]),results:null});
-  currentArchIdx=architectures.length-1;renderArchList();setStatus('Salvata: '+name);
+  currentArchIdx=architectures.length-1;renderArchList();setStatus('Saved: '+name);
   document.getElementById('na-name').value='';
 }
 function addArch(){
@@ -718,7 +721,7 @@ function addArch(){
 }
 function renderArchList(){
   const el=document.getElementById('arch-list');
-  if(!architectures.length){el.innerHTML='<p style="color:var(--muted);font-size:12px;">Nessuna architettura. Salva la baseline per iniziare.</p>';return;}
+  if(!architectures.length){el.innerHTML='<p style="color:var(--muted);font-size:12px;">No architectures yet. Save the baseline to start.</p>';return;}
   el.innerHTML=architectures.map((a,idx)=>`
     <div class="arch-item${idx===currentArchIdx?' active':''}">
       <div class="arch-item-info">
@@ -731,9 +734,9 @@ function renderArchList(){
       <button class="arch-btn del" onclick="delArch(${idx})">✕</button>
     </div>`).join('');
 }
-function selectArch(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];if(a.results)showStoredResults(a);document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Arch. corrente: '+a.name;}
+function selectArch(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];if(a.results)showStoredResults(a);document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;}
 function delArch(idx){architectures.splice(idx,1);if(currentArchIdx>=architectures.length)currentArchIdx=Math.max(0,architectures.length-1);renderArchList();}
-function selectAndSim(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Arch. corrente: '+a.name;runSim();}
+function selectAndSim(idx){currentArchIdx=idx;renderArchList();const a=architectures[idx];document.getElementById('hdr-arch').textContent=a.name;document.getElementById('sim-arch-label').textContent='Current arch.: '+a.name;runSim();}
 
 // ══ SIMULATION ══
 async function runSim(){
@@ -744,11 +747,11 @@ async function runSim(){
   const CHUNK=40;
   let runActs,runProb,runImp,archName;
   if(architectures.length>0){const a=architectures[currentArchIdx];runActs=a.acts_seq;runProb=a.prob_seq;runImp=a.imp_seq;archName=a.name;}
-  else{runActs=acts;runProb=probM;runImp=impM;archName='(baseline non salvata)';}
+  else{runActs=acts;runProb=probM;runImp=impM;archName='(baseline not saved)';}
   const n=runActs.length;
   curSimS=[];curSimC=[];curGantt=[];
   document.getElementById('rb').disabled=true;document.getElementById('dot').className='dot run';
-  setStatus('Simulazione in corso...');
+  setStatus('Simulation running...');
   let r=0,stab=false;
   while(r<rMax&&!stab){
     const chunk=Math.min(CHUNK,rMax-r);
@@ -757,11 +760,11 @@ async function runSim(){
     for(let i=0;i<chunk;i++){const res=singleRunWith(us[i],uc[i],rho,r+i===0,n,runActs,runProb,runImp);curSimS.push(res.S);curSimC.push(res.C);if(r+i===0)curGantt=res.gantt||[];}
     r+=chunk;if(useStab&&r>=2*b&&stable(curSimS,b,alpha))stab=true;
     document.getElementById('pf').style.width=`${Math.round(r/rMax*100)}%`;
-    setStatus(`Run ${r}/${rMax}${stab?' — stabile':''} — ${archName}`);
+    setStatus(`Run ${r}/${rMax}${stab?' — stable':''} — ${archName}`);
     await new Promise(res=>setTimeout(res,0));
   }
   document.getElementById('rb').disabled=false;document.getElementById('dot').className='dot ok';
-  setStatus(`Completato ${curSimS.length} run${stab?' (stabilità)':''} — ${archName}`);
+  setStatus(`Completed ${curSimS.length} runs${stab?' (stability)':''} — ${archName}`);
   document.getElementById('pf').style.width='100%';
   const res=computeMetrics(curSimS,curSimC);
   if(architectures.length>0){architectures[currentArchIdx].results={...res,runs:curSimS.length,stab};architectures[currentArchIdx].simS=[...curSimS];architectures[currentArchIdx].simC=[...curSimC];renderArchList();}
@@ -787,7 +790,7 @@ function showStoredResults(arch){
   if(!arch.results)return;const r=arch.results;
   setMetrics(r.EC,r.sC,r.ES,r.sS,r.gC,r.gS,r.PC,r.PS,r.RC,r.RS,r.runs);
   document.getElementById('m-arch-tag').textContent=arch.name;
-  if(arch.simS){drawHist('cv-s',[...arch.simS].sort((a,b)=>a-b),r.TS||130,'#4a9eff','Schedule (giorni)');drawHist('cv-c',[...arch.simC].sort((a,b)=>a-b),r.TC||630,'#f5952a','Costo ($k)');drawJoint(arch.simS,arch.simC,r.TS||130,r.TC||630);}
+  if(arch.simS){drawHist('cv-s',[...arch.simS].sort((a,b)=>a-b),r.TS||130,'#4a9eff','Schedule (days)');drawHist('cv-c',[...arch.simC].sort((a,b)=>a-b),r.TC||630,'#f5952a','Cost ($k)');drawJoint(arch.simS,arch.simC,r.TS||130,r.TC||630);}
 }
 
 function showResultsData(res,S_arr,C_arr,gantt,archName,runs,n,rA,rP,rI){
@@ -795,8 +798,8 @@ function showResultsData(res,S_arr,C_arr,gantt,archName,runs,n,rA,rP,rI){
   setMetrics(EC,sC,ES,sS,gC,gS,PC,PS,RC,RS,runs);
   document.getElementById('m-arch-tag').textContent=archName;
   const S=[...S_arr].sort((a,b)=>a-b),C=[...C_arr].sort((a,b)=>a-b);
-  drawHist('cv-s',S,TS,'#4a9eff','Schedule (giorni)');
-  drawHist('cv-c',C,TC,'#f5952a','Costo ($k)');
+  drawHist('cv-s',S,TS,'#4a9eff','Schedule (days)');
+  drawHist('cv-c',C,TC,'#f5952a','Cost ($k)');
   drawJoint(S_arr,C_arr,TS,TC);
   drawCrit(rA,rP,rI,n);
   if(gantt&&gantt.length)drawGantt(gantt,n,rA);
@@ -868,10 +871,10 @@ function drawJoint(S,C,TS,TC){
   ctx.strokeStyle='#263050';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(p.l,p.t);ctx.lineTo(p.l,p.t+ph);ctx.lineTo(p.l+pw,p.t+ph);ctx.stroke();
   ctx.fillStyle='#5e6d8f';ctx.font='11px JetBrains Mono';
-  ctx.fillText('Schedule (giorni)',p.l+pw/2-55,H-6);
-  ctx.save();ctx.translate(14,p.t+ph/2+30);ctx.rotate(-Math.PI/2);ctx.fillText('Costo ($k)',0,0);ctx.restore();
+  ctx.fillText('Schedule (days)',p.l+pw/2-55,H-6);
+  ctx.save();ctx.translate(14,p.t+ph/2+30);ctx.rotate(-Math.PI/2);ctx.fillText('Cost ($k)',0,0);ctx.restore();
   ctx.fillText(Sm.toFixed(0),p.l,p.t+ph+16);ctx.fillText(Sx.toFixed(0),p.l+pw-28,p.t+ph+16);
-  [['Entrambi over','rgba(232,69,69,.9)'],['Schedule over','rgba(245,149,42,.9)'],['Costo over','rgba(157,124,244,.9)'],['In target','rgba(74,158,255,.7)']].forEach(([l,c],i)=>{
+  [['Both over','rgba(232,69,69,.9)'],['Schedule over','rgba(245,149,42,.9)'],['Cost over','rgba(157,124,244,.9)'],['In target','rgba(74,158,255,.7)']].forEach(([l,c],i)=>{
     ctx.fillStyle=c;ctx.beginPath();ctx.arc(p.l+7,p.t+12+i*16,4,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#7a8aaa';ctx.fillText(l,p.l+14,p.t+16+i*16);
   });
@@ -884,17 +887,17 @@ function drawCrit(rA,pm,im,n){
     if(p>0&&imp>0){const icj=rA[j].ic,msj=rA[j].ms;pairs.push({i,j,p,im:imp,icj,msj,crit:p*imp*icj*msj,lbl:`${rA[i].nm} ← ${rA[j].nm}`});}
   }
   pairs.sort((a,b)=>b.crit-a.crit);
-  if(!pairs.length){document.getElementById('crit-c').innerHTML='<p style="color:var(--muted)">Nessuna entry non zero.</p>';return;}
+  if(!pairs.length){document.getElementById('crit-c').innerHTML='<p style="color:var(--muted)">No non-zero entries.</p>';return;}
   const mx=pairs[0].crit;
   const byA=new Array(n).fill(0);pairs.forEach(p=>byA[p.i]+=p.crit);
   const ar=[...rA.map((a,i)=>({nm:a.nm,v:byA[i]}))].sort((a,b)=>b.v-a.v);const ma=ar[0].v||1;
-  let h=`<table class="crt"><thead><tr><th>Interfaccia</th><th>Prob</th><th>Impact</th><th>IC_j</th><th>ActS_j</th><th>Criticità</th><th style="min-width:100px"></th></tr></thead><tbody>`;
+  let h=`<table class="crt"><thead><tr><th>Interface</th><th>Prob</th><th>Impact</th><th>IC_j</th><th>ActS_j</th><th>Criticality</th><th style="min-width:100px"></th></tr></thead><tbody>`;
   pairs.slice(0,20).forEach((p,idx)=>{
     const col=idx===0?'var(--orange)':'var(--blue)';const bw=Math.round((p.crit/mx)*100);
     h+=`<tr><td style="color:${col};font-weight:${idx===0?700:400}">${p.lbl}</td><td>${p.p.toFixed(2)}</td><td>${p.im.toFixed(2)}</td><td>${p.icj.toFixed(2)}</td><td>${p.msj}</td><td style="color:${col}">${p.crit.toFixed(3)}</td><td><div class="cbar" style="width:${bw}px;background:${col}"></div></td></tr>`;
   });
-  h+=`</tbody></table><div style="margin-top:16px;"><div style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Rank attività — Σ criticità incoming</div>
-  <table class="crt"><thead><tr><th>Rank</th><th>Attività</th><th>Σ Criticità</th><th style="min-width:140px"></th></tr></thead><tbody>`;
+  h+=`</tbody></table><div style="margin-top:16px;"><div style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Activity rank — Σ incoming criticality</div>
+  <table class="crt"><thead><tr><th>Rank</th><th>Activity</th><th>Σ Criticality</th><th style="min-width:140px"></th></tr></thead><tbody>`;
   ar.forEach((a,idx)=>{const col=idx===0?'var(--orange)':'var(--green)';const bw=Math.round((a.v/ma)*140);h+=`<tr><td style="color:${col}">${idx+1}</td><td style="color:${col};font-weight:${idx===0?700:400}">${a.nm}</td><td style="color:${col}">${a.v.toFixed(3)}</td><td><div class="cbar" style="width:${bw}px;background:${col}"></div></td></tr>`;});
   h+=`</tbody></table></div>`;document.getElementById('crit-c').innerHTML=h;
 }
@@ -936,12 +939,12 @@ function drawOverview(ES,sS,EC,sC,gS,gC,PS,PC,RS,RC,runs){
 
 function drawCompare(){
   const done=architectures.filter(a=>a.results);
-  if(done.length<1){document.getElementById('compare-c').innerHTML='<p style="color:var(--muted)">Simula almeno 1 architettura.</p>';return;}
+  if(done.length<1){document.getElementById('compare-c').innerHTML='<p style="color:var(--muted)">Simulate at least 1 architecture.</p>';return;}
   const metrics=['E[C] $k','σ_C $k','E[S] d','σ_S d','γ_C','γ_S','P_C','P_S','R_C','R_S'];
   const keys=['EC','sC','ES','sS','gC','gS','PC','PS','RC','RS'];
   const fmts=[0,0,1,1,2,2,3,3,0,0];
   const pv=N===14?[DS.ucav.paper.EC,DS.ucav.paper.sC,DS.ucav.paper.ES,DS.ucav.paper.sS,DS.ucav.paper.gC,DS.ucav.paper.gS,DS.ucav.paper.PC,DS.ucav.paper.PS,DS.ucav.paper.RC,DS.ucav.paper.RS]:null;
-  let h=`<table class="rtt"><thead><tr><th class="left">Metrica</th>`;
+  let h=`<table class="rtt"><thead><tr><th class="left">Metric</th>`;
   if(pv)h+=`<th>Paper</th>`;done.forEach(a=>h+=`<th>${a.name}</th>`);h+=`</tr></thead><tbody>`;
   keys.forEach((k,ki)=>{
     const vals=done.map(a=>a.results[k]),mn=Math.min(...vals);
@@ -950,7 +953,7 @@ function drawCompare(){
     done.forEach(a=>{const v=a.results[k];h+=`<td class="${v===mn?'best':''}">${v.toFixed(fmts[ki])}</td>`;});
     h+=`</tr>`;
   });
-  h+=`</tbody></table><div class="note-box">Il <strong style="color:var(--green)">verde</strong> indica il valore minimo per riga. Per P_C, P_S, R_C, R_S valori minori = minor rischio.</div>`;
+  h+=`</tbody></table><div class="note-box"><strong style="color:var(--green)">Green</strong> marks the row minimum. For P_C, P_S, R_C, R_S lower values = lower risk.</div>`;
   document.getElementById('compare-c').innerHTML=h;
 }
 
@@ -963,7 +966,7 @@ function loadEx(name){
   architectures=[];currentArchIdx=0;curSimS=[];curSimC=[];curGantt=[];
   document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
   clearMetrics();renderAll();
-  setStatus('Dataset '+name.toUpperCase()+' caricato — vai ad Architetture, salva baseline, poi RUN');
+  setStatus('Dataset '+name.toUpperCase()+' loaded — go to Architectures, save the baseline, then RUN');
 }
 function clearMetrics(){
   ['m-ec','m-sc','m-es','m-ss','m-gc','m-gs','m-pc','m-ps','m-rc','m-rs','m-r'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
@@ -995,8 +998,8 @@ function showOTab(name){
 }
 function redrawChart(name){
   const TS=+document.getElementById('ts').value||130,TC=+document.getElementById('tc').value||630;
-  if(name==='sched'&&curSimS.length)drawHist('cv-s',[...curSimS].sort((a,b)=>a-b),TS,'#4a9eff','Schedule (giorni)');
-  if(name==='cost'&&curSimC.length)drawHist('cv-c',[...curSimC].sort((a,b)=>a-b),TC,'#f5952a','Costo ($k)');
+  if(name==='sched'&&curSimS.length)drawHist('cv-s',[...curSimS].sort((a,b)=>a-b),TS,'#4a9eff','Schedule (days)');
+  if(name==='cost'&&curSimC.length)drawHist('cv-c',[...curSimC].sort((a,b)=>a-b),TC,'#f5952a','Cost ($k)');
   if(name==='joint'&&curSimS.length)drawJoint(curSimS,curSimC,TS,TC);
   if(name==='gantt'&&curGantt.length){const a=architectures.length>0?architectures[currentArchIdx]:null;drawGantt(curGantt,a?a.acts_seq.length:N,a?a.acts_seq:acts);}
   if(name==='compare')drawCompare();
@@ -1013,35 +1016,32 @@ function setStatus(t){document.getElementById('stxt').textContent=t;}
 
 // ══ EXPORT / IMPORT ══
 function exportToolkitJSON(){
-  const pairs = {};
+  const pairs = {}, impPairs = {};
   for(let i=0;i<N;i++) for(let j=0;j<N;j++){
     if(i===j) continue;
     if(dsmBin[i]&&dsmBin[i][j]){
-      const p = probM[i]&&probM[i][j] ? probM[i][j] : 0;
-      const imp = impM[i]&&impM[i][j] ? impM[i][j] : 0;
-      if(p>0||imp>0){
-        // Convert scalar p to 6D tensor (uniform distribution across aspects)
-        pairs[(i+1)+','+(j+1)] = [p,p,p,p,p,p];
-      }
+      const key=(i+1)+','+(j+1);
+      // Neutral tensor seed (0.5 on all six FRAM aspects) for every active DSM pair:
+      // B-E has no functional coupling data — refine via FRAME-6 elicitation in FEBS/FRAME-Q.
+      pairs[key] = [0.5,0.5,0.5,0.5,0.5,0.5];
+      impPairs[key] = (impM[i]&&impM[i][j]) || 0;
     }
   }
   const out = {
     _schema: "dsm-fram-toolkit-v1",
     _description: "Shared format for B-E, FEBS and FRAME-Q simulators",
     _source: "B-E",
-    _note: "m_pairs generated from scalar rework probabilities — use FRAME-6 elicitation to refine",
+    _note: "m_pairs are a neutral seed (0.5 across aspects) — use FRAME-6 elicitation to refine; be_matrices carry the lossless B-E data",
     timestamp: new Date().toISOString(),
     activities: acts.map((a,i)=>({
-      id: i+1,
-      name: a.nm,
-      bcv: a.bs||a.bcv||1,
-      mlv: a.ms||a.mlv||2,
-      wcv: a.ws||a.wcv||3,
-      bc_cost: a.bc||null,
-      mc_cost: a.mc||null,
-      wc_cost: a.wc||null
+      id: i+1, name: a.nm, desc: '',
+      bcv: a.bs, mlv: a.ms, wcv: a.ws,
+      cost_bcv: a.bc, cost_mlv: a.mc, cost_wcv: a.wc,
+      ic: a.ic
     })),
     m_pairs: pairs,
+    impact_pairs: impPairs,
+    binary_dsm: dsmBin.map(r=>[...r]),
     be_matrices: {
       prob: probM.map(r=>[...r]),
       impact: impM.map(r=>[...r]),
@@ -1051,9 +1051,9 @@ function exportToolkitJSON(){
   const blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = (document.getElementById('proj-name').value||'progetto').replace(/\s+/g,'_')+'_toolkit.json';
+  a.download = (document.getElementById('proj-name').value||'project').replace(/\s+/g,'_')+'_toolkit.json';
   a.click();
-  setStatus('Toolkit JSON esportato.');
+  setStatus('Toolkit JSON exported.');
 }
 
 function importToolkitJSON(){
@@ -1067,36 +1067,52 @@ function importToolkitJSON(){
         const data = JSON.parse(ev.target.result);
         if(data._schema !== 'dsm-fram-toolkit-v1') throw new Error('Not a toolkit JSON file');
         N = data.activities.length;
-        acts = data.activities.map(a=>({
-          nm: a.name,
-          bs: a.bcv||a.bs||1, ms: a.mlv||a.ms||2, ws: a.wcv||a.ws||3,
-          bc: a.bc_cost||a.bcv||1, mc: a.mc_cost||a.mlv||2, wc: a.wc_cost||a.wcv||3,
-          ic: 0.5
-        }));
+        acts = data.activities.map((a,idx)=>{
+          const bs=+(a.bcv??a.bs??1), ms=+(a.mlv??a.ms??2), ws=+(a.wcv??a.ws??3);
+          return {
+            nm: a.name||('A'+(idx+1)),
+            bs, ms, ws,
+            bc:+(a.cost_bcv??a.bc_cost??a.bc??bs), mc:+(a.cost_mlv??a.mc_cost??a.mc??ms), wc:+(a.cost_wcv??a.wc_cost??a.wc??ws),
+            ic:+(a.ic??0.5)
+          };
+        });
         dsmBin = data.activities.map(()=>data.activities.map(()=>0));
         probM = data.activities.map(()=>data.activities.map(()=>0));
         impM = data.activities.map(()=>data.activities.map(()=>0));
-        // Load from be_matrices if available
+        let probDefaulted = false;
         if(data.be_matrices){
+          // Lossless B-E round-trip
           dsmBin = data.be_matrices.binary_dsm.map(r=>[...r]);
           probM = data.be_matrices.prob.map(r=>[...r]);
           impM = data.be_matrices.impact.map(r=>[...r]);
         } else {
-          // Reconstruct from m_pairs using first component as scalar
-          Object.entries(data.m_pairs||{}).forEach(([key,vals])=>{
-            const [i,j]=key.split(',').map(Number);
-            dsmBin[i-1][j-1]=1;
-            probM[i-1][j-1]=vals[0]||0.5;
-            impM[i-1][j-1]=vals[0]||0.5;
-          });
+          // File from FEBS / FRAME-Q: DSM from binary_dsm (or m_pairs keys),
+          // impacts from impact_pairs, rework probabilities defaulted to 0.3 (review!)
+          if(Array.isArray(data.binary_dsm)){
+            for(let r=0;r<N;r++) for(let c=0;c<N;c++)
+              dsmBin[r][c]=(data.binary_dsm[r]&&data.binary_dsm[r][c])?1:0;
+          } else {
+            Object.keys(data.m_pairs||{}).forEach(key=>{
+              const [i,j]=key.split(',').map(Number);
+              if(i>=1&&i<=N&&j>=1&&j<=N&&i!==j) dsmBin[i-1][j-1]=1;
+            });
+          }
+          const ip = data.impact_pairs||{};
+          for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+            if(!dsmBin[r][c]) continue;
+            const key=(r+1)+','+(c+1);
+            impM[r][c] = (key in ip) ? +ip[key] : 0.5;
+            probM[r][c] = 0.3;
+            probDefaulted = true;
+          }
         }
         document.getElementById('proj-name').value = 'From Toolkit (' + (data._source||'?') + ')';
         document.getElementById('nv').textContent=N;
         document.getElementById('hdr-n').textContent='n = '+N;
         architectures=[]; currentArchIdx=0;
         curSimS=[]; curSimC=[]; curGantt=[]; clearMetrics(); renderAll();
-        setStatus('Toolkit JSON importato: '+N+' attivit\u00e0 da ' + (data._source||'source sconosciuta'));
-      } catch(err){ setStatus('Errore import toolkit: '+err.message); alert('Errore: '+err.message); }
+        setStatus('Toolkit JSON imported: '+N+' activities from ' + (data._source||'unknown source') + (probDefaulted?' — rework probabilities defaulted to 0.3: review the Probability matrix':''));
+      } catch(err){ setStatus('Toolkit import error: '+err.message); alert('Error: '+err.message); }
     };
     reader.readAsText(file);
   };
@@ -1109,8 +1125,8 @@ function exportJSON(){
     currentArchIdx,simParams:{rmax:document.getElementById('rmax').value,batch:document.getElementById('batch').value,alpha:document.getElementById('alpha').value,rho:document.getElementById('rho').value,tc:document.getElementById('tc').value,ts:document.getElementById('ts').value,kc:document.getElementById('kc').value,ks:document.getElementById('ks').value,useLHS,useStab}};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=(document.getElementById('proj-name').value||'progetto').replace(/\s+/g,'_')+'_dsm_v7.json';a.click();
-  setStatus('Progetto esportato.');
+  a.download=(document.getElementById('proj-name').value||'project').replace(/\s+/g,'_')+'_dsm_v7.json';a.click();
+  setStatus('Project exported.');
 }
 function importJSON(){document.getElementById('file-import').click();}
 function handleImport(e){
@@ -1118,16 +1134,16 @@ function handleImport(e){
   const reader=new FileReader();
   reader.onload=ev=>{
     try{
-      const data=JSON.parse(ev.target.result);if(!data.n||!data.activities)throw new Error('Formato non valido');
-      document.getElementById('proj-name').value=data.projectName||'Progetto Importato';
+      const data=JSON.parse(ev.target.result);if(!data.n||!data.activities)throw new Error('Invalid format');
+      document.getElementById('proj-name').value=data.projectName||'Imported Project';
       N=data.n;acts=data.activities.map(a=>({...a}));dsmBin=data.dsmBinary||acts.map(()=>acts.map(()=>0));
       probM=data.probMatrix.map(r=>[...r]);impM=data.impMatrix.map(r=>[...r]);
       architectures=(data.architectures||[]).map(a=>({...a}));currentArchIdx=data.currentArchIdx||0;
       if(data.simParams){const sp=data.simParams;['rmax','batch','alpha','rho','tc','ts','kc','ks'].forEach(k=>{const el=document.getElementById(k);if(el&&sp[k]!==undefined)el.value=sp[k];});useLHS=sp.useLHS!==undefined?sp.useLHS:true;useStab=sp.useStab!==undefined?sp.useStab:true;document.getElementById('lb').className='tog'+(useLHS?' on':'');document.getElementById('lb').textContent=useLHS?'ON':'OFF';document.getElementById('sb').className='tog'+(useStab?' on':'');document.getElementById('sb').textContent=useStab?'ON':'OFF';}
       document.getElementById('nv').textContent=N;document.getElementById('hdr-n').textContent='n = '+N;
       curSimS=[];curSimC=[];curGantt=[];clearMetrics();renderAll();
-      setStatus('Importato: '+document.getElementById('proj-name').value);
-    }catch(err){setStatus('Errore import: '+err.message);alert('Errore: '+err.message);}
+      setStatus('Imported: '+document.getElementById('proj-name').value);
+    }catch(err){setStatus('Import error: '+err.message);alert('Error: '+err.message);}
   };reader.readAsText(file);e.target.value='';
 }
 
@@ -1141,7 +1157,7 @@ document.getElementById('nv').textContent=N;document.getElementById('hdr-n').tex
 architectures=[{name:'Arch. 1 baseline',V:Array.from({length:N},(_,i)=>i+1),acts_seq:acts.map(a=>({...a})),prob_seq:probM.map(r=>[...r]),imp_seq:impM.map(r=>[...r]),results:null}];
 currentArchIdx=0;
 renderAll();
-setStatus('Pronto — UCAV 2002 caricato · Arch. 1 baseline attiva · premi RUN per simulare');
+setStatus('Ready — UCAV 2002 loaded · Arch. 1 baseline active · press RUN to simulate');
 </script>
 </body>
 </html>
