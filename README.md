@@ -25,7 +25,10 @@ The three simulators form a progressive analytical hierarchy:
 
 1. **Download** any simulator HTML file from `simulators/`
 2. **Open** it in Chrome, Firefox, Edge, or Safari (no server needed)
-3. **Load an example**: click the "Load Example" button to use the preloaded UCAV case
+3. **Load an example** — each simulator ships with its own preloaded case:
+   - B-E: `UCAV 2002`, `MIT v2.1` or `Airport`
+   - FEBS: `Airport example`
+   - FRAME-Q: `Load UCAV`
 4. **Run the simulation**: follow the step-by-step wizard
 
 That's it. No Python, no npm, no configuration.
@@ -68,8 +71,8 @@ A complete implementation of the Browning & Eppinger (2002) process simulation m
 - All 10 schedule and cost risk metrics from Table V of Browning & Eppinger (2002)
 - Interface Criticality analysis (analytic and empirical)
 - Multi-architecture comparison with minimum highlighting
-- Import/export in MIT DSM format, JSON, and the shared Toolkit JSON format
-- Preloaded UCAV design process case (Browning, 1998)
+- Import/export in JSON and the shared Toolkit JSON format
+- Three preloaded datasets: the UCAV design process (Browning, 1998), MIT v2.1, and an airport turnaround
 
 ### FEBS Simulator v6
 
@@ -80,9 +83,9 @@ Extends B-E by replacing scalar rework probabilities with six-dimensional coupli
 - Weighted Euclidean norm aggregation of tensor components
 - Interface Resonance Risk (IRR) index per activity
 - Full Monte Carlo simulation with empirical rework frequency tracking
-- Sobol sensitivity analysis on E[S] (forthcoming extension)
-- Export tensor M in the shared Toolkit JSON format for FRAME-Q import
-- Preloaded UCAV case with full tensor M
+- Export in CSV, JSON, MIT format, and the shared Toolkit JSON format; import of Toolkit JSON
+- Preloaded synthetic airport turnaround case (5 functions) with full tensor M, as used in the DSM 2026 paper
+- Sobol sensitivity analysis on E[S]: forthcoming, not yet implemented
 
 **The FRAME-6 aspects:**
 
@@ -186,7 +189,7 @@ A single FRAME-6 elicitation session can feed all three simulators. Every simula
   "timestamp": "2026-07-17T09:00:00.000Z",
   "activities": [
     { "id": 1, "name": "Prepare UCAV Preliminary DR&O", "desc": "",
-      "bcv": 2.0, "mlv": 3.0, "wcv": 5.0 },
+      "bcv": 1.9, "mlv": 2.0, "wcv": 3.0 },
     { "id": 2, "name": "Develop procedural guidance", "desc": "",
       "sigma": 0.25 }
   ],
@@ -214,7 +217,9 @@ Export from FEBS → import into FRAME-Q eliminates data re-entry.
 
 ## The UCAV Benchmark Case
 
-All three simulators ship with the UCAV (Unmanned Combat Air Vehicle) design process case, originally published in Browning (1998) and used as the running example in Browning & Eppinger (2002). The case comprises 14 design activities with 52 active dependency pairs. It serves as the common benchmark for comparing B-E, FEBS, and FRAME-Q results on the same process.
+The UCAV (Unmanned Combat Air Vehicle) design process case was originally published in Browning (1998) and used as the running example in Browning & Eppinger (2002). It comprises 14 design activities with 52 active dependency pairs.
+
+It ships preloaded in the **B-E** and **FRAME-Q** simulators, where it serves as the common benchmark for comparing their results on the same process. The **FEBS** simulator currently ships with the synthetic airport turnaround example used in the DSM 2026 paper; extending the UCAV benchmark to FEBS is planned work.
 
 ---
 
@@ -240,7 +245,7 @@ See also `CITATION.cff` for full citation metadata, and `CHANGELOG.md` for versi
 ## Related Publications
 
 - Grazzini, D. (2026). FEBS: FRAM-Extended Browning-Eppinger Simulation for functional resonance risk assessment. *Proceedings of DSM 2026*, Milan.
-- Grazzini, D., Browning, T.R., & Pourghadiri, P. (2026). FRAME-Q: Functional Resonance Analysis Method Extended and Quantified. *Working paper*.
+- Grazzini, D., & Pourghadiri, P. (2026). FRAME-Q: Functional Resonance Analysis Method Extended and Quantified. *Working paper*.
 - Grazzini, D. et al. (2024). Development of a method for comparing industrial processes using DSM: the SeatBridge patent. *Proceedings of DSM 2024*, Stuttgart.
 
 ---
