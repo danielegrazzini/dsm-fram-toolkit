@@ -1,6 +1,31 @@
 <!--
   FRAME-Q Simulator — FRAM Functional Resonance Analysis Method Extended and Quantified
-  Version S28 · June 2026
+  Version S29 · July 2026
+  ────────────────────────────────────────────────────────────────────────────
+  CHANGELOG S28 → S29 — "elicited sigma" patch (17 July 2026)
+  Rationale: sigma_i was derived from the duration spread, (WCV-BCV)/(6*MLV), a
+  Browning-Eppinger inheritance in which variability IS schedule dispersion. In
+  FRAME-Q sigma_i is the intrinsic performance variability of a function, elicited
+  via FRAME-6 against a variability taxonomy — a different quantity. On models whose
+  functions are not scheduled activities (e.g. the TASM ground-handling model, where
+  organisational functions have no duration), the derived value is meaningless and
+  the elicited judgements were silently discarded on import.
+  Changes, all additive and backward compatible:
+    1. calcStep1  — sigma_i = elicited value when present, else derived from durations.
+    2. calcStep1  — durations optional per activity; each activity needs either sigma
+                    or a full BCV/MLV/WCV triple. Bounds check now 0 < sigma < 1
+                    (Beta(sigma*nu,(1-sigma)*nu) is undefined at the bounds).
+    3. calcStep1  — wDur (R_net weights) = duration share when ALL activities carry
+                    durations, otherwise uniform 1/n. R_i and its ranking never depend
+                    on wDur: they are duration-free.
+    4. Import     — reads activities[].sigma; the legacy 2/3/5 duration fallback now
+                    applies ONLY when no sigma is given. Also reads nu from the file.
+    5. Export     — emits sigma and nu; durations only when present.
+    6. UI         — "sigma elicited" column, placeholder "derived"; Step 1 and Step 3
+                    texts state the two modes.
+  Non-regression: UCAV (no sigma field) reproduces S28 exactly — sigma and wDur
+  identical to zero difference, R_net = 1.040429 on 13 valid functions.
+  ────────────────────────────────────────────────────────────────────────────
 
   Copyright (c) 2026 Daniele Grazzini
   Independent Researcher, Rome, Italy
@@ -14,6 +39,8 @@
   The computational engine implements:
     L1: Tensor M elicitation via FRAME-6 protocol (Eq. 1-2)
     L2: Beta-distributed epistemic parameters sigma_i (Eq. 3-4)
+        sigma_i is elicited (FRAME-6); when absent it falls back to the
+        Browning-Eppinger duration-derived proxy (WCV-BCV)/(6*MLV)
     L3: RMS-based variability propagation — V(Of_i), Phi_i, R_i, R_net (Eq. 5a-5c, 6-8)
     L4: Global Sobol sensitivity analysis via Saltelli method (Eq. 9-11)
 
@@ -274,11 +301,12 @@ canvas{display:block;max-width:100%}
   <div class="content-area">
     <div class="sec-hdr">Step 1 — Activity Definition</div>
     <div class="sec-note">
-      Enter the process activities. For each activity specify name and durations (BCV/MLV/WCV).
-      &sigma;<sub>i</sub> and Beta parameters are computed automatically.<br>
+      Enter the process activities. Each activity needs <b>either</b> a duration triple (BCV/MLV/WCV), from which
+      &sigma;<sub>i</sub> is derived, <b>or</b> an elicited &sigma;<sub>i</sub> (FRAME-6). Beta parameters are computed automatically.<br>
       <span style="color:var(--cyan)">BCV</span> = Best Case Value &nbsp;&middot;&nbsp;
       <span style="color:var(--cyan)">MLV</span> = Most Likely Value &nbsp;&middot;&nbsp;
-      <span style="color:var(--cyan)">WCV</span> = Worst Case Value
+      <span style="color:var(--cyan)">WCV</span> = Worst Case Value &nbsp;&middot;&nbsp;
+      <span style="color:var(--orange)">&sigma; elicited</span> = intrinsic performance variability judged directly; overrides the derived value
     </div>
     <div class="acts-toolbar">
       <button class="add-btn" onclick="addActivity()">+ Add activity</button>
@@ -290,6 +318,7 @@ canvas{display:block;max-width:100%}
           <th style="width:32px">#</th>
           <th style="min-width:200px">Activity name</th>
           <th>Dur BCV</th><th>Dur MLV</th><th>Dur WCV</th>
+          <th style="color:var(--orange)">&sigma; elicited</th>
           <th style="width:28px"></th>
         </tr>
       </thead>
@@ -347,7 +376,7 @@ canvas{display:block;max-width:100%}
   <div class="content-area">
     <div class="sec-hdr">Step 3 — Epistemic Parameters &amp; Nominal Calibration</div>
     <div class="formula-box">
-      <span class="hl">&sigma;<sub>i</sub></span> = (WCV<sub>i</sub> - BCV<sub>i</sub>) / (6 &middot; MLV<sub>i</sub>)
+      <span class="hl">&sigma;<sub>i</sub></span> = elicited (FRAME-6) &nbsp;<span style="color:var(--muted)">or, if absent,</span>&nbsp; (WCV<sub>i</sub> - BCV<sub>i</sub>) / (6 &middot; MLV<sub>i</sub>)
       &nbsp;&nbsp;&nbsp;
       <span class="hl">Beta(&alpha;, &beta;)</span> = Beta(&sigma;&middot;&nu;, (1-&sigma;)&middot;&nu;) con &nu;=10
       &nbsp;&nbsp;&nbsp;
@@ -451,7 +480,7 @@ canvas{display:block;max-width:100%}
 
 <div class="statusbar">
   <span class="dot idle" id="dot2"></span>
-  <span id="stbar">FRAME-Q &middot; Grazzini 2026 &middot; MIT License &middot; danielegrazzini77@gmail.com</span>
+  <span id="stbar">FRAME-Q S29 &middot; Grazzini 2026 &middot; MIT License &middot; danielegrazzini77@gmail.com</span>
 </div>
 
 <script>
@@ -468,7 +497,7 @@ const CAT_COLORS = {
 };
 
 // STATE
-let acts = [];       // [{nm, bcv, mlv, wcv, bcc, mlc, wcc, ic}]
+let acts = [];       // [{nm, bcv, mlv, wcv, bcc, mlc, wcc, ic, sigma}] — sigma: elicited FRAME-6 value; when present it overrides the duration-derived sigma and durations become optional
 let mData = {};      // {`${i},${j}`: [v0..v5]}  1-indexed
 let mActive = new Set(); // `${i},${j}` active pairs (1-indexed)
 let computed = {step1: null, step3: null};
@@ -515,9 +544,10 @@ function renderActs(){
     tbody.innerHTML += `<tr>
       <td class="act-id">A${i+1}</td>
       <td><input type="text" value="${a.nm}" onchange="acts[${i}].nm=this.value" style="min-width:180px"></td>
-      <td><input type="number" value="${a.bcv}" min="0" step="0.1" onchange="acts[${i}].bcv=+this.value"></td>
-      <td><input type="number" value="${a.mlv}" min="0.01" step="0.1" onchange="acts[${i}].mlv=+this.value"></td>
-      <td><input type="number" value="${a.wcv}" min="0" step="0.1" onchange="acts[${i}].wcv=+this.value"></td>
+      <td><input type="number" value="${a.bcv ?? ''}" min="0" step="0.1" placeholder="—" onchange="acts[${i}].bcv = this.value===''?null:+this.value"></td>
+      <td><input type="number" value="${a.mlv ?? ''}" min="0.01" step="0.1" placeholder="—" onchange="acts[${i}].mlv = this.value===''?null:+this.value"></td>
+      <td><input type="number" value="${a.wcv ?? ''}" min="0" step="0.1" placeholder="—" onchange="acts[${i}].wcv = this.value===''?null:+this.value"></td>
+      <td><input type="number" value="${a.sigma ?? ''}" min="0" max="1" step="0.01" placeholder="derived" title="Elicited σ (FRAME-6). If set, it overrides the value derived from the duration spread." style="border-color:var(--orange)" onchange="acts[${i}].sigma = this.value===''?null:+this.value"></td>
       <td><button class="del-btn" onclick="deleteAct(${i})">&#10005;</button></td>
     </tr>`;
   });
@@ -546,17 +576,28 @@ function deleteAct(i){
 function calcStep1(){
   const n = acts.length;
   if(n < 3){ s1msg('At least 3 activities required','warn'); return; }
+  const hasSig = a => a.sigma != null && a.sigma !== '';
+  const hasDur = a => a.bcv != null && a.mlv != null && a.wcv != null;
   for(const a of acts){
+    if(hasSig(a)) continue;   // σ elicited: durations are not required for this activity
+    if(!hasDur(a)){ s1msg(`'${a.nm}': provide either an elicited σ or a full BCV/MLV/WCV triple`,'err'); return; }
     if(a.bcv > a.mlv || a.mlv > a.wcv){ s1msg('BCV ≤ MLV ≤ WCV required for all activities','err'); return; }
     if(a.mlv <= 0){ s1msg('MLV must be > 0','err'); return; }
   }
-  const sigMu = acts.map(a=>(a.wcv-a.bcv)/(6*a.mlv));
-  const bad = sigMu.findIndex(s=>s>=1);
-  if(bad>=0){ s1msg(`\u03c3(A${bad+1}) = ${sigMu[bad].toFixed(2)} \u2265 1 \u2014 duration spread too wide: require (WCV\u2212BCV) < 6\u00b7MLV`,'err'); return; }
-  const sumD = acts.reduce((s,a)=>s+a.mlv,0);
-  const wDur = acts.map(a=>a.mlv/sumD);
-  computed.step1 = {n, sigMu, wDur, sumD};
-  s1msg(`✓ ${n} activities validated — σ computed`,'ok');
+  const sigMu = acts.map(a=> hasSig(a) ? +a.sigma : (a.wcv-a.bcv)/(6*a.mlv));
+  const bad = sigMu.findIndex(s=>!(s>0 && s<1));
+  if(bad>=0){
+    s1msg(hasSig(acts[bad])
+      ? `\u03c3(A${bad+1}) = ${sigMu[bad].toFixed(2)} \u2014 elicited \u03c3 must be strictly between 0 and 1: Beta(\u03c3\u00b7\u03bd,(1\u2212\u03c3)\u00b7\u03bd) is undefined at the bounds`
+      : `\u03c3(A${bad+1}) = ${sigMu[bad].toFixed(2)} \u2014 duration spread invalid: require 0 < (WCV\u2212BCV) < 6\u00b7MLV`,'err');
+    return;
+  }
+  const allDur = acts.every(a=>hasDur(a) && a.mlv>0);
+  const sumD = allDur ? acts.reduce((s,a)=>s+a.mlv,0) : 0;
+  const wDur = allDur ? acts.map(a=>a.mlv/sumD) : acts.map(()=>1/n);
+  const nSig = acts.filter(hasSig).length;
+  computed.step1 = {n, sigMu, wDur, sumD, allDur, nSig};
+  s1msg(`✓ ${n} activities validated — σ: ${nSig} elicited / ${n-nSig} derived from durations · R_net weights: ${allDur?'duration share':'uniform 1/n'}`,'ok');
   setWizDone(1); setWizStatus(1,n+' activities','ok');
   document.getElementById('s1-next').disabled = false;
   document.getElementById('ws2').classList.remove('locked');
@@ -1253,8 +1294,11 @@ function exportToolkitJSON(){
     _source: "FRAME-Q",
     timestamp: new Date().toISOString(),
     activities: acts.map((a,i)=>({
-      id: i+1, name: a.nm, desc: '', bcv: a.bcv, mlv: a.mlv, wcv: a.wcv
+      id: i+1, name: a.nm, desc: '',
+      ...(a.sigma != null ? {sigma: +a.sigma} : {}),
+      ...(a.bcv != null && a.mlv != null && a.wcv != null ? {bcv: a.bcv, mlv: a.mlv, wcv: a.wcv} : {})
     })),
+    nu: getNu(),
     m_pairs: Object.fromEntries(Array.from(mActive).map(key=>[key,[...(mData[key]||[0,0,0,0,0,0])]])),
     binary_dsm: (()=>{ const n=acts.length;
       const d=Array.from({length:n},()=>new Array(n).fill(0));
@@ -1284,13 +1328,26 @@ function importToolkitJSON(){
       try {
         const data = JSON.parse(ev.target.result);
         if(data._schema !== 'dsm-fram-toolkit-v1') throw new Error('Not a toolkit JSON file. Expected _schema: dsm-fram-toolkit-v1');
-        acts = data.activities.map(a=>({nm:a.name, bcv:a.bcv||a.bs||2, mlv:a.mlv||a.ms||3, wcv:a.wcv||a.ws||5}));
+        acts = data.activities.map(a=>{
+          const o = {nm:a.name};
+          if(a.sigma != null) o.sigma = +a.sigma;
+          const b = a.bcv ?? a.bs, m = a.mlv ?? a.ms, w = a.wcv ?? a.ws;
+          if(b != null && m != null && w != null){ o.bcv=+b; o.mlv=+m; o.wcv=+w; }
+          else if(o.sigma == null){ o.bcv=2; o.mlv=3; o.wcv=5; }  // legacy fallback ONLY when no elicited σ
+          else { o.bcv=null; o.mlv=null; o.wcv=null; }
+          return o;
+        });
+        if(data.nu != null){ const nel=document.getElementById('nu-inp'); if(nel) nel.value = Math.max(2, Math.min(50, +data.nu)); }
         mActive = new Set(); mData = {};
         Object.entries(data.m_pairs||{}).forEach(([key,vals])=>{ mActive.add(key); mData[key]=[...vals]; });
         computed = {step1:null, step3:null}; simRes = null;
         renderActs(); calcStep1(); calcStep2(); goStep(1);
         document.getElementById('exp-toolkit-btn').disabled = false;
-        setSt('Toolkit JSON imported: ' + data.activities.length + ' activities, ' + Object.keys(data.m_pairs||{}).length + ' active pairs' + (data._source ? ' [from ' + data._source + ']' : ''));
+        const _ns = acts.filter(a=>a.sigma!=null).length;
+        setSt('Toolkit JSON imported: ' + data.activities.length + ' activities (' + _ns + ' with elicited \u03c3), '
+          + Object.keys(data.m_pairs||{}).length + ' active pairs'
+          + (data.nu != null ? ', \u03bd=' + data.nu : '')
+          + (data._source ? ' [from ' + data._source + ']' : ''));
       } catch(err){ setSt('Import error: ' + err.message); alert('Import error: ' + err.message); }
     };
     reader.readAsText(file);
