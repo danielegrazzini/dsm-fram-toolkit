@@ -3,7 +3,7 @@ message: "If you use this software, please cite it as below."
 type: software
 title: "dsm-fram-toolkit: A browser-based simulator suite for DSM–FRAM integration and functional resonance risk analysis"
 version: S29
-date-released: 2026-06-01
+date-released: 2026-07-17
 license: MIT
 repository-code: "https://github.com/danielegrazzini/dsm-fram-toolkit"
 authors:
