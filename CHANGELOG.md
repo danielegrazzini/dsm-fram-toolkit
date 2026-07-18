@@ -72,3 +72,47 @@ Weighting resonance by duration share is meaningful in B-E, where long activitie
 dominate schedule risk. In a model whose functions are not scheduled activities,
 uniform weighting is the neutral choice rather than a fallback for missing data.
 State the convention in use whenever `R_net` is reported.
+
+## [B-E Simulator v7.2] — 2026-07-18
+### Added
+- B&E-fidelity toggles in the parameters panel (default OFF = v7.1 behaviour):
+  - **Comonotone sampling** — one quantile per run, common to all activities. Identified in
+    Test 1 (S12) as the sampling scheme implied by the published no-iteration reference
+    (σ_C = 55 equals the *sum* of the activity σᵢ = 53.9, unreachable under independent
+    sampling, which yields ≈ 27). With this mode the no-iteration reference replicates
+    615/55/133/13 and the full model passes 4/4 pre-registered replication criteria.
+  - **Full-radius second-order rework** — k = j+1…n including the triggering cycle, per
+    B&E 2002 p. 430 ("j, j+1, …, n"), replacing the limited-radius (1998 thesis) variant.
+### Notes
+- Alignment freeze (PREREG_U4, Amendment 1): no further tuning toward the published values.
+
+## [B-E Simulator v7.1] — 2026-07-18
+### Fixed
+- UCAV dataset: corrected two cell transpositions vs the source figures (B&E 2002, Figs. 3–4,
+  p. 431), in both the probability and impact planes:
+  - prob/imp (2,8) → (2,9)
+  - prob/imp (8,11) → (8,12)
+  Evidence: programmatic grid detection on the rasterised source figures (S12) plus independent
+  corroboration from the interface tables of Browning (1998) (A511 ← A533 "Recommended Config.
+  Changes"; A532 ← A5344 "Materials, Sizing & Deformations"). Canonical dataset:
+  `data/UCAV_source_verified_S12.json`. Table I values confirmed 98/98; the (5,8) anomaly
+  (nonzero probability, zero impact) is a property of the source and is preserved.
+
+## [data/] — 2026-07-18
+### Added
+- `UCAV_source_verified_S12.json` — UCAV dataset verified cell-by-cell against B&E 2002, with
+  per-block provenance (figure, page, extraction method) and held-out published values.
+- `UCAV_tensor_B_v1.json` — 6D coupling tensor, 52 pairs, reviewed with documented rationales
+  anchored to Browning (1998), under the norm-reproduces-probability constraint (protocol U3-B).
+- `UCAV_FEBS_full_v1.json`, `UCAV_FEBS_reduction_test2.json` — Toolkit JSON configurations for
+  FEBS (FRAM-native tensor and B-E-reduction respectively).
+
+## [tests/] — 2026-07-18
+### Added
+- `be_published_replication.js` — headless replication of the published B&E (2002) UCAV
+  results (Table V, arch. 1) at pre-registered tolerances, including the no-iteration
+  comonotone-signature reference. 8 assertions.
+- `febs_be_reduction_equivalence.js` — numerical demonstration of the FEBS→B-E reduction:
+  exact P = DSM1 mapping (machine precision) + strong statistical equivalence of the twin
+  Monte Carlo engines (4 assertions on pooled deltas).
+
