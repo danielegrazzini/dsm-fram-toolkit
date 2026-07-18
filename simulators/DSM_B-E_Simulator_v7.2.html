@@ -1,4 +1,31 @@
 <!DOCTYPE html>
+<!--
+CHANGELOG v7.2 — 18 luglio 2026, Sessione 12 (esiti Test 1, vedi TEST1_REPORT_S12.md)
+Aggiunti due toggle di fedelta' B&E (default OFF = comportamento v7.1):
+  useComono: campionamento comonotono — un quantile per run comune a tutte le attivita'.
+    Scoperta S12: i valori pubblicati (sigma_C=55 no-iteration = somma delle sigma_i)
+    implicano questo schema; con esso il no-iteration replica 615/55/133/13 e il
+    modello completo passa 4/4 i criteri pre-registrati del Test 1.
+  useFullRadius: secondo ordine k=j+1..n incluso il ciclo innescante (B&E 2002 p.430),
+    in luogo del raggio limitato (variante tesi 1998).
+Clausola di congelamento allineamento: nessuna ulteriore taratura verso i valori
+pubblicati (PREREG_U4, Emendamento 1).
+-->
+
+<!--
+CHANGELOG v7.1 — 18 luglio 2026, Sessione 12 (U2, programma DSM-FRAM)
+Correzione dati UCAV vs fonte primaria (Browning & Eppinger 2002, IEEE TEM 49(4)):
+  prob[2][8]=0.2 -> prob[2][9]=0.2   (Fig.3 p.431: marca in colonna 9, non 8)
+  prob[8][11]=0.5 -> prob[8][12]=0.5 (Fig.3 p.431: marca in colonna 12, non 11)
+  imp[2][8]=0.1  -> imp[2][9]=0.1    (Fig.4 p.431)
+  imp[8][11]=0.5 -> imp[8][12]=0.5   (Fig.4 p.431)
+Evidenza: rilevamento programmatico della griglia sulle figure rasterizzate (S12) +
+corroborazione indipendente dalle tabelle interfacce della tesi Browning 1998
+(A511: input Recommended_Config._Changes da A533; A532: input Materials_Sizing_&_
+Deformations da A5344). Vedi UCAV_source_verified_S12.json per il canone completo.
+Nessun'altra modifica: Table I conforme 98/98, anomalia (5,8) gia' corretta in v7.
+-->
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -249,7 +276,9 @@ table.rtt td.best{color:var(--green);font-weight:700;}
         <div class="param-row"><span class="param-label">Max run r</span><input class="param-input" id="rmax" type="number" value="1100" min="50" max="5000"></div>
         <div class="param-row"><span class="param-label">Batch b</span><input class="param-input" id="batch" type="number" value="100"></div>
         <div class="param-row"><span class="param-label">Stability α</span><input class="param-input" id="alpha" type="number" value="0.01" step="0.001"></div>
-        <div class="param-row"><span class="param-label">ρ corr C-S</span><input class="param-input" id="rho" type="number" value="0.9" step="0.05"></div>
+        <div class="param-row"><span class="param-label">ρ corr C-S</span><input class="param-input" id="rho" type="number" value="0.9" step="0.05">
+  <label style="display:block;font-size:10px;margin-top:6px;"><input type="checkbox" onchange="useComono=this.checked"> comonotone sampling <span style="opacity:.6">(B&amp;E fidelity — Test 1 S12)</span></label>
+  <label style="display:block;font-size:10px;"><input type="checkbox" onchange="useFullRadius=this.checked"> full-radius 2nd-order <span style="opacity:.6">(B&amp;E 2002 p.430)</span></label></div>
         <div class="param-row"><span class="param-label">Target T_C ($k)</span><input class="param-input" id="tc" type="number" value="630"></div>
         <div class="param-row"><span class="param-label">Target T_S (gg)</span><input class="param-input" id="ts" type="number" value="130"></div>
         <div class="param-row"><span class="param-label">κ_C</span><input class="param-input" id="kc" type="number" value="1" step="0.1"></div>
@@ -465,6 +494,7 @@ let N=14, acts=[], dsmBin=[], probM=[], impM=[];
 let architectures=[], currentArchIdx=0;
 let curSimS=[], curSimC=[], curGantt=[];
 let useLHS=true, useStab=true;
+let useComono=false, useFullRadius=false; // v7.2: B&E-fidelity toggles (Test 1, S12)
 
 // ══ DATASETS ══
 const DS={
@@ -484,8 +514,8 @@ ucav:{n:14,acts:[
   {nm:'13-Manuf',bs:30,ms:32.5,ws:36,bc:214,mc:232,wc:257,ic:0.28},
   {nm:'14-Proposal',bs:4.5,ms:5,ws:6.25,bc:20,mc:22.5,wc:28.1,ic:0.70},
 ],
-prob:[[0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0.4,0,0,0,0,0,0,0.2,0,0,0,0,0,0],[0,0.5,0,0.4,0,0,0,0,0,0,0,0,0,0],[0.3,0,0.5,0,0,0,0,0,0,0,0,0,0,0],[0.4,0,0.5,0,0,0.1,0,0.1,0,0,0,0.3,0.1,0],[0.1,0,0,0,0.4,0,0,0,0,0,0,0,0,0],[0.4,0,0,0,0,0.4,0,0,0,0,0,0,0,0],[0,0,0,0,0,0.5,0,0,0,0,0.5,0,0,0],[0.4,0,0.5,0.5,0,0,0,0.5,0,0,0,0,0,0],[0,0,0,0.1,0,0.5,0.2,0.1,0,0,0.4,0,0,0],[0,0,0,0,0,0.5,0.5,0.5,0,0.5,0,0,0,0],[0.4,0,0,0,0,0.4,0.5,0,0,0.5,0.4,0,0,0],[0.5,0,0,0,0.5,0,0,0,0,0,0,0.4,0,0],[0.3,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0]],
-imp:[[0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0.5,0,0,0,0,0,0,0.1,0,0,0,0,0,0],[0,0.3,0,0.5,0,0,0,0,0,0,0,0,0,0],[0.4,0,0.8,0,0,0,0,0,0,0,0,0,0,0],[0.1,0,0.1,0,0,0.1,0,0,0,0,0,0.3,0.1,0],[0.1,0,0,0,0.3,0,0,0,0,0,0,0,0,0],[0.5,0,0,0,0,0.8,0,0,0,0,0,0,0,0],[0,0,0,0,0,0.5,0,0,0,0,0.5,0,0,0],[0.3,0,0.3,0.3,0,0,0,0.3,0,0,0,0,0,0],[0,0,0,0.1,0,0.5,0.4,0.3,0,0,0.3,0,0,0],[0,0,0,0,0,0.5,0.5,0.3,0,0.3,0,0,0,0],[0.5,0,0,0,0,0.3,0.5,0,0,0.5,0.5,0,0,0],[0.9,0,0,0,0.9,0,0,0,0,0,0,0.3,0,0],[0.5,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0]],
+prob:[[0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0.4,0,0,0,0,0,0,0,0.2,0,0,0,0,0],[0,0.5,0,0.4,0,0,0,0,0,0,0,0,0,0],[0.3,0,0.5,0,0,0,0,0,0,0,0,0,0,0],[0.4,0,0.5,0,0,0.1,0,0.1,0,0,0,0.3,0.1,0],[0.1,0,0,0,0.4,0,0,0,0,0,0,0,0,0],[0.4,0,0,0,0,0.4,0,0,0,0,0,0,0,0],[0,0,0,0,0,0.5,0,0,0,0,0,0.5,0,0],[0.4,0,0.5,0.5,0,0,0,0.5,0,0,0,0,0,0],[0,0,0,0.1,0,0.5,0.2,0.1,0,0,0.4,0,0,0],[0,0,0,0,0,0.5,0.5,0.5,0,0.5,0,0,0,0],[0.4,0,0,0,0,0.4,0.5,0,0,0.5,0.4,0,0,0],[0.5,0,0,0,0.5,0,0,0,0,0,0,0.4,0,0],[0.3,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0]],
+imp:[[0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0.5,0,0,0,0,0,0,0,0.1,0,0,0,0,0],[0,0.3,0,0.5,0,0,0,0,0,0,0,0,0,0],[0.4,0,0.8,0,0,0,0,0,0,0,0,0,0,0],[0.1,0,0.1,0,0,0.1,0,0,0,0,0,0.3,0.1,0],[0.1,0,0,0,0.3,0,0,0,0,0,0,0,0,0],[0.5,0,0,0,0,0.8,0,0,0,0,0,0,0,0],[0,0,0,0,0,0.5,0,0,0,0,0,0.5,0,0],[0.3,0,0.3,0.3,0,0,0,0.3,0,0,0,0,0,0],[0,0,0,0.1,0,0.5,0.4,0.3,0,0,0.3,0,0,0],[0,0,0,0,0,0.5,0.5,0.3,0,0.3,0,0,0,0],[0.5,0,0,0,0,0.3,0.5,0,0,0.5,0.5,0,0,0],[0.9,0,0,0,0.9,0,0,0,0,0,0,0.3,0,0],[0.5,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0]],
 paper:{EC:637,sC:63,ES:138,sS:14,gC:0.58,gS:0.55,PC:0.51,PS:0.67,RC:2654,RS:255,TC:630,TS:130,r:1100}
 },
 mit:{n:12,acts:[
@@ -555,7 +585,7 @@ function singleRunWith(u_s,u_c,rho,rec,n,actsA,pm,im){
           // Second-order rework: limited radius — only intermediate activities
           // strictly between the reworked activity j and the triggering activity ci
           // (Browning 1998, Ch. 6; Guide Sec. 3.4). It does not propagate beyond ci.
-          for(let k=j+1;k<ci;k++){
+          for(let k=j+1;k<(useFullRadius?n:ci);k++){
             if(pm[k][j]>0&&Math.random()<=pm[k][j]){
               if(W[k]===1)W[k]=2;W[k]+=im[k][j]*actsA[k].ic;if(W[k]>=2)W[k]=1;if(W[k]>1)W[k]=0.9;
             }
@@ -755,8 +785,9 @@ async function runSim(){
   let r=0,stab=false;
   while(r<rMax&&!stab){
     const chunk=Math.min(CHUNK,rMax-r);
-    const us=useLHS?lhs(chunk,n):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));
-    const uc=useLHS?lhs(chunk,n):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));
+    let us,uc;
+    if(useComono){const u1=useLHS?lhs(chunk,1):Array.from({length:chunk},()=>[Math.random()]);const u2=useLHS?lhs(chunk,1):Array.from({length:chunk},()=>[Math.random()]);us=u1.map(v=>new Array(n).fill(v[0]));uc=u2.map(v=>new Array(n).fill(v[0]));}
+    else{us=useLHS?lhs(chunk,n):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));uc=useLHS?lhs(chunk,n):Array.from({length:chunk},()=>Array.from({length:n},()=>Math.random()));}
     for(let i=0;i<chunk;i++){const res=singleRunWith(us[i],uc[i],rho,r+i===0,n,runActs,runProb,runImp);curSimS.push(res.S);curSimC.push(res.C);if(r+i===0)curGantt=res.gantt||[];}
     r+=chunk;if(useStab&&r>=2*b&&stable(curSimS,b,alpha))stab=true;
     document.getElementById('pf').style.width=`${Math.round(r/rMax*100)}%`;
