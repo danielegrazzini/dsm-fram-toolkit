@@ -1,0 +1,2046 @@
+{
+ "_schema": "dsm-fram-toolkit-tensorB-v0",
+ "_source": "Tensore S11 riscalato al vincolo ||C||_w = DSM1 (Fig.3 B&E 2002 verificata S12)",
+ "_protocol": "PROTOCOLLO_U3B_tensore_UCAV.md \u2014 congelato 18 lug 2026",
+ "_status": "v1 \u2014 revisione completa 52/52 con razionali; vincolo verificato; pending: armonizzazione Pourghadiri (->v2)",
+ "_impact_rule": "IMPACT = DSM2 pubblicato (Fig.4 verificata), impact(5,8)=0 esplicito",
+ "pairs": {
+  "2,1": {
+   "profile_S11": [
+    0.9,
+    0.7,
+    0.85,
+    0.2,
+    0.75,
+    0.5
+   ],
+   "unit_direction": [
+    0.5308,
+    0.4128,
+    0.5013,
+    0.118,
+    0.4423,
+    0.2949
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.577852,
+   "rescaled": [
+    0.520067,
+    0.404496,
+    0.491174,
+    0.11557,
+    0.433389,
+    0.288926
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBA",
+   "rationale": "CONFERMA. DR&O 'controlling requirements document' (tesi p.127, narrativa A4); input Updated_DR&O in tabella A511 (p.139). C alto testualmente giustificato dal ruolo normativo; I/P alti da input diretto necessario; R basso; T moderato (disponibilita' all'avvio).",
+   "profile_reviewed": [
+    0.9,
+    0.7,
+    0.85,
+    0.2,
+    0.75,
+    0.5
+   ]
+  },
+  "2,9": {
+   "profile_S11": [
+    0.3,
+    0.4,
+    0.2,
+    0.15,
+    0.35,
+    0.25
+   ],
+   "unit_direction": [
+    0.4253,
+    0.5671,
+    0.2836,
+    0.2127,
+    0.4962,
+    0.3544
+   ],
+   "published_prob": 0.2,
+   "scale_factor": 0.694559,
+   "rescaled": [
+    0.208368,
+    0.277824,
+    0.138912,
+    0.104184,
+    0.243096,
+    0.17364
+   ],
+   "dominant_aspect": "O",
+   "review_status": "reviewed-S12-batchBA",
+   "rationale": "CONFERMA con flag. Narrativa A533 (p.128): esiti S&C (stabilita', vincolo LO) alterano l'architettura -> O dominante corretto; I contenuto (legame vive nell'iterazione). FLAG: riga tabella A511 da A533 non leggibile con certezza (OCR p.139). AGGIORNAMENTO B-C: flag sciolto \u2014 tabella A511 (p.139) riga 'i Recommended_Config._Changes <- A533' e output corrispondente in tabella A533: fonte confermata. Valori numerici tesi non mappabili (dati 'disguised' in B&E 2002): canone numerico = figure 2002 verificate.",
+   "profile_reviewed": [
+    0.3,
+    0.4,
+    0.2,
+    0.15,
+    0.35,
+    0.25
+   ]
+  },
+  "3,2": {
+   "profile_S11": [
+    0.85,
+    0.65,
+    0.8,
+    0.2,
+    0.6,
+    0.45
+   ],
+   "unit_direction": [
+    0.5747,
+    0.4395,
+    0.5409,
+    0.1352,
+    0.2704,
+    0.3043
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.828079,
+   "rescaled": [
+    0.703867,
+    0.538251,
+    0.662463,
+    0.165616,
+    0.331231,
+    0.372635
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBA",
+   "rationale": "CORREZIONE C 0.60->0.40. Tabella A512 (p.140): input UCAV_3-D_Model da A511; cause ritardo 'Errors in A511 (3-D Model)' (p.148) -> I/P alti e T moderato giustificati. A511 fornisce, non regola: C ridotto (pattern sistematico fornitura-dati).",
+   "profile_reviewed": [
+    0.85,
+    0.65,
+    0.8,
+    0.2,
+    0.4,
+    0.45
+   ]
+  },
+  "3,4": {
+   "profile_S11": [
+    0.55,
+    0.6,
+    0.25,
+    0.2,
+    0.45,
+    0.35
+   ],
+   "unit_direction": [
+    0.5268,
+    0.5747,
+    0.2395,
+    0.1916,
+    0.431,
+    0.3352
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.938474,
+   "rescaled": [
+    0.516161,
+    0.563085,
+    0.234619,
+    0.187695,
+    0.422313,
+    0.328466
+   ],
+   "dominant_aspect": "O",
+   "review_status": "reviewed-S12-batchBA",
+   "rationale": "CONFERMA. Tabella A512 (p.140): input UCAV_Surface_Requirements da A531 \u2014 feedback documentato. O dominante corretto (i requisiti aero alterano il lofting); C 0.45 difendibile (requisiti prescrittivi).",
+   "profile_reviewed": [
+    0.55,
+    0.6,
+    0.25,
+    0.2,
+    0.45,
+    0.35
+   ]
+  },
+  "4,1": {
+   "profile_S11": [
+    0.7,
+    0.55,
+    0.65,
+    0.15,
+    0.7,
+    0.4
+   ],
+   "unit_direction": [
+    0.5095,
+    0.4003,
+    0.4731,
+    0.1092,
+    0.5095,
+    0.2911
+   ],
+   "published_prob": 0.3,
+   "scale_factor": 0.534876,
+   "rescaled": [
+    0.374413,
+    0.294182,
+    0.34767,
+    0.080231,
+    0.374413,
+    0.213951
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBA",
+   "rationale": "CONFERMA. Tabella A531 (p.140): input dedicato DR&O/Aero_Data_Set da A4; narrativa 'based on the surfaced models and DR&O' (p.127). Schema (2,1): C alto legittimo dal ruolo controllante del DR&O.",
+   "profile_reviewed": [
+    0.7,
+    0.55,
+    0.65,
+    0.15,
+    0.7,
+    0.4
+   ]
+  },
+  "4,3": {
+   "profile_S11": [
+    0.95,
+    0.7,
+    0.9,
+    0.25,
+    0.5,
+    0.55
+   ],
+   "unit_direction": [
+    0.5828,
+    0.4294,
+    0.5521,
+    0.1534,
+    0.184,
+    0.3374
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.751292,
+   "rescaled": [
+    0.713728,
+    0.525905,
+    0.676163,
+    0.187823,
+    0.225388,
+    0.413211
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBA",
+   "rationale": "CORREZIONE C 0.50->0.30. Tabella A531 (p.140): input UCAV_Surfaced_Models da A512 (prob tabella coerente con Fig.3); rework 'Config./Geometry changes', ritardi 'awkward geometries' (p.149) -> I 0.95 e P 0.90 legittimi, O/T sostenuti. Il lofting non regola l'aero: C ridotto.",
+   "profile_reviewed": [
+    0.95,
+    0.7,
+    0.9,
+    0.25,
+    0.3,
+    0.55
+   ]
+  },
+  "5,1": {
+   "profile_S11": [
+    0.65,
+    0.5,
+    0.6,
+    0.15,
+    0.65,
+    0.35
+   ],
+   "unit_direction": [
+    0.5139,
+    0.3953,
+    0.4743,
+    0.1186,
+    0.5139,
+    0.2767
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.774597,
+   "rescaled": [
+    0.503488,
+    0.387298,
+    0.464758,
+    0.11619,
+    0.503488,
+    0.271109
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CONFERMA. Tabella A521 (p.140): input dedicato DR&O/Structural_Designer_Data_Set da A4, prob/imp coerenti con Fig.3/4; cause rework 'Requirements change or missing 5' (p.149). Pattern documento-controllante: C alto legittimo.",
+   "profile_reviewed": [
+    0.65,
+    0.5,
+    0.6,
+    0.15,
+    0.65,
+    0.35
+   ]
+  },
+  "5,3": {
+   "profile_S11": [
+    0.9,
+    0.7,
+    0.85,
+    0.3,
+    0.6,
+    0.5
+   ],
+   "unit_direction": [
+    0.5709,
+    0.4441,
+    0.5392,
+    0.1903,
+    0.222,
+    0.3172
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.776931,
+   "rescaled": [
+    0.699238,
+    0.543852,
+    0.660391,
+    0.233079,
+    0.271926,
+    0.388465
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CORREZIONE C 0.60->0.35. Tabella A521: Surfaced_Models da A512, prob .5 = Fig.3. I/P alti giustificati (base geometrica). Fornitura, non regolazione; lieve prescrittivita' dei disegni di internal arrangement (membri strutturali) -> C 0.35.",
+   "profile_reviewed": [
+    0.9,
+    0.7,
+    0.85,
+    0.3,
+    0.35,
+    0.5
+   ]
+  },
+  "5,6": {
+   "profile_S11": [
+    0.4,
+    0.5,
+    0.2,
+    0.25,
+    0.35,
+    0.3
+   ],
+   "unit_direction": [
+    0.4698,
+    0.5872,
+    0.2349,
+    0.2936,
+    0.4111,
+    0.3523
+   ],
+   "published_prob": 0.1,
+   "scale_factor": 0.287678,
+   "rescaled": [
+    0.115071,
+    0.143839,
+    0.057536,
+    0.071919,
+    0.100687,
+    0.086303
+   ],
+   "dominant_aspect": "O",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CONFERMA con flag. Feedback assente dalla tabella input di A521 (natura superdiagonale, scoperto in iterazione). O dominante corretto: problemi emersi nella formattazione FEM risalgono alla geometria. FLAG: riga tabella assente/illeggibile.",
+   "profile_reviewed": [
+    0.4,
+    0.5,
+    0.2,
+    0.25,
+    0.35,
+    0.3
+   ]
+  },
+  "5,8": {
+   "profile_S11": [
+    0.45,
+    0.55,
+    0.15,
+    0.2,
+    0.4,
+    0.3
+   ],
+   "unit_direction": [
+    0.4977,
+    0.6083,
+    0.1659,
+    0.2212,
+    0.4424,
+    0.3318
+   ],
+   "published_prob": 0.1,
+   "scale_factor": 0.270914,
+   "rescaled": [
+    0.121911,
+    0.149003,
+    0.040637,
+    0.054183,
+    0.108366,
+    0.081274
+   ],
+   "dominant_aspect": "O",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CONFERMA + corroborazione anomalia. Tabella A521: input Weights_Inertias_&_Mass_Properties da A532 documentato con valori bassi -> la dipendenza esiste ed e' debole; il 2002 registra impatto nullo (Fig.4 cella vuota, verificata S12). O dominante corretto.",
+   "profile_reviewed": [
+    0.45,
+    0.55,
+    0.15,
+    0.2,
+    0.4,
+    0.3
+   ]
+  },
+  "5,12": {
+   "profile_S11": [
+    0.55,
+    0.7,
+    0.2,
+    0.25,
+    0.55,
+    0.4
+   ],
+   "unit_direction": [
+    0.4721,
+    0.6008,
+    0.1717,
+    0.2146,
+    0.4721,
+    0.3433
+   ],
+   "published_prob": 0.3,
+   "scale_factor": 0.630706,
+   "rescaled": [
+    0.346888,
+    0.441494,
+    0.126141,
+    0.157676,
+    0.346888,
+    0.252282
+   ],
+   "dominant_aspect": "O",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CONFERMA. Tabella A521: Materials_Sizing_&_Deformations da A5344; narrativa A5344 (p.128): fornisce materiali/sizing/deformazioni. Verdetto di verifica con forza normativa sulla geometria -> C 0.55 moderato giustificato (ramo valutazioni del pattern).",
+   "profile_reviewed": [
+    0.55,
+    0.7,
+    0.2,
+    0.25,
+    0.55,
+    0.4
+   ]
+  },
+  "5,13": {
+   "profile_S11": [
+    0.5,
+    0.65,
+    0.15,
+    0.2,
+    0.55,
+    0.45
+   ],
+   "unit_direction": [
+    0.449,
+    0.5837,
+    0.1347,
+    0.1796,
+    0.4939,
+    0.4041
+   ],
+   "published_prob": 0.1,
+   "scale_factor": 0.219971,
+   "rescaled": [
+    0.109985,
+    0.142981,
+    0.032996,
+    0.043994,
+    0.120984,
+    0.098987
+   ],
+   "dominant_aspect": "O",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CONFERMA. Tabella A521: DFMA evaluation e Mfg_Cost_Evaluation da A54x; narrativa A541: producibilita' come vincolo. Ramo valutazioni: C moderato giustificato.",
+   "profile_reviewed": [
+    0.5,
+    0.65,
+    0.15,
+    0.2,
+    0.55,
+    0.45
+   ]
+  },
+  "6,1": {
+   "profile_S11": [
+    0.45,
+    0.35,
+    0.4,
+    0.15,
+    0.5,
+    0.3
+   ],
+   "unit_direction": [
+    0.4888,
+    0.3802,
+    0.4345,
+    0.1629,
+    0.5431,
+    0.3259
+   ],
+   "published_prob": 0.1,
+   "scale_factor": 0.266076,
+   "rescaled": [
+    0.119734,
+    0.093127,
+    0.10643,
+    0.039911,
+    0.133038,
+    0.079823
+   ],
+   "dominant_aspect": "C",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CONFERMA con flag. Tabella A522 (p.140): input DR&O/Structural_Designer_Data_Set da A4 documentato; valori colonna illeggibili (FLAG). Coupling debole a C dominante, coerente col pattern documento-controllante a bassa intensita'.",
+   "profile_reviewed": [
+    0.45,
+    0.35,
+    0.4,
+    0.15,
+    0.5,
+    0.3
+   ]
+  },
+  "6,5": {
+   "profile_S11": [
+    0.95,
+    0.8,
+    0.9,
+    0.5,
+    0.7,
+    0.65
+   ],
+   "unit_direction": [
+    0.5323,
+    0.4483,
+    0.5043,
+    0.2802,
+    0.2241,
+    0.3642
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.549011,
+   "rescaled": [
+    0.52156,
+    0.439209,
+    0.49411,
+    0.274505,
+    0.219604,
+    0.356857
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CORREZIONE C 0.70->0.40. Tabella A522: Initial_Structural_3-D_Model da A521, prob .4 = Fig.3. Narrativa inequivocabile: A522 esiste solo per convertire il modello 3-D in 2-D per gli analisti stress -> I .95 e P .90 pienamente giustificati; T .65 sostenuto dalla natura a stadi di A521. R .50 tenuto con FLAG assunzione (continuita' gruppo strutture, senza evidenza diretta). Fornitura pura: C ridotto.",
+   "profile_reviewed": [
+    0.95,
+    0.8,
+    0.9,
+    0.5,
+    0.4,
+    0.65
+   ]
+  },
+  "7,1": {
+   "profile_S11": [
+    0.75,
+    0.55,
+    0.7,
+    0.15,
+    0.75,
+    0.4
+   ],
+   "unit_direction": [
+    0.5175,
+    0.3795,
+    0.483,
+    0.1035,
+    0.5175,
+    0.276
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.676123,
+   "rescaled": [
+    0.507093,
+    0.371868,
+    0.473286,
+    0.101419,
+    0.507093,
+    0.270449
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CONFERMA. Tabella A5341 (p.141): DR&O/Structural_Analysis_Data_Set da A4. Supporto testuale piu' forte della matrice per C alto: i requisiti DR&O 'will drive the design', riassunti in report che governa i passi successivi (narrativa p.128).",
+   "profile_reviewed": [
+    0.75,
+    0.55,
+    0.7,
+    0.15,
+    0.75,
+    0.4
+   ]
+  },
+  "7,6": {
+   "profile_S11": [
+    0.8,
+    0.65,
+    0.75,
+    0.4,
+    0.6,
+    0.5
+   ],
+   "unit_direction": [
+    0.5446,
+    0.4425,
+    0.5106,
+    0.2723,
+    0.2383,
+    0.3404
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.667053,
+   "rescaled": [
+    0.533642,
+    0.433584,
+    0.50029,
+    0.266821,
+    0.233468,
+    0.333526
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBB",
+   "rationale": "CORREZIONE C 0.60->0.35. Tabella A5341: Structural_Geometry_&_Notes_for_Analysis da A522, prob .4 = Fig.3 (colonna impatto illeggibile vs Fig.4=0.8: FLAG, prevale la fonte 2002 verificata). I/P alti giustificati. R .40 con FLAG (causa 'Resource availability 3' non prova condivisione con A522). Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.8,
+    0.65,
+    0.75,
+    0.4,
+    0.35,
+    0.5
+   ]
+  },
+  "8,6": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.8,
+    0.35,
+    0.55,
+    0.5
+   ],
+   "unit_direction": [
+    0.5548,
+    0.4569,
+    0.5221,
+    0.2284,
+    0.2284,
+    0.3263
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.799361,
+   "rescaled": [
+    0.679457,
+    0.559553,
+    0.639489,
+    0.279776,
+    0.279776,
+    0.39968
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBC",
+   "rationale": "CORREZIONE C 0.55->0.35. Tabella A532 (p.140): Structural_Geometry_&_Notes_for_Analysis da A522, prob .5 = Fig.3. Narrativa: metodi esatti man mano che geometria/materiali si definiscono -> I/P alti, O e T sostenuti. Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.8,
+    0.35,
+    0.35,
+    0.5
+   ]
+  },
+  "8,12": {
+   "profile_S11": [
+    0.45,
+    0.6,
+    0.15,
+    0.3,
+    0.45,
+    0.35
+   ],
+   "unit_direction": [
+    0.45,
+    0.6,
+    0.15,
+    0.3,
+    0.45,
+    0.35
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 1.224745,
+   "rescaled": [
+    0.551135,
+    0.734847,
+    0.183712,
+    0.367423,
+    0.551135,
+    0.428661
+   ],
+   "dominant_aspect": "O",
+   "review_status": "reviewed-S12-batchBC",
+   "rationale": "CONFERMA. Tabella A532: Materials_Sizing_&_Deformations da A5344 a prob di fascia massima \u2014 (8,12) confermata da DUE fonti indipendenti (Fig.2/3 2002 lette programmaticamente + tabella tesi); (8,11) del B-E v7 definitivamente confutata (-> changelog U2). O dominante corretto (feedback da esiti di verifica che muovono la misura chiave 'peso'); C 0.45 nel ramo valutazioni-verdetto. Fattore scala 1.225, comp. max 0.735 entro vincolo.",
+   "profile_reviewed": [
+    0.45,
+    0.6,
+    0.15,
+    0.3,
+    0.45,
+    0.35
+   ]
+  },
+  "9,1": {
+   "profile_S11": [
+    0.7,
+    0.55,
+    0.65,
+    0.15,
+    0.7,
+    0.4
+   ],
+   "unit_direction": [
+    0.5095,
+    0.4003,
+    0.4731,
+    0.1092,
+    0.5095,
+    0.2911
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.713168,
+   "rescaled": [
+    0.499218,
+    0.392243,
+    0.46356,
+    0.106975,
+    0.499218,
+    0.285267
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBC",
+   "rationale": "CONFERMA. Tabella A533 (p.141): input dedicato DR&O/S&C_Data_Set da A4. Pattern documento-controllante con data set disciplinare.",
+   "profile_reviewed": [
+    0.7,
+    0.55,
+    0.65,
+    0.15,
+    0.7,
+    0.4
+   ]
+  },
+  "9,3": {
+   "profile_S11": [
+    0.9,
+    0.7,
+    0.85,
+    0.25,
+    0.55,
+    0.5
+   ],
+   "unit_direction": [
+    0.5741,
+    0.4465,
+    0.5422,
+    0.1595,
+    0.2233,
+    0.319
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.781266,
+   "rescaled": [
+    0.703139,
+    0.546886,
+    0.664076,
+    0.195316,
+    0.273443,
+    0.390633
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBC",
+   "rationale": "CORREZIONE C 0.55->0.35. Tabella A533: UCAV_Surfaced_Models da A512 \u2014 base geometrica dell'analisi. I/P alti giustificati. Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.9,
+    0.7,
+    0.85,
+    0.25,
+    0.35,
+    0.5
+   ]
+  },
+  "9,4": {
+   "profile_S11": [
+    0.9,
+    0.75,
+    0.85,
+    0.35,
+    0.6,
+    0.55
+   ],
+   "unit_direction": [
+    0.5536,
+    0.4614,
+    0.5229,
+    0.2153,
+    0.2153,
+    0.3383
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.753422,
+   "rescaled": [
+    0.67808,
+    0.565066,
+    0.640408,
+    0.263698,
+    0.263698,
+    0.414382
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBC",
+   "rationale": "CORREZIONE C 0.60->0.35. Tabella A533: UCAV_Forces_&_Moments, output documentato di A531 \u2014 input cardine della stabilita'. I/P alti, O sostenuto. Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.9,
+    0.75,
+    0.85,
+    0.35,
+    0.35,
+    0.55
+   ]
+  },
+  "9,8": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.8,
+    0.3,
+    0.55,
+    0.5
+   ],
+   "unit_direction": [
+    0.5587,
+    0.4601,
+    0.5258,
+    0.1972,
+    0.23,
+    0.3286
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.804952,
+   "rescaled": [
+    0.684209,
+    0.563467,
+    0.643962,
+    0.241486,
+    0.281733,
+    0.402476
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBC",
+   "rationale": "CORREZIONE C 0.55->0.35. Tabella A533: Weights_Inertias_&_Mass_Properties da A532, prob .5 = Fig.3 \u2014 CG e inerzie essenziali per S&C. Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.8,
+    0.3,
+    0.35,
+    0.5
+   ]
+  },
+  "10,4": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.8,
+    0.3,
+    0.6,
+    0.5
+   ],
+   "unit_direction": [
+    0.5587,
+    0.4601,
+    0.5258,
+    0.1972,
+    0.23,
+    0.3286
+   ],
+   "published_prob": 0.1,
+   "scale_factor": 0.16099,
+   "rescaled": [
+    0.136842,
+    0.112693,
+    0.128792,
+    0.048297,
+    0.056347,
+    0.080495
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CORREZIONE C 0.60->0.35. Tabella A5342 (p.141): input UCAV_Pressure_Distribution (output A531); cause A5343 'Aero. distribution changes 2.5' sostengono O. Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.8,
+    0.3,
+    0.35,
+    0.5
+   ]
+  },
+  "10,6": {
+   "profile_S11": [
+    0.8,
+    0.65,
+    0.75,
+    0.35,
+    0.6,
+    0.5
+   ],
+   "unit_direction": [
+    0.5494,
+    0.4464,
+    0.5151,
+    0.2404,
+    0.2404,
+    0.3434
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.841158,
+   "rescaled": [
+    0.672927,
+    0.546753,
+    0.630869,
+    0.294405,
+    0.294405,
+    0.420579
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CORREZIONE C 0.60->0.35. Tabella: Data_for_FEM da A522, prob .5 = Fig.3. FEM = substrato di lavoro condiviso con A5343 (R 0.35 con evidenza: modello comune + cause 'Good tools not available 3'). Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.8,
+    0.65,
+    0.75,
+    0.35,
+    0.35,
+    0.5
+   ]
+  },
+  "10,7": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.8,
+    0.35,
+    0.65,
+    0.5
+   ],
+   "unit_direction": [
+    0.5224,
+    0.4302,
+    0.4917,
+    0.2151,
+    0.3995,
+    0.3073
+   ],
+   "published_prob": 0.2,
+   "scale_factor": 0.301084,
+   "rescaled": [
+    0.255921,
+    0.210759,
+    0.240867,
+    0.105379,
+    0.195705,
+    0.150542
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CONFERMA. Tabella: Structural_Design_Conditions da A5341 \u2014 il report che 'governa i passi successivi dell'analisi strutturale' (narrativa A5341, p.128). Caso normativo piu' netto dopo il DR&O: C 0.65 giustificato.",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.8,
+    0.35,
+    0.65,
+    0.5
+   ]
+  },
+  "10,8": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.8,
+    0.3,
+    0.6,
+    0.5
+   ],
+   "unit_direction": [
+    0.5587,
+    0.4601,
+    0.5258,
+    0.1972,
+    0.23,
+    0.3286
+   ],
+   "published_prob": 0.1,
+   "scale_factor": 0.16099,
+   "rescaled": [
+    0.136842,
+    0.112693,
+    0.128792,
+    0.048297,
+    0.056347,
+    0.080495
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CORREZIONE C 0.60->0.35. Tabella: Weights_Inertias_&_Mass_Properties da A532 \u2014 proprieta' di massa per il bilanciamento. Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.8,
+    0.3,
+    0.35,
+    0.5
+   ]
+  },
+  "10,11": {
+   "profile_S11": [
+    0.45,
+    0.6,
+    0.15,
+    0.3,
+    0.45,
+    0.35
+   ],
+   "unit_direction": [
+    0.4397,
+    0.5862,
+    0.1466,
+    0.2931,
+    0.342,
+    0.4885
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.957323,
+   "rescaled": [
+    0.430795,
+    0.574394,
+    0.143598,
+    0.287197,
+    0.335063,
+    0.478662
+   ],
+   "dominant_aspect": "O",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CORREZIONE T 0.35->0.50 (al rialzo) e C 0.45->0.35; O 0.60 INVARIATO (dominante). Tabella: Internal_Loads_Distribution da A5343, prob .4 = Fig.3. Narrativa: trasferimento a meta' corsa \u2014 dopo il primo passo di A5343 arrivano le summations dei load cases e solo allora A5342 completa. Sincronizzazione critica sottopesata da S11. [QA v1: errore di trascrizione O=0.35 nella registrazione B-D rilevato e corretto in chiusura \u2014 il dry-run approvato manteneva O=0.60.]",
+   "profile_reviewed": [
+    0.45,
+    0.6,
+    0.15,
+    0.3,
+    0.35,
+    0.5
+   ]
+  },
+  "11,6": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.8,
+    0.4,
+    0.65,
+    0.55
+   ],
+   "unit_direction": [
+    0.5444,
+    0.4484,
+    0.5124,
+    0.2562,
+    0.2242,
+    0.3523
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.784465,
+   "rescaled": [
+    0.666795,
+    0.549125,
+    0.627572,
+    0.313786,
+    0.274563,
+    0.431455
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CORREZIONE C 0.65->0.35. Tabella A5343: Data_for_FEM da A522; narrativa: il rough FEM e' la base del primo passo (nodal layout, connettivita'). R 0.40 sostenuto dal FEM condiviso. Fornitura: C ridotto.",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.8,
+    0.4,
+    0.35,
+    0.55
+   ]
+  },
+  "11,7": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.8,
+    0.35,
+    0.65,
+    0.55
+   ],
+   "unit_direction": [
+    0.5173,
+    0.426,
+    0.4869,
+    0.213,
+    0.3956,
+    0.3347
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.745356,
+   "rescaled": [
+    0.633553,
+    0.521749,
+    0.596285,
+    0.260875,
+    0.484481,
+    0.409946
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CONFERMA. Tabella: Structural_Design_Conditions da A5341 \u2014 stesso caso normativo di (10,7): C 0.65 giustificato.",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.8,
+    0.35,
+    0.65,
+    0.55
+   ]
+  },
+  "11,8": {
+   "profile_S11": [
+    0.75,
+    0.6,
+    0.7,
+    0.3,
+    0.55,
+    0.5
+   ],
+   "unit_direction": [
+    0.5477,
+    0.4382,
+    0.5112,
+    0.2191,
+    0.2556,
+    0.3651
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.894427,
+   "rescaled": [
+    0.67082,
+    0.536656,
+    0.626099,
+    0.268328,
+    0.31305,
+    0.447214
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CORREZIONE C 0.55->0.35 con FLAG. Riga input non leggibile, ma cause di rework A5343 citano 'Incomplete inputs mass dist.' (evidenza P) e 'Mass distribution changes 1.5' (evidenza O): dipendenza dalla distribuzione di massa documentata per via indiretta.",
+   "profile_reviewed": [
+    0.75,
+    0.6,
+    0.7,
+    0.3,
+    0.35,
+    0.5
+   ]
+  },
+  "11,10": {
+   "profile_S11": [
+    0.95,
+    0.8,
+    0.9,
+    0.4,
+    0.7,
+    0.65
+   ],
+   "unit_direction": [
+    0.54,
+    0.4547,
+    0.5116,
+    0.2274,
+    0.2274,
+    0.3695
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.69617,
+   "rescaled": [
+    0.661361,
+    0.556936,
+    0.626553,
+    0.278468,
+    0.278468,
+    0.45251
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBD",
+   "rationale": "CORREZIONE C 0.70->0.40. Tabella: Balanced_External_Loads da A5342; narrativa: 'closely coupled', scalari e balanced load cases del secondo passo letteralmente preconditivi -> I .95 e P .90 giustificati; T .65 dalla sincronizzazione a meta' corsa; R .40 dal FEM condiviso. Parallelo esatto di (6,5).",
+   "profile_reviewed": [
+    0.95,
+    0.8,
+    0.9,
+    0.4,
+    0.4,
+    0.65
+   ]
+  },
+  "12,1": {
+   "profile_S11": [
+    0.65,
+    0.5,
+    0.6,
+    0.15,
+    0.7,
+    0.35
+   ],
+   "unit_direction": [
+    0.5034,
+    0.3872,
+    0.4646,
+    0.1162,
+    0.5421,
+    0.271
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.758757,
+   "rescaled": [
+    0.493192,
+    0.379378,
+    0.455254,
+    0.113814,
+    0.53113,
+    0.265565
+   ],
+   "dominant_aspect": "C",
+   "review_status": "reviewed-S12-batchBE",
+   "rationale": "CONFERMA. Tabella A5344 (p.141): input dedicato DR&O/Structures_&_Life_Data_Set da A4. Documento controllante: C 0.70 giustificato.",
+   "profile_reviewed": [
+    0.65,
+    0.5,
+    0.6,
+    0.15,
+    0.7,
+    0.35
+   ]
+  },
+  "12,6": {
+   "profile_S11": [
+    0.9,
+    0.75,
+    0.85,
+    0.45,
+    0.65,
+    0.6
+   ],
+   "unit_direction": [
+    0.5398,
+    0.4498,
+    0.5098,
+    0.2699,
+    0.2099,
+    0.3599
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.587643,
+   "rescaled": [
+    0.528878,
+    0.440732,
+    0.499496,
+    0.264439,
+    0.205675,
+    0.352586
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBE",
+   "rationale": "CORREZIONE C 0.65->0.35. Tabella: Structural_Geometry_&_Notes_for_Analysis da A522; narrativa A5344 'based on geometry data'. Fornitura. R 0.45 con FLAG (continuita' gruppo strutture).",
+   "profile_reviewed": [
+    0.9,
+    0.75,
+    0.85,
+    0.45,
+    0.35,
+    0.6
+   ]
+  },
+  "12,7": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.8,
+    0.35,
+    0.7,
+    0.55
+   ],
+   "unit_direction": [
+    0.5109,
+    0.4208,
+    0.4809,
+    0.2104,
+    0.4208,
+    0.3306
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.73621,
+   "rescaled": [
+    0.625779,
+    0.515347,
+    0.588968,
+    0.257674,
+    0.515347,
+    0.404916
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBE",
+   "rationale": "CONFERMA. Tabella: Structural_Design_Conditions da A5341 \u2014 A5344 e' il passo di analisi strutturale che il report dichiaratamente governa. Caso normativo per eccellenza: C 0.70.",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.8,
+    0.35,
+    0.7,
+    0.55
+   ]
+  },
+  "12,10": {
+   "profile_S11": [
+    0.9,
+    0.75,
+    0.85,
+    0.4,
+    0.65,
+    0.6
+   ],
+   "unit_direction": [
+    0.544,
+    0.4533,
+    0.5137,
+    0.2418,
+    0.2115,
+    0.3626
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.740233,
+   "rescaled": [
+    0.66621,
+    0.555175,
+    0.629198,
+    0.296093,
+    0.259082,
+    0.44414
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBE",
+   "rationale": "CORREZIONE C 0.65->0.35. Tabella (p.142): Balanced_External_Loads da A5342 + narrativa A5344. Fornitura.",
+   "profile_reviewed": [
+    0.9,
+    0.75,
+    0.85,
+    0.4,
+    0.35,
+    0.6
+   ]
+  },
+  "12,11": {
+   "profile_S11": [
+    0.95,
+    0.8,
+    0.9,
+    0.45,
+    0.7,
+    0.65
+   ],
+   "unit_direction": [
+    0.5363,
+    0.4516,
+    0.5081,
+    0.2541,
+    0.2258,
+    0.367
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.553151,
+   "rescaled": [
+    0.525494,
+    0.442521,
+    0.497836,
+    0.248918,
+    0.22126,
+    0.359548
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBE",
+   "rationale": "CORREZIONE C 0.70->0.40. Tabella: Internal_Loads_Distribution da A5343 \u2014 input primario dell'analisi (I .95 legittimo). Fornitura; parallelo (11,10)/(6,5).",
+   "profile_reviewed": [
+    0.95,
+    0.8,
+    0.9,
+    0.45,
+    0.4,
+    0.65
+   ]
+  },
+  "13,1": {
+   "profile_S11": [
+    0.7,
+    0.55,
+    0.65,
+    0.2,
+    0.7,
+    0.4
+   ],
+   "unit_direction": [
+    0.5072,
+    0.3985,
+    0.4709,
+    0.1449,
+    0.5072,
+    0.2898
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.887357,
+   "rescaled": [
+    0.62115,
+    0.488046,
+    0.576782,
+    0.177471,
+    0.62115,
+    0.354943
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBE",
+   "rationale": "CONFERMA. Tabella A541 (p.142): DR&O/Manufacturing_Data_Set da A4, prob .5 = Fig.3; narrativa: dal DR&O rate di produzione e quantita'. C 0.70. Impatto Fig.4 = 0.9 (massimo della matrice) catturato da IMPACT=DSM2 (B2).",
+   "profile_reviewed": [
+    0.7,
+    0.55,
+    0.65,
+    0.2,
+    0.7,
+    0.4
+   ]
+  },
+  "13,5": {
+   "profile_S11": [
+    0.9,
+    0.75,
+    0.85,
+    0.3,
+    0.65,
+    0.55
+   ],
+   "unit_direction": [
+    0.5571,
+    0.4642,
+    0.5261,
+    0.1857,
+    0.2166,
+    0.3404
+   ],
+   "published_prob": 0.5,
+   "scale_factor": 0.758098,
+   "rescaled": [
+    0.682288,
+    0.568574,
+    0.644383,
+    0.227429,
+    0.265334,
+    0.416954
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBE",
+   "rationale": "CORREZIONE C 0.65->0.35. Tabella: Structural_Geometry_&_Notes_for_Mfg da A521, prob .5; narrativa: 'a notion of the structural geometry and materials... must be known'. Fornitura. Impatto 0.9 in IMPACT.",
+   "profile_reviewed": [
+    0.9,
+    0.75,
+    0.85,
+    0.3,
+    0.35,
+    0.55
+   ]
+  },
+  "13,12": {
+   "profile_S11": [
+    0.75,
+    0.65,
+    0.7,
+    0.3,
+    0.65,
+    0.5
+   ],
+   "unit_direction": [
+    0.5388,
+    0.467,
+    0.5029,
+    0.2155,
+    0.2514,
+    0.3592
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.703906,
+   "rescaled": [
+    0.52793,
+    0.457539,
+    0.492734,
+    0.211172,
+    0.246367,
+    0.351953
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBE",
+   "rationale": "CORREZIONE C 0.65->0.35 con FLAG riga parziale (voce A5344 orfana in tabella A541, coerente con output Materials_Sizing e narrativa). Verso il manufacturing i materiali sono dati di progetto, non verdetto sul lavoro di A541: ramo fornitura. Distinzione direzionale rispetto a (5,12): la direzione d'uso dell'output decide il ramo.",
+   "profile_reviewed": [
+    0.75,
+    0.65,
+    0.7,
+    0.3,
+    0.35,
+    0.5
+   ]
+  },
+  "14,1": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.75,
+    0.6
+   ],
+   "unit_direction": [
+    0.4804,
+    0.4484,
+    0.4163,
+    0.1281,
+    0.4804,
+    0.3843
+   ],
+   "published_prob": 0.3,
+   "scale_factor": 0.470679,
+   "rescaled": [
+    0.353009,
+    0.329475,
+    0.305941,
+    0.094136,
+    0.353009,
+    0.282407
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CONFERMA. Unico input registrato separatamente dal bundle in tabella A6, valori coerenti con Fig.3 (.3); il proposal deve conformarsi ai requisiti: documento controllante fino all'ultimo atto, C differenziata 0.75 giustificata.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.75,
+    0.6
+   ]
+  },
+  "14,2": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,3": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,4": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,5": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,6": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,7": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,8": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,9": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,10": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,11": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,12": {
+   "profile_S11": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5307,
+    0.4953,
+    0.4599,
+    0.1415,
+    0.2476,
+    0.4245
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.693254,
+   "rescaled": [
+    0.51994,
+    0.485278,
+    0.450615,
+    0.138651,
+    0.242639,
+    0.415952
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CORREZIONE C 0.55->0.35 (uniforme sul bundle). Tabella A6 (p.142): input a granularita' di bundle ('Prelim._UCAV_Configuration' voce unica per i deliverable delle att. 2-13); B&E 2002 disaggregano uniformemente (Fig.3 riga 14 = .4 salvo (14,1); Fig.4 = .8 salvo (14,1)); narrativa A6: 'collecting all the technical, cost, schedule and people information', ~3 iterazioni. Uniformita' MOTIVATA dalla granularita' documentale, non default. Il bundle fornisce contenuto, non regola il Proposal.",
+   "profile_reviewed": [
+    0.75,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  },
+  "14,13": {
+   "profile_S11": [
+    0.85,
+    0.7,
+    0.65,
+    0.2,
+    0.55,
+    0.6
+   ],
+   "unit_direction": [
+    0.5787,
+    0.4766,
+    0.4425,
+    0.1362,
+    0.2383,
+    0.4085
+   ],
+   "published_prob": 0.4,
+   "scale_factor": 0.667053,
+   "rescaled": [
+    0.566995,
+    0.466937,
+    0.433584,
+    0.133411,
+    0.233468,
+    0.400232
+   ],
+   "dominant_aspect": "I",
+   "review_status": "reviewed-S12-batchBF",
+   "rationale": "CONFERMA differenziazione I 0.85 + CORREZIONE C 0.55->0.35. Supporto testuale diretto: 'a manufacturing and tooling plan must be included in the proposal' (narrativa A541) \u2014 sezione da incorporare, non input da sintetizzare. ",
+   "profile_reviewed": [
+    0.85,
+    0.7,
+    0.65,
+    0.2,
+    0.35,
+    0.6
+   ]
+  }
+ },
+ "_changelog": [
+  "S12/18-07-2026 batch B-A: 4 conferme, 2 correzioni C ((3,2) 0.60->0.40; (4,3) 0.50->0.30). Pattern a verbale: S11 gonfia Control su coppie di pura fornitura dati; C alto legittimo solo con ruolo normativo reale (DR&O, valutazioni-verifica).",
+  "S12/18-07-2026 batch B-B: 7 conferme, 3 correzioni C ((5,3) .60->.35; (6,5) .70->.40; (7,6) .60->.35). Regola a due rami consolidata: C moderato-alto per fornitori normativi (DR&O, valutazioni-verdetto), C .30-.40 per pura fornitura dati/modelli. Corroborazione tesi dell'anomalia (5,8).",
+  "S12 batch B-C: 2 conferme, 4 correzioni C (ramo fornitura). (8,12) confermata da due fonti indipendenti; flag (2,9) sciolto.",
+  "S12 batch B-D: 2 conferme (coppie del report normativo A5341), 7 correzioni \u2014 6 su C (ramo fornitura) e la PRIMA correzione al rialzo: T (10,11) .35->.50 su evidenza del mid-stream transfer.",
+  "S12 batch B-E: 3 conferme (coppie normative), 5 correzioni C. Distinzione direzionale su A5344: verdetto verso att.5, dato verso att.13.",
+  "S12 batch B-F: riga 14 \u2014 uniformita' ASSOLTA con motivazione documentale (bundle in tabella A6 + disaggregazione uniforme di B&E stessi); (14,1) e (14,13) differenziazioni confermate con evidenza testuale; C->0.35 uniforme sulle 11 coppie bundle + (14,13).",
+  "S12 QA finale: errore di trascrizione in (10,11) (O clobbered a 0.35 in B-D) rilevato e corretto: O=0.60 ripristinato come da dry-run approvato."
+ ]
+}
