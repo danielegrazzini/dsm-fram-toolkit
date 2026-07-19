@@ -15,8 +15,8 @@ The three simulators form a progressive analytical hierarchy:
 
 | Simulator | Description | Key output |
 |-----------|-------------|------------|
-| **B-E Simulator v7.2** | Full Browning-Eppinger (2002) stochastic process simulation | E[S], σ[S], P[S], Interface Criticality |
-| **FEBS Simulator v6** | FRAM-Extended B-E — replaces scalar weights with 6D coupling tensors | Interface Resonance Risk (IRR) |
+| **B-E Simulator v7.2.1** | Full Browning-Eppinger (2002) stochastic process simulation | E[S], σ[S], P[S], Interface Criticality |
+| **FEBS Simulator v6.0.2** | FRAM-Extended B-E — replaces scalar weights with 6D coupling tensors | Interface Resonance Risk (IRR) |
 | **FRAME-Q Simulator S29** | Network variability propagation + Saltelli (2002) global sensitivity analysis | Rnet, Sobol Sᵢ and Tᵢ |
 
 ---
@@ -40,8 +40,8 @@ That's it. No Python, no npm, no configuration.
 ```
 dsm-fram-toolkit/
 ├── simulators/
-│   ├── DSM_B-E_Simulator_v7.2.html     # Browning-Eppinger 2002 stochastic simulation
-│   ├── FEBS_Simulator_v6.html          # FRAM-Extended B-E Simulation
+│   ├── DSM_B-E_Simulator_v7.2.1.html   # Browning-Eppinger 2002 stochastic simulation
+│   ├── FEBS_Simulator_v6.0.2.html      # FRAM-Extended B-E Simulation
 │   └── FRAMEQ_Simulator.html           # FRAME-Q variability propagation + Sobol analysis (S29)
 ├── data/
 │   ├── UCAV_source_verified_S12.json   # UCAV dataset verified cell-by-cell against B&E 2002
@@ -67,7 +67,7 @@ dsm-fram-toolkit/
 
 ## Simulators
 
-### B-E Simulator v7.2
+### B-E Simulator v7.2.1
 
 A complete implementation of the Browning & Eppinger (2002) process simulation model.
 
@@ -79,10 +79,10 @@ A complete implementation of the Browning & Eppinger (2002) process simulation m
 - All 10 schedule and cost risk metrics from Table V of Browning & Eppinger (2002)
 - Interface Criticality analysis (analytic and empirical)
 - Multi-architecture comparison with minimum highlighting
-- Import/export in JSON and the shared Toolkit JSON format
+- Import/export in JSON and the shared Toolkit JSON format; the project export records the full configuration including the fidelity toggles, and the two export buttons are labelled "results" vs "data only" (v7.2.1)
 - Three preloaded datasets: the UCAV design process (Browning, 1998; **verified cell-by-cell against the published figures**, v7.1 changelog), MIT v2.1, and an airport turnaround
 
-### FEBS Simulator v6
+### FEBS Simulator v6.0.2
 
 Extends B-E by replacing scalar rework probabilities with six-dimensional coupling tensors.
 
@@ -91,7 +91,7 @@ Extends B-E by replacing scalar rework probabilities with six-dimensional coupli
 - Weighted Euclidean norm aggregation of tensor components
 - Interface Resonance Risk (IRR) index per activity
 - Full Monte Carlo simulation with empirical rework frequency tracking
-- Export in CSV, JSON, MIT format, and the shared Toolkit JSON format; import of Toolkit JSON
+- Export in CSV, JSON, MIT format, and the shared Toolkit JSON format; import of Toolkit JSON. The results export is self-contained: sim_stats includes σ_S, σ_C, P_S, P_C, the full parameter set (p, β, Pbase, ρ, weights), θ and the active-pair count (v6.0.2)
 - Preloaded synthetic airport turnaround case (5 functions) with full tensor M, as used in the DSM 2026 paper
 - **UCAV benchmark via Toolkit JSON** (`data/UCAV_FEBS_full_v1.json` for the FRAM-native tensor, `data/UCAV_FEBS_reduction_test2.json` for the B-E-reduction configuration)
 - Sobol sensitivity analysis on E[S]: forthcoming, not yet implemented
@@ -191,7 +191,7 @@ The script `tests/be_published_replication.js` extracts the simulator's math cor
 **Requirements:** Node ≥ 14. No dependencies, no browser.
 
 ```bash
-node tests/be_published_replication.js simulators/DSM_B-E_Simulator_v7.2.html
+node tests/be_published_replication.js simulators/DSM_B-E_Simulator_v7.2.1.html
 ```
 
 **Expected output:** 8 PASS lines (4 no-iteration reference + 4 full model) ending in `✓ ALL CHECKS PASSED` with exit code 0. Note: the published input data are rounded and disguised for confidentiality by the original authors; the published outputs are nevertheless internally consistent with the published inputs, which is what this test verifies. Matching beyond the pre-registered tolerances is not a meaningful target.
@@ -204,7 +204,7 @@ The script `tests/febs_be_reduction_equivalence.js` demonstrates the FEBS→B-E 
 
 ```bash
 node tests/febs_be_reduction_equivalence.js \
-     simulators/FEBS_Simulator_v6.html simulators/DSM_B-E_Simulator_v7.2.html
+     simulators/FEBS_Simulator_v6.0.2.html simulators/DSM_B-E_Simulator_v7.2.1.html
 ```
 
 **Expected output:** exact reduction mapping (max deviation ≈ 5.6e-17 over 52 active pairs), four PASS deltas (|ΔE[C]| ≤ 2, |ΔE[S]| ≤ 0.4, |Δσ_C| ≤ 1.5, |Δσ_S| ≤ 0.3), ending in `✓ ALL CHECKS PASSED — strong equivalence` with exit code 0.
