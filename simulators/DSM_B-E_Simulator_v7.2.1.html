@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <!--
+CHANGELOG v7.2.1 — 19 luglio 2026, Sessione 13 (issue #4)
+  Export di progetto: simParams include ora useComono e useFullRadius
+  (stato dei toggle di fedelta' B&E, per export autoportanti).
+  Etichette export chiarite: "Export JSON (results)" / "Export Toolkit JSON (data only)"
+  (ambiguita' emersa nel riscontro doppio canale S13).
+Math core invariato (certificato; test di replica ripassato).
+-->
+
+<!--
 CHANGELOG v7.2 — 18 luglio 2026, Sessione 12 (esiti Test 1, vedi TEST1_REPORT_S12.md)
 Aggiunti due toggle di fedelta' B&E (default OFF = comportamento v7.1):
   useComono: campionamento comonotono — un quantile per run comune a tutte le attivita'.
@@ -30,7 +39,7 @@ Nessun'altra modifica: Table I conforme 98/98, anomalia (5,8) gia' corretta in v
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>B-E DSM Simulator v7</title>
+<title>B-E DSM Simulator v7.2.1</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 :root{
@@ -240,7 +249,7 @@ table.rtt td.best{color:var(--green);font-weight:700;}
 <div class="hdr">
   <div class="hdr-brand">
     <div class="hdr-brand-name">B-E DSM SIMULATOR</div>
-    <div class="hdr-brand-sub">IEEE TEM 49(4) 2002 · v7.1</div>
+    <div class="hdr-brand-sub">IEEE TEM 49(4) 2002 · v7.2.1</div>
   </div>
   <div class="hdr-mid">
     <div class="hdr-proj"><input id="proj-name" value="My Project" spellcheck="false"></div>
@@ -248,9 +257,9 @@ table.rtt td.best{color:var(--green);font-weight:700;}
     <div class="badge badge-n" id="hdr-n">n = 14</div>
   </div>
   <div class="hdr-right">
-    <button class="hbtn save" onclick="exportJSON()">↓ Export JSON</button>
+    <button class="hbtn save" onclick="exportJSON()">↓ Export JSON (results)</button>
     <button class="hbtn" onclick="importJSON()">↑ Import JSON</button>
-    <button class="hbtn" onclick="exportToolkitJSON()" style="background:#00c9a7;color:#0d0d0d">↓ Toolkit JSON</button>
+    <button class="hbtn" onclick="exportToolkitJSON()" style="background:#00c9a7;color:#0d0d0d">↓ Toolkit JSON (data only)</button>
     <button class="hbtn" onclick="importToolkitJSON()" style="border:1px solid #00c9a7;background:transparent;color:#00c9a7">↑ Import Toolkit</button>
     <input type="file" id="file-import" accept=".json" style="display:none" onchange="handleImport(event)">
   </div>
@@ -1153,10 +1162,10 @@ function importToolkitJSON(){
 function exportJSON(){
   const data={version:7,projectName:document.getElementById('proj-name').value,n:N,activities:acts,dsmBinary:dsmBin,probMatrix:probM,impMatrix:impM,
     architectures:architectures.map(a=>({name:a.name,V:a.V,acts_seq:a.acts_seq,prob_seq:a.prob_seq,imp_seq:a.imp_seq,results:a.results||null})),
-    currentArchIdx,simParams:{rmax:document.getElementById('rmax').value,batch:document.getElementById('batch').value,alpha:document.getElementById('alpha').value,rho:document.getElementById('rho').value,tc:document.getElementById('tc').value,ts:document.getElementById('ts').value,kc:document.getElementById('kc').value,ks:document.getElementById('ks').value,useLHS,useStab}};
+    currentArchIdx,simParams:{rmax:document.getElementById('rmax').value,batch:document.getElementById('batch').value,alpha:document.getElementById('alpha').value,rho:document.getElementById('rho').value,tc:document.getElementById('tc').value,ts:document.getElementById('ts').value,kc:document.getElementById('kc').value,ks:document.getElementById('ks').value,useLHS,useStab,useComono,useFullRadius}};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=(document.getElementById('proj-name').value||'project').replace(/\s+/g,'_')+'_dsm_v7.json';a.click();
+  a.download=(document.getElementById('proj-name').value||'project').replace(/\s+/g,'_')+'_dsm_v7.2.1.json';a.click();
   setStatus('Project exported.');
 }
 function importJSON(){document.getElementById('file-import').click();}
