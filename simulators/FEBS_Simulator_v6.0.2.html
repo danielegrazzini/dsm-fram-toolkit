@@ -1,9 +1,30 @@
 <!DOCTYPE html>
+<!--
+CHANGELOG v6.0.2 — 19 luglio 2026, Sessione 13 (issue FEBS #4 e #5, esiti riscontro doppio canale)
+  #4 Export autoportante: sim_stats ora include sigma_S, sigma_C, P_S, P_C,
+     parametri completi (p, beta, Pbase, rho, rmax, pesi), theta e coppie attive.
+  #5 Default pesi corretti da 0.1667 a 0.166667 (CAUSA RADICE della convenzione intercettata dal riscontro S13: era il default della UI, non input operatore), step="any", + pulsante UNIFORM 1/6 nel pannello pesi (evita la convenzione 0.1667,
+     intercettata e dimostrata innocua dal riscontro S13).
+Math core invariato (certificato byte-identico; test di equivalenza ripassato).
+-->
+
+<!--
+CHANGELOG v6.0.1 — 18 luglio 2026, Sessione 12 (issue FEBS #3)
+Fix wizard, nessuna modifica al math core:
+  1. Pulsante n4 (pane 4): puntava a nav(6) saltando il pane 5 (freq), il cui
+     confirmFreq() e' l'unico a sbloccare ws6 -> vicolo cieco dopo l'import.
+     Ora n4 -> nav(5); confirmFreq() porta a 6 come da flusso progettato.
+     Etichetta corretta da "Next > Simulate" a "Next >".
+  2. nav() su step bloccato: avviso in status bar invece del ritorno silenzioso.
+Regressione: math core identico a v6 (diff vuoto); test di equivalenza della
+riduzione ripassato contro questo file (vedi verbale S12).
+-->
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>FEBS Simulator v6 — FRAM-Extended Browning-Eppinger</title>
+<title>FEBS Simulator v6.0.2 — FRAM-Extended Browning-Eppinger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -437,19 +458,20 @@ canvas{display:block;max-width:100%}
     <div class="sh" style="margin-top:20px">FRAME-6 ASPECT WEIGHTS w<sub>k</sub></div>
     <div class="snote">Weighted norm &#8214;C&#8214;<sub>w</sub> = &#8730;(&#931; w<sub>k</sub>&#183;c&#178;<sub>k</sub>). Default = 1/6 &#8776; 0.1667 uniform.</div>
     <div class="weights-row">
-      <div class="w-item"><span class="w-lbl" style="color:var(--inp)">I</span><input class="w-inp" id="wI" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--out)">O</span><input class="w-inp" id="wO" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--pre)">P</span><input class="w-inp" id="wP" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--res)">R</span><input class="w-inp" id="wR" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--ctl)">C</span><input class="w-inp" id="wC" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
-      <div class="w-item"><span class="w-lbl" style="color:var(--tim)">T</span><input class="w-inp" id="wT" value="0.1667" type="number" min="0" max="1" step="0.01"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--inp)">I</span><input class="w-inp" id="wI" value="0.166667" type="number" min="0" max="1" step="any"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--out)">O</span><input class="w-inp" id="wO" value="0.166667" type="number" min="0" max="1" step="any"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--pre)">P</span><input class="w-inp" id="wP" value="0.166667" type="number" min="0" max="1" step="any"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--res)">R</span><input class="w-inp" id="wR" value="0.166667" type="number" min="0" max="1" step="any"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--ctl)">C</span><input class="w-inp" id="wC" value="0.166667" type="number" min="0" max="1" step="any"></div>
+      <div class="w-item"><span class="w-lbl" style="color:var(--tim)">T</span><input class="w-inp" id="wT" value="0.166667" type="number" min="0" max="1" step="any">
+<button class="btn sm" onclick="['wI','wO','wP','wR','wC','wT'].forEach(id=>i(id).value=(1/6).toFixed(6));setS('Uniform weights 1/6 set')" title="Set all six weights to exactly 1/6">UNIFORM 1/6</button></div>
     </div>
   </div>
   <div class="foot">
     <button class="btn sm" onclick="nav(3)">&#8249; Back</button>
     <button class="btn pri" onclick="validateP4()">&#9654; CONFIRM PARAMETERS</button>
     <span class="msg" id="m4"></span>
-    <button class="btn sm" style="margin-left:auto" onclick="nav(6)" id="n4" disabled>Next &#8250; Simulate</button>
+    <button class="btn sm" style="margin-left:auto" onclick="nav(5)" id="n4" disabled>Next &#8250;</button>
   </div>
 </div>
 
@@ -1114,11 +1136,23 @@ function expIRR(){
     activities: fns.map((f,i)=>({id:i+1, name:f.nm, desc:f.desc||'', bcv:f.bs, mlv:f.ms, wcv:f.ws, cost_bcv:f.bc, cost_mlv:f.mc, cost_wcv:f.wc, ic:f.ic})),
     m_pairs: (()=>{const p={};for(let i=1;i<=N;i++)for(let j=1;j<=N;j++){if(i===j)continue;if(!dsmB[i-1]||!dsmB[i-1][j-1])continue;p[i+','+j]=[...tensorM[i-1][j-1]];}return p;})(),
     irr_results: rows,
-    sim_stats: simS.length ? {
-      n_runs: simS.length,
-      E_S: +(simS.reduce((a,b)=>a+b,0)/simS.length).toFixed(4),
-      E_C: simC.length ? +(simC.reduce((a,b)=>a+b,0)/simC.length).toFixed(4) : null
-    } : null
+    sim_stats: simS.length ? (()=>{
+      const n=simS.length;
+      const mS=simS.reduce((a,b)=>a+b,0)/n, mC=simC.reduce((a,b)=>a+b,0)/n;
+      const sS=Math.sqrt(simS.reduce((a,x)=>a+(x-mS)**2,0)/n);
+      const sC=Math.sqrt(simC.reduce((a,x)=>a+(x-mC)**2,0)/n);
+      const TC=+i('tc')?.value||null, TS=+i('ts')?.value||null;
+      const sn=febs_norms?Object.values(febs_norms).sort((a,b)=>a-b):[];
+      return {
+        n_runs:n, E_S:+mS.toFixed(4), E_C:+mC.toFixed(4),
+        sigma_S:+sS.toFixed(4), sigma_C:+sC.toFixed(4),
+        P_S: TS?+(simS.filter(s=>s>TS).length/n).toFixed(4):null,
+        P_C: TC?+(simC.filter(c=>c>TC).length/n).toFixed(4):null,
+        params:{p:+i('pp').value, beta:+i('beta').value, pbase:+i('pbase').value,
+                rho:+i('rho').value, rmax:+i('rmax').value, weights:getWeights()},
+        theta: sn.length?+sn[Math.min(Math.floor(+i('pp').value/100*sn.length),sn.length-1)].toFixed(6):null,
+        active_pairs: febs_S?Object.values(febs_S).filter(v=>v>0).length:null
+      };})() : null
   };
   const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
@@ -1627,7 +1661,7 @@ function renderSens(){
 // ═══════════════════════════════════════════════════════════════════════
 
 function nav(n){
-  const _t=i('ws'+n);if(_t&&_t.classList.contains('locked'))return;
+  const _t=i('ws'+n);if(_t&&_t.classList.contains('locked')){setS('Step '+n+' locked \u2014 complete the validation button of the current pane first');return;}
   [1,2,3,4,5,6].forEach(k=>{
     const p=i('p'+k);if(p)p.classList.toggle('on',k===n);
     const w=i('ws'+k);if(w){
