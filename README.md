@@ -241,7 +241,7 @@ See also `CITATION.cff` for full citation metadata.
 
 ## Related Publications
 
-- Grazzini, D., .& Pourghadiri, P. (2026). *FEBS: extending the Browning-Eppinger stochastic model with a six-aspect FRAM coupling tensor.* (Extension study; UCAV case, FEBS->B-E reduction, and the formal proof in `data/`.) Working paper.
+- Grazzini, D., & Pourghadiri, P. (2026). *FEBS: extending the Browning-Eppinger stochastic model with a six-aspect FRAM coupling tensor.* (Extension study; UCAV case, FEBS->B-E reduction, and the formal proof in `data/`.) Working paper.
 - Grazzini, D. (2026). *FRAM Extended Browning-Eppinger Simulation (FEBS): a multidimensional coupling model for functional resonance risk assessment.* Proceedings of the International DSM Conference, Milan.
 - Grazzini, D., & Pourghadiri, P. (2026). *FRAME-Q: Functional Resonance Analysis Method Extended and Quantified.* Working paper.
 - Grazzini, D. et al. (2024). *Development of a method for comparing industrial processes using DSM: the SeatBridge patent.* Proceedings of the International DSM Conference, Stuttgart.
