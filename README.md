@@ -16,10 +16,10 @@ The three simulators form a progressive analytical hierarchy:
 | Simulator | Description | Key output |
 |---|---|---|
 | **B-E Simulator** | Full Browning-Eppinger (2002) stochastic process simulation | E[S], sigma[S], P[S], Interface Criticality |
-| **FEBS Simulator** | FRAM-Extended B-E — replaces scalar weights with 6D coupling tensors | Interface Resonance Index (IRR) |
+| **FEBS Simulator** | FRAM-Extended B-E — replaces scalar weights with 6D coupling tensors | Interface Resonance Risk Index (IRR) |
 | **FRAME-Q Simulator** | Network variability propagation + Saltelli (2002) global sensitivity analysis | Rnet, Sobol Si and Ti |
 
-> **Note on the IRR acronym.** The per-activity index produced by the FEBS Simulator is written **IRR**. It appears in the literature under two equivalent long forms: *Interface Resonance Index* (used here and in the extension study) and *Functional Resonance Risk Index* (used in the DSM 2026 conference paper). Both denote the same quantity; the acronym IRR is stable across all project outputs.
+> **Note on the IRR acronym.** The per-activity index produced by the FEBS Simulator is written **IRR**. It appears in the literature under two equivalent long forms: *Interface Resonance Risk Index* (used here and in the extension study) and *Functional Resonance Risk Index* (used in the DSM 2026 conference paper). Both denote the same quantity; the acronym IRR is stable across all project outputs.
 
 ---
 
@@ -105,7 +105,7 @@ Extends B-E by replacing scalar rework probabilities with six-dimensional coupli
 
 - FRAME-6 structured elicitation panel for all 6 FRAM aspects per active pair
 - Weighted Euclidean norm aggregation of tensor components
-- Interface Resonance Index (IRR) per activity
+- Interface Resonance Risk Index (IRR) per activity
 - Full Monte Carlo simulation with empirical rework frequency tracking
 - Export tensor M in shared JSON format for FRAME-Q import
 - Preloaded UCAV case with full tensor M
@@ -241,9 +241,9 @@ See also `CITATION.cff` for full citation metadata.
 
 ## Related Publications
 
-- Grazzini, D., & Pourghadiri, P. (2026). *FEBS: extending the Browning-Eppinger stochastic model with a six-aspect FRAM coupling tensor.* (Extension study; UCAV case, FEBS->B-E reduction, and the formal proof in `data/`.) Working paper.
+- Grazzini, D. (2026). *FEBS: extending the Browning-Eppinger stochastic model with a six-aspect FRAM coupling tensor.* (Extension study; UCAV case, FEBS->B-E reduction, and the formal proof in `data/`.)
 - Grazzini, D. (2026). *FRAM Extended Browning-Eppinger Simulation (FEBS): a multidimensional coupling model for functional resonance risk assessment.* Proceedings of the International DSM Conference, Milan.
-- Grazzini, D., & Pourghadiri, P. (2026). *FRAME-Q: Functional Resonance Analysis Method Extended and Quantified.* Working paper.
+- Grazzini, D., Browning, T.R., & Pourghadiri, P. (2026). *FRAME-Q: Functional Resonance Analysis Method Extended and Quantified.* Working paper.
 - Grazzini, D. et al. (2024). *Development of a method for comparing industrial processes using DSM: the SeatBridge patent.* Proceedings of the International DSM Conference, Stuttgart.
 
 ---
