@@ -5,6 +5,12 @@ Entries are ordered newest first.
 
 ---
 
+## [Unreleased]
+### Added
+- `ROADMAP.md`: public development roadmap up to the JOSS submission (January 2027).
+
+---
+
 ## [B-E Simulator v7.2.1] — 2026-07-19
 ### Added
 - Project export now records the fidelity toggle state (`useComono`, `useFullRadius`),
