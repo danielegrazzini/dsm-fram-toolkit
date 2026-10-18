@@ -13,11 +13,11 @@
  * The no-iteration reference (615 / 55 / 133 / 13) is asserted first: it is
  * the arithmetic signature of comonotone sampling (sigma_C = sum of sigma_i).
  *
- * Usage:  node tests/be_published_replication.js simulators/DSM_B-E_Simulator_v7.2.html
+ * Usage:  node tests/be_published_replication.js simulators/DSM_B-E_Simulator_v7.2.1.html
  * Requires: Node >= 14. No dependencies, no browser.
  */
 const fs = require('fs');
-const path = process.argv[2] || 'simulators/DSM_B-E_Simulator_v7.2.html';
+const path = process.argv[2] || 'simulators/DSM_B-E_Simulator_v7.2.1.html';
 const html = fs.readFileSync(path, 'utf8');
 
 // ── extract math core + UCAV dataset verbatim from the simulator ──

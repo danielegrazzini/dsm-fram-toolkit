@@ -15,12 +15,12 @@
  *
  * Usage:
  *   node tests/febs_be_reduction_equivalence.js \
- *        simulators/FEBS_Simulator_v6.html simulators/DSM_B-E_Simulator_v7.2.html
+ *        simulators/FEBS_Simulator_v6.0.2.html simulators/DSM_B-E_Simulator_v7.2.1.html
  * Requires: Node >= 14. No dependencies, no browser.
  */
 const fs = require('fs');
-const febsPath = process.argv[2] || 'simulators/FEBS_Simulator_v6.html';
-const bePath   = process.argv[3] || 'simulators/DSM_B-E_Simulator_v7.2.html';
+const febsPath = process.argv[2] || 'simulators/FEBS_Simulator_v6.0.2.html';
+const bePath   = process.argv[3] || 'simulators/DSM_B-E_Simulator_v7.2.1.html';
 const febsHtml = fs.readFileSync(febsPath, 'utf8');
 const beHtml   = fs.readFileSync(bePath, 'utf8');
 
