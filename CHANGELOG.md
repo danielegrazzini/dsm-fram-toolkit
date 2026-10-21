@@ -12,6 +12,10 @@ Entries are ordered newest first.
 - `tests/be_published_replication.js` and `tests/febs_be_reduction_equivalence.js` now default to the
   current simulator files (`DSM_B-E_Simulator_v7.2.1.html`, `FEBS_Simulator_v6.0.2.html`), so the commands
   in the README run as written.
+- `paper.bib`: corrected DOIs (Browning & Eppinger 2002; Falegnami et al. 2020; Patriarca et al. 2017),
+  co-author names, page range and DOI of the DSM 2024 paper, title and DOI of the DSM 2026 paper; removed an unused entry;
+  added the author's theses (Zenodo DOIs); updated the author list of the FRAME-Q working paper.
+- `CITATION.cff`: now valid against the CFF 1.2.0 schema; removed the placeholder preferred citation.
 
 ---
 

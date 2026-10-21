@@ -32,15 +32,6 @@ keywords:
   - functional resonance
   - Sobol indices
   - Browning-Eppinger model
-preferred-citation:
-  type: article
-  authors:
-    - family-names: Grazzini
-      given-names: Daniele
-  title: "dsm-fram-toolkit: A browser-based simulator suite for DSM–FRAM integration and functional resonance risk analysis"
-  journal: "Journal of Open Source Software"
-  year: 2026
-  doi: "10.21105/joss.XXXXX"
 references:
   - type: article
     authors:
@@ -71,5 +62,6 @@ references:
       - family-names: Hollnagel
         given-names: Erik
     title: "FRAM: The Functional Resonance Analysis Method"
-    publisher: "Ashgate Publishing"
+    publisher:
+      name: "Ashgate Publishing"
     year: 2012

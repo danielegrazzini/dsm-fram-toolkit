@@ -9,7 +9,7 @@ Status legend: ⬜ planned · 🟨 in progress · ✅ done
 |---|---|---|---|---|---|
 | 0 | 12 Oct 2026 | Publish this roadmap | `ROADMAP.md` | `docs: add development roadmap to JOSS submission` | ✅ |
 | 1 | 12 Oct 2026 | Point the test scripts' default paths to the current simulator versions (v7.2.1, v6.0.2), so the README commands run as written | `tests/be_published_replication.js`, `tests/febs_be_reduction_equivalence.js` | `tests: default paths to B-E v7.2.1 and FEBS v6.0.2` | ✅ |
-| 2 | 19 Oct 2026 | Correct bibliography metadata: DOIs (Browning & Eppinger 2002, Falegnami et al. 2020, Patriarca et al. 2017), titles and DOIs of the DSM 2024/2026 papers, co-author names; remove or cite unused entries | `paper.bib`, `CITATION.cff` | `paper: correct DOIs and bibliographic metadata` | ⬜ |
+| 2 | 19 Oct 2026 | Correct bibliography metadata: DOIs (Browning & Eppinger 2002, Falegnami et al. 2020, Patriarca et al. 2017), titles and DOIs of the DSM 2024/2026 papers, co-author names; remove or cite unused entries | `paper.bib`, `CITATION.cff` | `paper: correct DOIs and bibliographic metadata` | ✅ |
 | 3 | 19 Oct 2026 | Correct a collaborator affiliation in the acknowledgements | `paper.md` | `paper: fix affiliation in acknowledgements` | ⬜ |
 | 4 | 26 Oct 2026 | Continuous integration: run the four verification scripts on every push and pull request; make the Python script exit non-zero on failure; add a CI badge | `.github/workflows/tests.yml`, `tests/sobol_saltelli_verification.py`, `README.md` | `ci: run verification suite on push and PR` | ⬜ |
 | 5 | 2 Nov 2026 | Connect the repository to Zenodo and publish the first versioned release (semantic versioning) with an archive DOI | `CITATION.cff`, `CHANGELOG.md` | `release: v1.0.0` (tag `v1.0.0`) | ⬜ |
