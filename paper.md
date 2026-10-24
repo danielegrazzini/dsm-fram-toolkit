@@ -68,6 +68,6 @@ Claude Sonnet (Anthropic) was used to assist with: code generation for portions 
 
 # Acknowledgements
 
-The author thanks T.R. Browning (Texas Christian University) and P. Pourghadiri (University of Tehran) for discussions that shaped the development of the FRAME-Q framework. The B-E Simulator builds on the process simulation model introduced by T.R. Browning and S.D. Eppinger in their 2002 paper, and the UCAV case study data originally published in T.R. Browning's 1998 doctoral dissertation at MIT.
+The author thanks T.R. Browning (Texas Christian University) and P. Pourghadiri (Sharif University of Technology) for discussions that shaped the development of the FRAME-Q framework. The B-E Simulator builds on the process simulation model introduced by T.R. Browning and S.D. Eppinger in their 2002 paper, and the UCAV case study data originally published in T.R. Browning's 1998 doctoral dissertation at MIT.
 
 # References

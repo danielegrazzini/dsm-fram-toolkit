@@ -16,6 +16,7 @@ Entries are ordered newest first.
   co-author names, page range and DOI of the DSM 2024 paper, title and DOI of the DSM 2026 paper; removed an unused entry;
   added the author's theses (Zenodo DOIs); updated the author list of the FRAME-Q working paper.
 - `CITATION.cff`: now valid against the CFF 1.2.0 schema; removed the placeholder preferred citation.
+- `paper.md`: corrected a collaborator affiliation in the acknowledgements.
 
 ---
 
