@@ -330,3 +330,6 @@ print("  [4] Jansen, M.J.W. (1999). Analysis of variance designs for model outpu
 print("      Computer Physics Communications, 117(1–2), 35–43.")
 print("  [5] Saltelli, A. et al. (2008). Global Sensitivity Analysis: The Primer.")
 print("      Wiley. [Ishigami analytical solution: p. 179, Table 4.2]")
+
+import sys
+sys.exit(0 if all_pass else 1)
