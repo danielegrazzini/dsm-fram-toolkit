@@ -8,6 +8,12 @@ Entries are ordered newest first.
 ## [Unreleased]
 ### Added
 - `ROADMAP.md`: public development roadmap up to the JOSS submission (January 2027).
+- Continuous integration (`.github/workflows/tests.yml`): the four verification scripts run on every push
+  and pull request; status badge in the README.
+### Changed
+- `tests/sobol_saltelli_verification.py` exits with a non-zero status when a check fails.
+- README: replaced the placeholder JOSS badge with the test-status badge.
+- README and CI: NumPy is the only Python dependency of the verification suite (SciPy removed from the requirements).
 ### Fixed
 - `tests/be_published_replication.js` and `tests/febs_be_reduction_equivalence.js` now default to the
   current simulator files (`DSM_B-E_Simulator_v7.2.1.html`, `FEBS_Simulator_v6.0.2.html`), so the commands

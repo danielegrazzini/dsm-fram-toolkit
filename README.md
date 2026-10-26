@@ -3,7 +3,7 @@
 **A browser-based simulator suite for DSM–FRAM integration and functional resonance risk analysis**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![JOSS](https://joss.theoj.org/papers/placeholder/badge.svg)](paper.md)
+[![Verification tests](https://github.com/danielegrazzini/dsm-fram-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/danielegrazzini/dsm-fram-toolkit/actions/workflows/tests.yml)
 
 ---
 
@@ -163,14 +163,14 @@ The proof establishes that FEBS **extends** the Browning-Eppinger model — cont
 
 ## Verification
 
-The toolkit ships dependency-free verification scripts under `tests/`.
+The toolkit ships verification scripts under `tests/`: three Node scripts with no dependencies and one Python script that requires NumPy.
 
 `tests/sobol_saltelli_verification.py` benchmarks the FRAME-Q Saltelli estimator against the Ishigami function, whose Sobol' indices are known analytically.
 
-**Requirements:** Python >= 3.8, NumPy, SciPy
+**Requirements:** Python >= 3.8, NumPy
 
 ```
-pip install numpy scipy
+pip install numpy
 python tests/sobol_saltelli_verification.py
 ```
 
