@@ -1,0 +1,46 @@
+name: Verification tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  javascript:
+    name: Simulator verification (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: B-E replication of published UCAV results
+        run: node tests/be_published_replication.js
+
+      - name: FEBS to B-E reduction equivalence
+        run: node tests/febs_be_reduction_equivalence.js
+
+      - name: FRAME-Q variability-handling regression
+        run: node tests/frameq_sigma_regression.js
+
+  python:
+    name: Sobol-Saltelli estimator verification (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install numpy
+
+      - name: Ishigami benchmark
+        run: python tests/sobol_saltelli_verification.py
