@@ -4,6 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Verification tests](https://github.com/danielegrazzini/dsm-fram-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/danielegrazzini/dsm-fram-toolkit/actions/workflows/tests.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23841409.svg)](https://doi.org/10.5281/zenodo.23841409)
 
 ---
 
@@ -222,7 +223,23 @@ All three simulators ship with the UCAV (Unmanned Combat Air Vehicle) design pro
 
 ## Citation
 
-If you use `dsm-fram-toolkit` in your research, please cite the archived release of the software. Every release is archived on Zenodo with a DOI; the **Cite this repository** button on this page gives the full reference, generated from `CITATION.cff`.
+If you use `dsm-fram-toolkit` in your research, please cite the archived release of the software. Every release is archived on Zenodo with its own DOI:
+
+> Grazzini, D. (2026). *dsm-fram-toolkit: A browser-based simulator suite for DSM–FRAM integration and functional resonance risk analysis* (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.23841410
+
+```
+@software{grazzini2026toolkit,
+  author    = {Grazzini, Daniele},
+  title     = {dsm-fram-toolkit: A browser-based simulator suite for {DSM}--{FRAM}
+               integration and functional resonance risk analysis},
+  version   = {1.0.0},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.23841410}
+}
+```
+
+To cite the toolkit independently of a specific version, use the concept DOI [10.5281/zenodo.23841409](https://doi.org/10.5281/zenodo.23841409), which always resolves to the latest release. The **Cite this repository** button on this page gives the same reference, generated from `CITATION.cff`.
 
 ---
 

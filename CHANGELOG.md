@@ -5,6 +5,13 @@ Entries are ordered newest first.
 
 ---
 
+## [Unreleased]
+### Added
+- Zenodo archive of release v1.0.0: version DOI `10.5281/zenodo.23841410`, concept DOI (all versions)
+  `10.5281/zenodo.23841409`. DOI badge and full software citation in the README; concept DOI in `CITATION.cff`.
+
+---
+
 ## [1.0.0] — 2026-10-31
 First versioned release of the toolkit, archived on Zenodo with a DOI.
 Contents: B-E Simulator v7.2.1, FEBS Simulator v6.0.2 (unchanged; SHA-256 `9932c988401e92b9`, the file
