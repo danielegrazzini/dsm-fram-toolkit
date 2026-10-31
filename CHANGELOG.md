@@ -5,7 +5,10 @@ Entries are ordered newest first.
 
 ---
 
-## [Unreleased]
+## [1.0.0] — 2026-10-31
+First versioned release of the toolkit, archived on Zenodo with a DOI.
+Contents: B-E Simulator v7.2.1, FEBS Simulator v6.0.2 (unchanged; SHA-256 `9932c988401e92b9`, the file
+used for the results of the extension study), FRAME-Q Simulator (S29), shared JSON data and verification suite.
 ### Added
 - `ROADMAP.md`: public development roadmap up to the JOSS submission (January 2027).
 - Continuous integration (`.github/workflows/tests.yml`): the four verification scripts run on every push
@@ -13,6 +16,11 @@ Entries are ordered newest first.
 ### Changed
 - `tests/sobol_saltelli_verification.py` exits with a non-zero status when a check fails.
 - README: replaced the placeholder JOSS badge with the test-status badge.
+- README: *Related Publications* completed and corrected (titles, authors, DOIs of the DSM 2024/2025/2026
+  papers, the author's theses); *Citation* now points to the archived release instead of a placeholder
+  JOSS DOI.
+- `paper.bib`: updated title of the FRAME-Q working paper.
+- `CITATION.cff`: version 1.0.0, release date 2026-10-31.
 - README and CI: NumPy is the only Python dependency of the verification suite (SciPy removed from the requirements).
 ### Fixed
 - `tests/be_published_replication.js` and `tests/febs_be_reduction_equivalence.js` now default to the

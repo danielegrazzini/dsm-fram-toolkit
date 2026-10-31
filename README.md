@@ -222,29 +222,19 @@ All three simulators ship with the UCAV (Unmanned Combat Air Vehicle) design pro
 
 ## Citation
 
-If you use `dsm-fram-toolkit` in your research, please cite:
-
-```
-@article{grazzini2026toolkit,
-  author  = {Grazzini, Daniele},
-  title   = {dsm-fram-toolkit: A browser-based simulator suite for DSM--FRAM
-             integration and functional resonance risk analysis},
-  journal = {Journal of Open Source Software},
-  year    = {2026},
-  doi     = {10.21105/joss.XXXXX}
-}
-```
-
-See also `CITATION.cff` for full citation metadata.
+If you use `dsm-fram-toolkit` in your research, please cite the archived release of the software. Every release is archived on Zenodo with a DOI; the **Cite this repository** button on this page gives the full reference, generated from `CITATION.cff`.
 
 ---
 
 ## Related Publications
 
-- Grazzini, D. (2026). *FEBS: extending the Browning-Eppinger stochastic model with a six-aspect FRAM coupling tensor.* (Extension study; UCAV case, FEBS->B-E reduction, and the formal proof in `data/`.) Working paper.
-- Grazzini, D. (2026). *FRAM Extended Browning-Eppinger Simulation (FEBS): a multidimensional coupling model for functional resonance risk assessment.* Proceedings of the International DSM Conference, Milan.
-- Grazzini, D., Pourghadiri, P. (2026). *FRAME-Q: Functional Resonance Analysis Method Extended and Quantified.* Working paper.
-- Grazzini, D. et al. (2024). *Development of a method for comparing industrial processes using DSM: the SeatBridge patent.* Proceedings of the International DSM Conference, Stuttgart.
+- Grazzini, D., Pourghadiri, P. (2026). *FEBS: extending the Browning-Eppinger stochastic model with a six-aspect FRAM coupling tensor.* (Extension study; UCAV case, FEBS->B-E reduction, and the formal proof in `data/`.) Manuscript in preparation.
+- Grazzini, D. (2026). *Functional Amplification in Design Networks: the FRAME-Q framework for DSM-based Resonance Analysis.* Working paper.
+- Grazzini, D. (2026). *FRAM Extended Browning-Eppinger Simulation (FEBS): A Multidimensional Coupling Model for Functional Resonance Risk Assessment.* Proceedings of the 28th International DSM Conference (DSM 2026), Milan. https://doi.org/10.35199/dsm2026.02
+- Grazzini, D., Falegnami, A., Tomassi, A., Buccini, C., Romano, E. (2025). *Enhancing Workflow Efficiency in Innovative Automotive Processes: A Structured Approach Using DMM and DSM Matrices.* Proceedings of the 27th International DSM Conference (DSM 2025), Hoboken, NJ, pp. 41–50. https://doi.org/10.35199/dsm2025.05
+- Grazzini, D., Tomassi, A., Falegnami, A., Romano, E., Buccini, C. (2024). *Development of a method for comparing industrial processes using DSM: application to a case study in the automotive sector, the SeatBridge patent.* Proceedings of the 26th International DSM Conference (DSM 2024), Stuttgart, pp. 30–39. https://doi.org/10.35199/dsm2024.04
+- Grazzini, D. (2025). *Translation of models between DSM and FRAM for the representation of complex systems.* Master's thesis (English translation), International Telematic University UNINETTUNO, Rome. https://doi.org/10.5281/zenodo.23287569
+- Grazzini, D. (2024). *Sviluppo di un sistema di valutazione dell'efficienza nei processi automotive tramite la Design Structure Matrix: il caso del brevetto Seat Bridge.* Bachelor's thesis, International Telematic University UNINETTUNO, Rome. https://doi.org/10.5281/zenodo.23288510
 
 ---
 
