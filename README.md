@@ -261,6 +261,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-## Contributing
+## Contributing and Support
 
-Issues, questions, and pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Issues, questions and pull requests are welcome. [`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to report a problem, ask for support and contribute changes, and how released simulator files are versioned. Please use the issue templates (*Bug report*, *Question / support*, *Feature request*). All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).

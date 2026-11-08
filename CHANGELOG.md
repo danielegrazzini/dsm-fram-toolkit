@@ -7,6 +7,9 @@ Entries are ordered newest first.
 
 ## [Unreleased]
 ### Added
+- Community guidelines: `CONTRIBUTING.md` (reporting problems, support, contributing, rules for
+  versioning released simulator files, governance), `CODE_OF_CONDUCT.md` (Contributor Covenant),
+  issue templates for bug reports, questions and feature requests.
 - Zenodo archive of release v1.0.0: version DOI `10.5281/zenodo.23841410`, concept DOI (all versions)
   `10.5281/zenodo.23841409`. DOI badge and full software citation in the README; concept DOI in `CITATION.cff`.
 
