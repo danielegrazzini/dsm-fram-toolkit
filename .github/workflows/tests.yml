@@ -27,6 +27,12 @@ jobs:
       - name: FRAME-Q variability-handling regression
         run: node tests/frameq_sigma_regression.js
 
+      - name: JSON validator self-test
+        run: node tests/validate_json.js --self-test
+
+      - name: Shared JSON format of the data files
+        run: node tests/validate_json.js
+
   python:
     name: Sobol-Saltelli estimator verification (Python)
     runs-on: ubuntu-latest
