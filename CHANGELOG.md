@@ -7,6 +7,12 @@ Entries are ordered newest first.
 
 ## [Unreleased]
 ### Added
+- `docs/json-format.md`: specification of the shared JSON format (`dsm-fram-toolkit-v1`) as implemented by
+  the three simulators — fields, conventions, which simulator reads what, default values, worked example.
+- `tests/validate_json.js`: dependency-free validator for the shared format, with a built-in self-test on
+  broken examples; both run in the CI workflow.
+- README: *Shared JSON Format* rewritten to match the files the simulators actually read and write, with a
+  link to the specification; *Repository Structure* updated.
 - Community guidelines: `CONTRIBUTING.md` (reporting problems, support, contributing, rules for
   versioning released simulator files, governance), `CODE_OF_CONDUCT.md` (Contributor Covenant),
   issue templates for bug reports, questions and feature requests.

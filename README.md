@@ -39,8 +39,11 @@ That's it. No Python, no npm, no configuration.
 
 ```
 dsm-fram-toolkit/
-├── .github/workflows/
-│   └── draft-pdf.yml                        # JOSS paper PDF build workflow
+├── .github/
+│   ├── ISSUE_TEMPLATE/                      # Bug report, question/support, feature request
+│   └── workflows/
+│       ├── draft-pdf.yml                    # JOSS paper PDF build workflow
+│       └── tests.yml                        # Verification suite, run on every push
 ├── simulators/
 │   ├── DSM_B-E_Simulator_v7.2.1.html        # Browning-Eppinger 2002 stochastic simulation
 │   ├── FEBS_Simulator_v6.0.2.html           # FRAM-Extended B-E Simulation
@@ -52,15 +55,21 @@ dsm-fram-toolkit/
 │   ├── UCAV_FEBS_reduction_test2.json              # FEBS->B-E reduction test configuration
 │   ├── PROOF_FEBS_extends_Browning-Eppinger.md     # Formal proof (English)
 │   └── PROOF_FEBS_estende_Browning-Eppinger.md     # Formal proof (Italian)
+├── docs/
+│   └── json-format.md                       # Specification of the shared JSON format
 ├── tests/
 │   ├── be_published_replication.js          # B-E replication of published UCAV baseline (Table V)
 │   ├── febs_be_reduction_equivalence.js     # FEBS->B-E reduction on the UCAV case
 │   ├── frameq_sigma_regression.js           # FRAME-Q variability-handling regression suite
+│   ├── validate_json.js                     # Validator for the shared JSON format
 │   └── sobol_saltelli_verification.py       # FRAME-Q Saltelli estimator vs Ishigami function
 ├── CHANGELOG.md
 ├── CITATION.cff                             # Citation metadata
+├── CODE_OF_CONDUCT.md                       # Contributor Covenant 2.0
+├── CONTRIBUTING.md                          # How to report, ask for support, contribute
 ├── LICENSE                                  # MIT License
 ├── README.md
+├── ROADMAP.md                               # Development plan to the JOSS submission
 ├── paper.bib                                # Bibliography
 └── paper.md                                 # JOSS paper
 ```
@@ -164,7 +173,7 @@ The proof establishes that FEBS **extends** the Browning-Eppinger model — cont
 
 ## Verification
 
-The toolkit ships verification scripts under `tests/`: three Node scripts with no dependencies and one Python script that requires NumPy.
+The toolkit ships verification scripts under `tests/`: four Node scripts with no dependencies and one Python script that requires NumPy.
 
 `tests/sobol_saltelli_verification.py` benchmarks the FRAME-Q Saltelli estimator against the Ishigami function, whose Sobol' indices are known analytically.
 
@@ -190,6 +199,7 @@ The Node scripts (no dependencies) verify the B-E and FEBS engines directly:
 node tests/be_published_replication.js        # replicates the published UCAV baseline (Table V)
 node tests/febs_be_reduction_equivalence.js    # verifies the FEBS->B-E reduction to machine precision
 node tests/frameq_sigma_regression.js          # FRAME-Q variability-handling regression
+node tests/validate_json.js                    # checks data/*.json against the shared JSON format
 ```
 
 The Ishigami x3 variable (S3 = 0.000, T3 = 0.244) is the canonical mathematical example of the **silent multiplier** phenomenon: a parameter with zero direct effect but dominant interaction effects. The FRAME-Q UCAV analysis identifies A2 ('Create Preliminary Design Architecture') as a silent multiplier with S2 approx 0.000 and T2 = 0.741, confirming that the phenomenon occurs in real process coupling networks.
@@ -198,20 +208,20 @@ The Ishigami x3 variable (S3 = 0.000, T3 = 0.244) is the canonical mathematical 
 
 ## Shared JSON Format
 
-A single FRAME-6 elicitation session can feed all three simulators. The shared format:
+A single FRAME-6 elicitation session can feed all three simulators: each one reads and writes the same JSON format (`_schema: "dsm-fram-toolkit-v1"`), so a project exported from FEBS opens in FRAME-Q and B-E without re-entering data. In outline:
 
 ```
 {
-  "activities": ["A1", "A2", ...],
-  "m_pairs": {
-    "i,j": [cI, cO, cP, cR, cC, cT]
-  },
-  "impact": { "i,j": value },
-  "prob":   { "i,j": value }
+  "_schema": "dsm-fram-toolkit-v1",
+  "activities":   [ { "id": 1, "name": "...", "bcv": ..., "mlv": ..., "wcv": ...,
+                      "cost_bcv": ..., "cost_mlv": ..., "cost_wcv": ..., "ic": ... }, ... ],
+  "binary_dsm":   [[0, 0, ...], [1, 0, ...], ...],
+  "m_pairs":      { "i,j": [cI, cO, cP, cR, cC, cT] },
+  "impact_pairs": { "i,j": value }
 }
 ```
 
-Export from FEBS -> import into FRAME-Q eliminates data re-entry.
+Pair `"i,j"` means that activity *i* depends on activity *j* (row depends on column). The full specification — every field, which simulator reads it, default values and a worked example — is in [`docs/json-format.md`](docs/json-format.md); `tests/validate_json.js` checks any file against it.
 
 ---
 
