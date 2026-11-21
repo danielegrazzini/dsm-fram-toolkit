@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: B-E engine module identical to the simulator
+        run: node tests/be_engine_equivalence.js
+
       - name: B-E replication of published UCAV results
         run: node tests/be_published_replication.js
 
