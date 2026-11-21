@@ -3,8 +3,9 @@
  * be_published_replication.js — dsm-fram-toolkit verification
  * ------------------------------------------------------------
  * Replicates the published Browning & Eppinger (2002) results for the UCAV
- * baseline architecture using the B-E Simulator's own math core, extracted
- * verbatim from the HTML file and run headless.
+ * baseline architecture with the B-E engine (engine/be_engine.js, the same
+ * code as the B-E Simulator: see tests/be_engine_equivalence.js) on the UCAV
+ * case data in data/UCAV_source_verified_S12.json.
  *
  * Configuration: B&E-fidelity mode (comonotone sampling + full-radius
  * second-order rework), as established in Test 1 (Session 12, 18 Jul 2026).
@@ -13,54 +14,32 @@
  * The no-iteration reference (615 / 55 / 133 / 13) is asserted first: it is
  * the arithmetic signature of comonotone sampling (sigma_C = sum of sigma_i).
  *
- * Usage:  node tests/be_published_replication.js simulators/DSM_B-E_Simulator_v7.2.1.html
+ * Usage:  node tests/be_published_replication.js
  * Requires: Node >= 14. No dependencies, no browser.
  */
+'use strict';
 const fs = require('fs');
-const path = process.argv[2] || 'simulators/DSM_B-E_Simulator_v7.2.1.html';
-const html = fs.readFileSync(path, 'utf8');
+const path = require('path');
+const BE = require('../engine/be_engine.js');
 
-// ── extract math core + UCAV dataset verbatim from the simulator ──
-const core = html.match(/\/\/ ══ MATH CORE[\s\S]*?return\{S,C:ActC\.reduce\(\(s,c,i\)=>s\+c\*Wd\[i\],0\),gantt\};\n\}/);
-if (!core) { console.error('FAIL: math core not found in ' + path); process.exit(1); }
-const data = html.match(/ucav:\{n:14,acts:\[([\s\S]*?)\],\nprob:(\[\[[\s\S]*?\]\]),\nimp:(\[\[[\s\S]*?\]\])/);
-if (!data) { console.error('FAIL: UCAV dataset not found'); process.exit(1); }
+// ── UCAV case (impact of the empty cell (5,8) = 0, as in the simulator) ──
+const d = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'UCAV_source_verified_S12.json'), 'utf8'));
+const n = d.activities.length;
+const ACTS = d.activities.map(a => ({ bs: a.bcv, ms: a.mlv, ws: a.wcv, bc: a.cost_bcv, mc: a.cost_mlv, wc: a.cost_wcv, ic: a.ic }));
+const PROB = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => d.prob_pairs[`${i + 1},${j + 1}`] ?? 0));
+const IMP = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => d.impact_pairs[`${i + 1},${j + 1}`] ?? 0));
+const ZIMP = Array.from({ length: n }, () => new Array(n).fill(0));
 
-let useFullRadius = true; // B&E 2002 p.430 semantics (v7.2 toggle)
-eval(core[0].replace('k<(useFullRadius?n:ci)', 'k<n').replace('for(let k=j+1;k<ci;k++){', 'for(let k=j+1;k<n;k++){'));
-const ACTS = eval('[' + data[1] + ']');
-const PROB = JSON.parse(data[2]);
-const IMP  = JSON.parse(data[3]);
-
-const ZIMP = Array.from({length:14},()=>new Array(14).fill(0));
-const RHO = 0.9, R = 5000, NREP = 5, CHUNK = 40;
-function metrics(S, C) {
-  const n = S.length;
-  const ES = S.reduce((a,b)=>a+b,0)/n, EC = C.reduce((a,b)=>a+b,0)/n;
-  const sS = Math.sqrt(S.map(x=>(x-ES)**2).reduce((a,b)=>a+b,0)/n);
-  const sC = Math.sqrt(C.map(x=>(x-EC)**2).reduce((a,b)=>a+b,0)/n);
-  return { ES, EC, sS, sC };
-}
+const RHO = 0.9, R = 5000, NREP = 5;
+// No-rework variant: zero impacts (banding preserved on the probability matrix; rework adds 0).
 function campaign(noRework) {
   const allS = [], allC = [];
   for (let rep = 0; rep < NREP; rep++) {
-    let r = 0;
-    while (r < R) {
-      const chunk = Math.min(CHUNK, R - r);
-      const u1 = lhs(chunk, 1), u2 = lhs(chunk, 1); // comonotone: one quantile per run
-      for (let i = 0; i < chunk; i++) {
-        const us = new Array(14).fill(u1[i][0]), uc = new Array(14).fill(u2[i][0]);
-        const pm = PROB, im = IMP;
-        // no-rework variant: keep banding on pm, skip rework loop via zeroed check
-        // no-rework variant: zero impacts (banding preserved on pm; rework adds 0)
-        const im2 = noRework ? ZIMP : im;
-        const res = singleRunWith(us, uc, RHO, false, 14, ACTS, pm, im2);
-        allS.push(res.S); allC.push(res.C);
-      }
-      r += chunk;
-    }
+    const res = BE.simulate({ acts: ACTS, prob: PROB, imp: noRework ? ZIMP : IMP, runs: R, rho: RHO,
+      comonotone: true, useLHS: true, useStab: false, fullRadius: true });
+    allS.push(...res.S); allC.push(...res.C);
   }
-  return metrics(allS, allC);
+  return BE.summary(allS, allC);
 }
 
 let fails = 0;
@@ -80,5 +59,5 @@ const full = campaign(false);
 check('E[C]', full.EC, 637, 6.5); check('sigma_C', full.sC, 63, 5.0);
 check('E[S]', full.ES, 138, 2.0); check('sigma_S', full.sS, 14, 1.5);
 
-console.log(fails === 0 ? '\u2713 ALL CHECKS PASSED' : `\u2717 ${fails} CHECK(S) FAILED`);
+console.log(fails === 0 ? '✓ ALL CHECKS PASSED' : `✗ ${fails} CHECK(S) FAILED`);
 process.exit(fails === 0 ? 0 : 1);
