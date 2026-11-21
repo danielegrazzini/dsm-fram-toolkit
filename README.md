@@ -57,7 +57,10 @@ dsm-fram-toolkit/
 │   └── PROOF_FEBS_estende_Browning-Eppinger.md     # Formal proof (Italian)
 ├── docs/
 │   └── json-format.md                       # Specification of the shared JSON format
+├── engine/
+│   └── be_engine.js                         # B-E computation engine as a standalone module
 ├── tests/
+│   ├── be_engine_equivalence.js             # Engine module identical to the B-E Simulator
 │   ├── be_published_replication.js          # B-E replication of published UCAV baseline (Table V)
 │   ├── febs_be_reduction_equivalence.js     # FEBS->B-E reduction on the UCAV case
 │   ├── frameq_sigma_regression.js           # FRAME-Q variability-handling regression suite
@@ -173,7 +176,7 @@ The proof establishes that FEBS **extends** the Browning-Eppinger model — cont
 
 ## Verification
 
-The toolkit ships verification scripts under `tests/`: four Node scripts with no dependencies and one Python script that requires NumPy.
+The toolkit ships verification scripts under `tests/`: five Node scripts with no dependencies and one Python script that requires NumPy.
 
 `tests/sobol_saltelli_verification.py` benchmarks the FRAME-Q Saltelli estimator against the Ishigami function, whose Sobol' indices are known analytically.
 
@@ -196,6 +199,7 @@ ALL CHECKS PASSED
 The Node scripts (no dependencies) verify the B-E and FEBS engines directly:
 
 ```
+node tests/be_engine_equivalence.js            # the engine module computes exactly what the B-E Simulator computes
 node tests/be_published_replication.js        # replicates the published UCAV baseline (Table V)
 node tests/febs_be_reduction_equivalence.js    # verifies the FEBS->B-E reduction to machine precision
 node tests/frameq_sigma_regression.js          # FRAME-Q variability-handling regression
@@ -203,6 +207,22 @@ node tests/validate_json.js                    # checks data/*.json against the 
 ```
 
 The Ishigami x3 variable (S3 = 0.000, T3 = 0.244) is the canonical mathematical example of the **silent multiplier** phenomenon: a parameter with zero direct effect but dominant interaction effects. The FRAME-Q UCAV analysis identifies A2 ('Create Preliminary Design Architecture') as a silent multiplier with S2 approx 0.000 and T2 = 0.741, confirming that the phenomenon occurs in real process coupling networks.
+
+---
+
+## Using the Engine from Code
+
+The B-E computation engine is also available as a standalone module, `engine/be_engine.js`, which runs in Node.js and in the browser without dependencies. It is a faithful transcription of the simulator's own code; `tests/be_engine_equivalence.js` feeds the module and the code inside `DSM_B-E_Simulator_v7.2.1.html` the same seeded random sequence and checks that every result is identical. The simulator itself stays a single self-contained HTML file.
+
+```js
+const BE = require('./engine/be_engine.js');
+const res = BE.simulate({ acts, prob, imp, runs: 5000,
+                          comonotone: true, fullRadius: true,   // B&E-fidelity mode
+                          rng: BE.seededRng(42) });             // reproducible run
+const { ES, EC, sS, sC } = BE.summary(res.S, res.C);
+```
+
+`acts` are objects `{bs, ms, ws, bc, mc, wc, ic}` (duration and cost triples, learning-curve factor); `prob[i][j]` and `imp[i][j]` are the rework probability and impact of activity *i* caused by activity *j*. See `tests/be_published_replication.js` for a complete example on the UCAV case.
 
 ---
 

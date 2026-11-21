@@ -7,6 +7,16 @@ Entries are ordered newest first.
 
 ## [Unreleased]
 ### Added
+- `engine/be_engine.js`: the B-E computation engine (math core and Monte Carlo sampling loop of the B-E
+  Simulator) as a standalone module for Node.js and the browser, with the random generator and the
+  rework-radius switch as parameters, and a seeded generator for reproducible runs.
+- `tests/be_engine_equivalence.js`: checks that the module computes exactly what the simulator computes —
+  helpers, Latin hypercube sampling, single runs and whole campaigns in every sampling mode give
+  identical results with the same seed — plus a negative control; runs in CI.
+### Changed
+- `tests/be_published_replication.js` now uses the engine module and reads the UCAV case from
+  `data/UCAV_source_verified_S12.json` instead of extracting code and data from the HTML file.
+- The B-E Simulator file is unchanged (v7.2.1, same SHA-256): it remains a single self-contained HTML file.
 - `docs/json-format.md`: specification of the shared JSON format (`dsm-fram-toolkit-v1`) as implemented by
   the three simulators — fields, conventions, which simulator reads what, default values, worked example.
 - `tests/validate_json.js`: dependency-free validator for the shared format, with a built-in self-test on

@@ -57,7 +57,10 @@ versions*). To keep that link verifiable:
   `v6.0.3`), with a CHANGELOG entry and a new fingerprint in the README;
 - a change that alters any computed value must say so explicitly in the pull
   request and in the CHANGELOG, and the verification tests must be updated
-  accordingly.
+  accordingly;
+- the engine modules in `engine/` are transcriptions of the simulators'
+  computation code: a change to the computation must be made in both, and the
+  equivalence test (e.g. `tests/be_engine_equivalence.js`) must keep passing.
 
 ## Governance
 
